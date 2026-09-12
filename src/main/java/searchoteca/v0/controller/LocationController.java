@@ -26,4 +26,4 @@ public class LocationController {
         return "localização deletada";
     };
 }
-}
+

@@ -24,4 +24,4 @@ public class DepartmentController {
         return "departamento deletado";
     };
 }
-}
+
