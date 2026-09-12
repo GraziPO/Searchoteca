@@ -30,14 +30,13 @@ public class BookController {
     }
 
     @PostMapping
-    public ResponseEntity<?> update(@RequestBody BookModel Book){
+    public ResponseEntity<?> create(@RequestBody BookModel Book){
         return ResponseEntity.ok(bookRepository.save(Book));
     }
 
     @PutMapping("/{isbn}")
-    public ResponseEntity<?> create(@PathVariable String isbn, @RequestBody BookModel bookInfo){
+    public ResponseEntity<?> update(@PathVariable String isbn, @RequestBody BookModel bookInfo){
         BookModel book = bookRepository.findByIsbn(isbn);
-        book.setIsbn(isbn);
         book.setTitle(bookInfo.getTitle());
         book.setAuthor(bookInfo.getAuthor());
         book.setRel_year((bookInfo.getRel_year()));
