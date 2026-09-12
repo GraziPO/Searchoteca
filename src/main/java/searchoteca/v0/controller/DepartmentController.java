@@ -12,23 +12,23 @@ public class DepartmentController {
 
     public DepartmentController(DepartmentRepository departmentRepository){
         this.departmentRepository=departmentRepository;
-    };
+    }
 
     @GetMapping
-    public ResponseEntity<?> getAll(){
+    public ResponseEntity<?> getAll() {
         return ResponseEntity.ok(departmentRepository.findAll());
-    };
+    }
 
     @GetMapping("/{departCode}")
     public ResponseEntity<?> getById(@PathVariable String departCode){
         DepartmentModel department = departmentRepository.findByDepartCode(departCode);
         return ResponseEntity.ok((department));
-    };
+    }
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody DepartmentModel department){
         return ResponseEntity.ok(departmentRepository.save(department));
-    };
+    }
 
     @PutMapping("/{departCode}")
     public ResponseEntity<?> update(@PathVariable String departCode, @RequestBody DepartmentModel departInfo){
@@ -36,16 +36,16 @@ public class DepartmentController {
         departament.setDepartName(departInfo.getDepartName());
         departament.setDepartDesc(departInfo.getDepartDesc());
         return ResponseEntity.ok(departmentRepository.save(departament));
-    };
+    }
 
     @DeleteMapping("/{departCode}")
     public ResponseEntity<?> delete(@PathVariable String departCode){
         DepartmentModel department = departmentRepository.findByDepartCode(departCode);
         if(!departmentRepository.existsByDepartCode(departCode)){
             return ResponseEntity.notFound().build();
-        };
+        }
         departmentRepository.deleteByDepartCode(department.getDepartCode());
         return ResponseEntity.noContent().build();
-    };
+    }
 }
 
