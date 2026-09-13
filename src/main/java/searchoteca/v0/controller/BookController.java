@@ -3,26 +3,26 @@ package searchoteca.v0.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchoteca.v0.model.BookModel;
-import searchoteca.v0.repository.BookRepository;
+import searchoteca.v0.service.BookService;
 
 @RestController
 @RequestMapping("/livro")
 public class BookController {
 
-    private final BookRepository bookRepository;
+    private final BookService bookService;
 
-    public BookController(BookRepository bookRepository){
-        this.bookRepository=bookRepository;
+    public BookController(BookService bookService){
+        this.bookService=bookService;
     }
 
     @GetMapping
     public ResponseEntity<?> getAll(){
-        return ResponseEntity.ok(bookRepository.findAll());
+        return ResponseEntity.ok(bookService.findAll());
     }
 
     @GetMapping("/{isbn}")
     public ResponseEntity<?> getByIsbn(@PathVariable String isbn){
-        BookModel book = bookRepository.findByIsbn(isbn);
+        BookModel book = bookService.findByIsbn(isbn);
         if (book == null){
             return ResponseEntity.notFound().build();
         }
@@ -31,27 +31,17 @@ public class BookController {
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody BookModel Book){
-        return ResponseEntity.ok(bookRepository.save(Book));
+        return ResponseEntity.ok(bookService.create(Book));
     }
 
     @PutMapping("/{isbn}")
     public ResponseEntity<?> update(@PathVariable String isbn, @RequestBody BookModel bookInfo){
-        BookModel book = bookRepository.findByIsbn(isbn);
-        book.setTitle(bookInfo.getTitle());
-        book.setAuthor(bookInfo.getAuthor());
-        book.setRel_year((bookInfo.getRel_year()));
-        book.setPublisher(bookInfo.getPublisher());
-        book.setGenre(bookInfo.getGenre());
-        return ResponseEntity.ok(bookRepository.save(book));
+        return ResponseEntity.ok(bookService.update(isbn, bookInfo));
     }
 
     @DeleteMapping("/{isbn}")
     public ResponseEntity<?> delete(@PathVariable String isbn) {
-        BookModel book = bookRepository.findByIsbn(isbn);
-        if (book == null) {
-            return ResponseEntity.notFound().build();
-        }
-        bookRepository.deleteByIsbn(book.getIsbn());
+        bookService.delete(isbn);
         return ResponseEntity.noContent().build();
     }
 }

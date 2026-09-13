@@ -12,21 +12,37 @@ public class BookService {
 
     public BookService(BookRepository bookRepository){
         this.bookRepository=bookRepository;
-    };
+    }
 
     public List<BookModel> findAll(){
         return (List<BookModel>) bookRepository.findAll();
-    };
+    }
 
     public BookModel create(BookModel book){
         return bookRepository.save(book);
-    };
+    }
 
-    public BookModel update (BookModel book){
+    public BookModel update (String isbn, BookModel bookInfo){
+        BookModel book = bookRepository.findByIsbn(isbn);
+        book.setTitle(bookInfo.getTitle());
+        book.setAuthor(bookInfo.getAuthor());
+        book.setRel_year((bookInfo.getRel_year()));
+        book.setPublisher(bookInfo.getPublisher());
+        book.setGenre(bookInfo.getGenre());
+        book.setDepartCode(bookInfo.getDepartCode());
+        book.setLocalCode(bookInfo.getLocalCode());
         return bookRepository.save(book);
-    };
+    }
 
-    public void delete (BookModel book){
-        bookRepository.delete(book);
-    };
+    public void delete (String isbn){
+        BookModel book = bookRepository.findByIsbn(isbn);
+        if (book == null) {
+            return;
+        }
+        bookRepository.deleteByIsbn(book.getIsbn());
+    }
+
+    public BookModel findByIsbn(String isbn){
+        return bookRepository.findByIsbn(isbn);
+    }
 }

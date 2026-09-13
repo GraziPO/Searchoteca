@@ -3,49 +3,53 @@ package searchoteca.v0.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import searchoteca.v0.model.DepartmentModel;
-import searchoteca.v0.repository.DepartmentRepository;
+import searchoteca.v0.service.DepartmentService;
 
 @RestController
 @RequestMapping("/departamento")
 public class DepartmentController {
-    private final DepartmentRepository departmentRepository;
+    private final DepartmentService departmentService;
 
-    public DepartmentController(DepartmentRepository departmentRepository){
-        this.departmentRepository=departmentRepository;
+    public DepartmentController(DepartmentService departmentRepository){
+        this.departmentService=departmentRepository;
     }
 
     @GetMapping
     public ResponseEntity<?> getAll() {
-        return ResponseEntity.ok(departmentRepository.findAll());
+        return ResponseEntity.ok(departmentService.findAll());
     }
 
     @GetMapping("/{departCode}")
     public ResponseEntity<?> getById(@PathVariable String departCode){
-        DepartmentModel department = departmentRepository.findByDepartCode(departCode);
-        return ResponseEntity.ok((department));
+        return ResponseEntity.ok(departmentService.findByDepartCode(departCode));
     }
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody DepartmentModel department){
-        return ResponseEntity.ok(departmentRepository.save(department));
+        return ResponseEntity.ok(departmentService.create(department));
     }
 
     @PutMapping("/{departCode}")
     public ResponseEntity<?> update(@PathVariable String departCode, @RequestBody DepartmentModel departInfo){
-        DepartmentModel departament = departmentRepository.findByDepartCode(departCode);
-        departament.setDepartName(departInfo.getDepartName());
-        departament.setDepartDesc(departInfo.getDepartDesc());
-        return ResponseEntity.ok(departmentRepository.save(departament));
+        return ResponseEntity.ok(departmentService.update(departCode, departInfo));
     }
 
     @DeleteMapping("/{departCode}")
     public ResponseEntity<?> delete(@PathVariable String departCode){
-        DepartmentModel department = departmentRepository.findByDepartCode(departCode);
-        if(!departmentRepository.existsByDepartCode(departCode)){
-            return ResponseEntity.notFound().build();
-        }
-        departmentRepository.deleteByDepartCode(department.getDepartCode());
+        departmentService.delete(departCode);
         return ResponseEntity.noContent().build();
+    }
+
+    /*------------------------------ funcões com chave estrangeiras ------------------------------*/
+
+    @GetMapping("/{departCode}/livros")
+    public ResponseEntity<?> getBooksById(@PathVariable String departCode){
+        return ResponseEntity.ok(departmentService.findBookByDepartCode(departCode));
+    }
+
+    @GetMapping("/{departCode}/localizacoes")
+    public ResponseEntity<?> getLocationById(@PathVariable String departCode){
+        return ResponseEntity.ok(departmentService.findLocalByDepartCode(departCode));
     }
 }
 
