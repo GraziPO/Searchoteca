@@ -6,7 +6,7 @@ import searchoteca.v0.model.LocationModel;
 import searchoteca.v0.service.LocationService;
 
 @RestController
-@RequestMapping("/localizacao")
+@RequestMapping("/api/localizacao")
 public class LocationController {
     private final LocationService locationService;
 

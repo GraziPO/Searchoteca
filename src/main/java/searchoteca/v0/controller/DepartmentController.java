@@ -6,7 +6,7 @@ import searchoteca.v0.model.DepartmentModel;
 import searchoteca.v0.service.DepartmentService;
 
 @RestController
-@RequestMapping("/departamento")
+@RequestMapping("/api/departamento")
 public class DepartmentController {
     private final DepartmentService departmentService;
 

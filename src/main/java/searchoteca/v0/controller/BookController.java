@@ -6,7 +6,7 @@ import searchoteca.v0.model.BookModel;
 import searchoteca.v0.service.BookService;
 
 @RestController
-@RequestMapping("/livro")
+@RequestMapping("/api/livro")
 public class BookController {
 
     private final BookService bookService;
