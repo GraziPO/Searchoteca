@@ -1,21 +1,48 @@
 package searchoteca.v0.service;
 
+import org.springframework.stereotype.Service;
+import searchoteca.v0.model.BookModel;
+import searchoteca.v0.model.LocationModel;
+import searchoteca.v0.repository.BookRepository;
+import searchoteca.v0.repository.LocationRepository;
+
+import java.util.List;
+
+@Service
 public class LocationService {
-    public String FindLocation (int id){
-        //chama a função de Select com base no ID e devolve lista com todas as localizações
-        return "Localizaçao";
-    };
+    private final LocationRepository locationRepository;
+    private final BookRepository bookRepository;
 
-    public void InsertLocation(int depart_name) {
-        //cadastra localização com base no departamento relacionado
-    };
+    public LocationService(LocationRepository locationRepository, BookRepository bookRepository) {
+        this.locationRepository= locationRepository;
+        this.bookRepository= bookRepository;
+    }
 
-    public void EditLocation(int id, String name, String local_dscrp){
-        /*função par alteração da localização do livro. já que as informações chegam via API,
-         não é possível alterá-las. */
-    };
+    public List<LocationModel> findAll(){
+        return (List<LocationModel>) locationRepository.findAll();
+    }
 
-    public void DeleteLocation (int id){
-        //exclui localização com base no id. não é possível excluir se não estiver vazio.
-    };
+    public LocationModel findByLocalCode(String localCode){
+        return locationRepository.findByLocalCode(localCode);
+    }
+
+    public LocationModel create(LocationModel location){
+        return locationRepository.save(location);
+    }
+
+    public LocationModel update(String localCode, LocationModel localInfo){
+        LocationModel location = locationRepository.findByLocalCode(localCode);
+        location.setLocalName(localInfo.getLocalCode());
+        location.setLocalDesc(localInfo.getLocalDesc());
+        location.setDepartCode(localInfo.getDepartCode());
+        return locationRepository.save(location);
+    }
+
+    public void delete(String localCode){
+        locationRepository.deleteByLocalCode(localCode);
+    }
+
+    public List<BookModel> findBooksByLocalCode(String localCode){
+        return bookRepository.findByLocalCode(localCode);
+    }
 }
