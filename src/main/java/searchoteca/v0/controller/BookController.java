@@ -1,28 +1,47 @@
 package searchoteca.v0.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import searchoteca.v0.model.BookModel;
+import searchoteca.v0.service.BookService;
 
 @RestController
-@RequestMapping("/livro")
+@RequestMapping("/api/livro")
 public class BookController {
 
-    @GetMapping("/")
-    public String GetBook(){
-        return "Retorna todos os livros";
-    };
+    private final BookService bookService;
 
-    @GetMapping("/{id}")
-    public String GetBookByID(@PathVariable String isbn){
-        return "informações do livro";
-    };
+    public BookController(BookService bookService){
+        this.bookService=bookService;
+    }
 
-    @PostMapping("/")
-    public String PostBook(@RequestBody int isbn){
-        return "livro cadastrado";
-    };
+    @GetMapping
+    public ResponseEntity<?> getAll(){
+        return ResponseEntity.ok(bookService.findAll());
+    }
 
-    @DeleteMapping("/{id}")
-    public String DeleteBook(@PathVariable String isbn){
-        return "livro deletado";
-    };
+    @GetMapping("/{isbn}")
+    public ResponseEntity<?> getByIsbn(@PathVariable String isbn){
+        BookModel book = bookService.findByIsbn(isbn);
+        if (book == null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(book);
+    }
+
+    @PostMapping
+    public ResponseEntity<?> create(@RequestBody BookModel Book){
+        return ResponseEntity.ok(bookService.create(Book));
+    }
+
+    @PutMapping("/{isbn}")
+    public ResponseEntity<?> update(@PathVariable String isbn, @RequestBody BookModel bookInfo){
+        return ResponseEntity.ok(bookService.update(isbn, bookInfo));
+    }
+
+    @DeleteMapping("/{isbn}")
+    public ResponseEntity<?> delete(@PathVariable String isbn) {
+        bookService.delete(isbn);
+        return ResponseEntity.noContent().build();
+    }
 }

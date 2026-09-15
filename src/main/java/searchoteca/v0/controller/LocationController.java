@@ -1,29 +1,47 @@
 package searchoteca.v0.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import searchoteca.v0.model.LocationModel;
+import searchoteca.v0.service.LocationService;
 
 @RestController
-@RequestMapping("/location")
+@RequestMapping("/api/localizacao")
 public class LocationController {
+    private final LocationService locationService;
 
-    @GetMapping("/")
-    public String GetLocation(@RequestParam String Department_id){
-        return "Retorna todas as prateleiras de um detereminado departamento";
-    };
+    public LocationController(LocationService locationService){
+        this.locationService=locationService;
+    }
 
-    @GetMapping("/{id}")
-    public String GetLocationByID(@PathVariable String isbn){
-        return "informações da prateleira específica (nome, descrição e capacidade)";
-    };
+    @GetMapping
+    public ResponseEntity<?> getAll(){
+        return ResponseEntity.ok(locationService.findAll());
+    }
 
-    @PostMapping("/")
-    public String PostLocation(@RequestBody int isbn){
-        return "localização cadastrada";
-    };
+    @GetMapping("/{localCode}")
+    public ResponseEntity<?> getById(@PathVariable String localCode){
+        return ResponseEntity.ok(locationService.findByLocalCode(localCode));
+    }
 
-    @DeleteMapping("/{id}")
-    public String DeleteLocation(@PathVariable String isbn){
-        return "localização deletada";
-    };
+    @PostMapping
+    public ResponseEntity<?> create(@RequestBody LocationModel location){
+        return ResponseEntity.ok(locationService.create(location));
+    }
+
+    @PutMapping("/{localCode}")
+    public ResponseEntity<?> update(@PathVariable String localCode, @RequestBody LocationModel local){
+        return ResponseEntity.ok(locationService.update(localCode, local));
+    }
+
+    @DeleteMapping("/{localCode}")
+    public ResponseEntity<?> delete(@PathVariable String localCode){
+        locationService.delete(localCode);
+        return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/{localCode}/livros")
+    public ResponseEntity<?> getByBookCode(@PathVariable String localCode){
+        return ResponseEntity.ok(locationService.findBooksByLocalCode(localCode));
+    }
 }
-}
+

@@ -1,27 +1,55 @@
 package searchoteca.v0.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import searchoteca.v0.model.DepartmentModel;
+import searchoteca.v0.service.DepartmentService;
+
 @RestController
-@RequestMapping("/department")
+@RequestMapping("/api/departamento")
 public class DepartmentController {
-    @GetMapping("/")
-    public String GetDepartment(){
-        return "Retorna todos os departamentos";
-    };
+    private final DepartmentService departmentService;
 
-    @GetMapping("/{id}")
-    public String GetDepartmentByID(@PathVariable String isbn){
-        return "informações do departmento";
-    };
+    public DepartmentController(DepartmentService departmentRepository){
+        this.departmentService=departmentRepository;
+    }
 
-    @PostMapping("/")
-    public String PostDepartment(@RequestBody int isbn){
-        return "departamento cadastrado";
-    };
+    @GetMapping
+    public ResponseEntity<?> getAll() {
+        return ResponseEntity.ok(departmentService.findAll());
+    }
 
-    @DeleteMapping("/{id}")
-    public String DeleteDepartment(@PathVariable String isbn){
-        return "departamento deletado";
-    };
+    @GetMapping("/{departCode}")
+    public ResponseEntity<?> getById(@PathVariable String departCode){
+        return ResponseEntity.ok(departmentService.findByDepartCode(departCode));
+    }
+
+    @PostMapping
+    public ResponseEntity<?> create(@RequestBody DepartmentModel department){
+        return ResponseEntity.ok(departmentService.create(department));
+    }
+
+    @PutMapping("/{departCode}")
+    public ResponseEntity<?> update(@PathVariable String departCode, @RequestBody DepartmentModel departInfo){
+        return ResponseEntity.ok(departmentService.update(departCode, departInfo));
+    }
+
+    @DeleteMapping("/{departCode}")
+    public ResponseEntity<?> delete(@PathVariable String departCode){
+        departmentService.delete(departCode);
+        return ResponseEntity.noContent().build();
+    }
+
+    /*------------------------------ funcões com chave estrangeiras ------------------------------*/
+
+    @GetMapping("/{departCode}/livros")
+    public ResponseEntity<?> getBooksById(@PathVariable String departCode){
+        return ResponseEntity.ok(departmentService.findBookByDepartCode(departCode));
+    }
+
+    @GetMapping("/{departCode}/localizacoes")
+    public ResponseEntity<?> getLocationById(@PathVariable String departCode){
+        return ResponseEntity.ok(departmentService.findLocalByDepartCode(departCode));
+    }
 }
-}
+
