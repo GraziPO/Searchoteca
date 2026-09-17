@@ -1,6 +1,7 @@
 package searchoteca.service;
 
 import org.springframework.stereotype.Service;
+import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.BookModel;
 import searchoteca.model.LocationModel;
@@ -38,22 +39,39 @@ public class LocationService {
     }
 
     public LocationModel create(LocationModel location){
+        if(location.getLocalCode() != null){
+            throw new ResourceConflictException("Livro já cadastrado");
+        }
         return locationRepository.save(location);
     }
 
     public LocationModel update(String localCode, LocationModel localInfo){
         LocationModel location = locationRepository.findByLocalCode(localCode);
+
+        if(location == null){
+            throw new ResourceNotFoundException("Registro inexistente");
+        }
         location.setLocalName(localInfo.getLocalCode());
         location.setLocalDesc(localInfo.getLocalDesc());
         location.setDepartCode(localInfo.getDepartCode());
+
         return locationRepository.save(location);
     }
 
     public void delete(String localCode){
+        LocationModel local =  locationRepository.findByLocalCode(localCode);
+
+        if(local == null){
+            throw new ResourceNotFoundException("registro não encontrado");
+        }
         locationRepository.deleteByLocalCode(localCode);
     }
 
     public List<BookModel> findBooksByLocalCode(String localCode){
+        LocationModel location =  locationRepository.findByLocalCode(localCode);
+        if(location == null){
+            throw new ResourceNotFoundException("Registro inexistente");
+        }
         return bookRepository.findByLocalCode(localCode);
     }
 }
