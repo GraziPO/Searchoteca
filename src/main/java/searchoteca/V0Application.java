@@ -1,4 +1,4 @@
-package searchoteca.v0;
+package searchoteca;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

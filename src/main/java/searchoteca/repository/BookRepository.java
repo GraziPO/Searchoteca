@@ -1,8 +1,8 @@
-package searchoteca.v0.repository;
+package searchoteca.repository;
 
 import org.springframework.data.repository.*;
 import org.springframework.stereotype.Repository;
-import searchoteca.v0.model.BookModel;
+import searchoteca.model.BookModel;
 
 import java.util.List;
 

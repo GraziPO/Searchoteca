@@ -1,11 +1,13 @@
-package searchoteca.v0.service;
+package searchoteca.service;
 
 import org.springframework.stereotype.Service;
-import searchoteca.v0.model.BookModel;
-import searchoteca.v0.model.LocationModel;
-import searchoteca.v0.repository.BookRepository;
-import searchoteca.v0.repository.LocationRepository;
+import searchoteca.exception.ResourceNotFoundException;
+import searchoteca.model.BookModel;
+import searchoteca.model.LocationModel;
+import searchoteca.repository.BookRepository;
+import searchoteca.repository.LocationRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -19,10 +21,19 @@ public class LocationService {
     }
 
     public List<LocationModel> findAll(){
-        return (List<LocationModel>) locationRepository.findAll();
+        List<LocationModel> location;
+        location =  (List<LocationModel>) locationRepository.findAll();
+
+        if(location.isEmpty()){
+            throw new ResourceNotFoundException("Nenhuma localização cadastrada");
+        }
+        return location;
     }
 
     public LocationModel findByLocalCode(String localCode){
+        if(localCode == null){
+            throw new ResourceNotFoundException("Nenhum livro encontrado");
+        }
         return locationRepository.findByLocalCode(localCode);
     }
 

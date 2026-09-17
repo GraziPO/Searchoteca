@@ -1,4 +1,4 @@
-package searchoteca.v0.model;
+package searchoteca.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;

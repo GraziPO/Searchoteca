@@ -1,9 +1,9 @@
-package searchoteca.v0.controller;
+package searchoteca.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import searchoteca.v0.model.DepartmentModel;
-import searchoteca.v0.service.DepartmentService;
+import searchoteca.model.DepartmentModel;
+import searchoteca.service.DepartmentService;
 
 @RestController
 @RequestMapping("/api/departamento")

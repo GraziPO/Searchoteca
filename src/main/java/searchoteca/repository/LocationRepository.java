@@ -1,7 +1,7 @@
-package searchoteca.v0.repository;
+package searchoteca.repository;
 
 import org.springframework.data.repository.CrudRepository;
-import searchoteca.v0.model.LocationModel;
+import searchoteca.model.LocationModel;
 
 import java.util.List;
 

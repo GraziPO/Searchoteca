@@ -1,9 +1,9 @@
-package searchoteca.v0.controller;
+package searchoteca.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import searchoteca.v0.model.BookModel;
-import searchoteca.v0.service.BookService;
+import searchoteca.model.BookModel;
+import searchoteca.service.BookService;
 
 @RestController
 @RequestMapping("/api/livro")

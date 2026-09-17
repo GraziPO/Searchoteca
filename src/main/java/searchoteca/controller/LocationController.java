@@ -1,9 +1,9 @@
-package searchoteca.v0.controller;
+package searchoteca.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import searchoteca.v0.model.LocationModel;
-import searchoteca.v0.service.LocationService;
+import searchoteca.model.LocationModel;
+import searchoteca.service.LocationService;
 
 @RestController
 @RequestMapping("/api/localizacao")
