@@ -21,9 +21,24 @@ CREATE TABLE IF NOT EXISTS org_books(
     author VARCHAR(100) NOT NULL,
     rel_year INT,
     publisher VARCHAR(50),
+<<<<<<< Updated upstream
     genre VARCHAR(50),
     depart_code VARCHAR,
     local_code  VARCHAR,
     FOREIGN KEY (depart_code) REFERENCES org_depart(depart_code),
     FOREIGN KEY (local_code) REFERENCES org_local(local_code)
+=======
+    genre VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS org_copies(
+    copy_id SERIAL PRIMARY KEY,
+    isbn VARCHAR(15) REFERENCES org_books(isbn),
+    depart_code VARCHAR REFERENCES org_depart(depart_code),
+    local_code VARCHAR REFERENCES org_local(local_code),
+    copy_index INT NOT NULL,
+    custom_id VARCHAR(60) GENERATED ALWAYS AS (isbn || depart_code || local_code || copy_index :: text) STORED,
+    status VARCHAR(20) NOT NULL DEFAULT 'AVALIABLE',
+    UNIQUE (isbn, copy_index)
+>>>>>>> Stashed changes
 );

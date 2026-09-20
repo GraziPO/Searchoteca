@@ -22,11 +22,5 @@ public class BookModel {
     private String publisher;
     private String genre;
 
-    @Column("depart_code")
-    private String departCode;
-
-    @Column("local_code")
-    private String localCode;
-
     public BookModel() {}
 }

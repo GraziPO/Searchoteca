@@ -10,7 +10,5 @@ public interface LocationRepository extends CrudRepository<LocationModel,String>
 
     void deleteByLocalCode(String localCode);
 
-    boolean existsByLocalCode(String localCode);
-
     List<LocationModel> findByDepartCode(String departCode);
 }

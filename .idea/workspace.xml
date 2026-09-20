@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="1daaa145-8aa5-4e40-a263-9fcd9df2d4de" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/model/BookModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/model/BookModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/repository/BookRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/repository/BookRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/repository/DepartmentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/repository/DepartmentRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/repository/LocationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/repository/LocationRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/service/BookService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/service/BookService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/service/DepartmentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/service/DepartmentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/service/LocationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/service/LocationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/V0Application.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/controller/BookController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/controller/DepartmentController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/controller/LocationController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/model/BookModel.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/model/DepartmentModel.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/model/LocationModel.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/repository/BookRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/repository/DepartmentRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/repository/LocationRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/service/BookService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/service/DepartmentService.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/service/LocationService.class" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+        <option value="Interface" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;GraziPO&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/GraziPO/Searchoteca.git&quot;,
+    &quot;accountId&quot;: &quot;1229a0f3-69b4-4584-a397-f3ab741e0daf&quot;
+  }
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3JTDGD9kcUjxO84LtSFRtIJs6G2" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Spring Boot.V0Application.executor&quot;: &quot;Run&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Feature-Users-CRUD&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/grazi/OneDrive/Documentos/GitHub/PFC&quot;,
+    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-a203e0a19954-intellij.indexing.shared.core-IU-262.10968.63" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.10968.63" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1daaa145-8aa5-4e40-a263-9fcd9df2d4de" name="Changes" comment="" />
+      <created>1789676067615</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1789676067615</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>

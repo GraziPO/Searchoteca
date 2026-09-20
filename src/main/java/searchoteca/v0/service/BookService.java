@@ -29,8 +29,6 @@ public class BookService {
         book.setRel_year((bookInfo.getRel_year()));
         book.setPublisher(bookInfo.getPublisher());
         book.setGenre(bookInfo.getGenre());
-        book.setDepartCode(bookInfo.getDepartCode());
-        book.setLocalCode(bookInfo.getLocalCode());
         return bookRepository.save(book);
     }
 
