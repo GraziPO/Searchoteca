@@ -4,21 +4,24 @@ import org.springframework.stereotype.Service;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.BookModel;
+import searchoteca.model.CopyModel;
 import searchoteca.model.LocationModel;
 import searchoteca.repository.BookRepository;
+import searchoteca.repository.CopyRepository;
 import searchoteca.repository.LocationRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class LocationService {
     private final LocationRepository locationRepository;
     private final BookRepository bookRepository;
+    private final CopyRepository copyRepository;
 
-    public LocationService(LocationRepository locationRepository, BookRepository bookRepository) {
+    public LocationService(LocationRepository locationRepository, BookRepository bookRepository, CopyRepository copyRepository) {
         this.locationRepository= locationRepository;
         this.bookRepository= bookRepository;
+        this.copyRepository= copyRepository;
     }
 
     public List<LocationModel> findAll(){
@@ -67,11 +70,18 @@ public class LocationService {
         locationRepository.deleteByLocalCode(localCode);
     }
 
-    public List<BookModel> findBooksByLocalCode(String localCode){
-        LocationModel location =  locationRepository.findByLocalCode(localCode);
-        if(location == null){
-            throw new ResourceNotFoundException("Registro inexistente");
+    public List<BookModel> findBookByLocalCode(String departCode){
+        if (departCode == null){
+            throw new ResourceNotFoundException("Nenhum registro encontrado");
         }
-        return bookRepository.findByLocalCode(localCode);
+
+        //fetches all the copies linked to the localCode, searches the corresponding books and return them
+        List<String> isbnList = copyRepository.findByLocalCode(departCode)
+                .stream()
+                .map(CopyModel::getIsbn)
+                .distinct()
+                .toList();
+
+        return bookRepository.findAllIsbns(isbnList);
     }
 }

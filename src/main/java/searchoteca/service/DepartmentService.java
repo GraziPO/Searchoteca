@@ -4,25 +4,28 @@ import org.springframework.stereotype.Service;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.BookModel;
+import searchoteca.model.CopyModel;
 import searchoteca.model.DepartmentModel;
 import searchoteca.model.LocationModel;
 import searchoteca.repository.BookRepository;
+import searchoteca.repository.CopyRepository;
 import searchoteca.repository.DepartmentRepository;
 import searchoteca.repository.LocationRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class DepartmentService {
     private final DepartmentRepository departmentRepository;
     private final BookRepository bookRepository;
+    private final CopyRepository copyRepository;
     private final LocationRepository locationRepository;
     
-    public DepartmentService(DepartmentRepository departmentRepository, BookRepository bookRepository, LocationRepository locationRepository) {
+    public DepartmentService(DepartmentRepository departmentRepository, BookRepository bookRepository, LocationRepository locationRepository,  CopyRepository copyRepository) {
         this.departmentRepository = departmentRepository;
         this.bookRepository = bookRepository;
         this.locationRepository = locationRepository;
+        this.copyRepository = copyRepository;
     }
 
 
@@ -83,7 +86,14 @@ public class DepartmentService {
         if (departCode == null){
             throw new ResourceNotFoundException("Nenhum registro encontrado");
         }
-        return bookRepository.findByDepartCode(departCode);
+        //fetches all the copies linked to the departCode, searches the corresponding books and return them
+        List<String> isbnList = copyRepository.findByDepartCode(departCode)
+                .stream()
+                .map(CopyModel::getIsbn)
+                .distinct()
+                .toList();
+
+        return bookRepository.findAllIsbns(isbnList);
     }
 
 

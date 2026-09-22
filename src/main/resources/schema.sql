@@ -26,11 +26,13 @@ CREATE TABLE IF NOT EXISTS org_books(
 
 CREATE TABLE IF NOT EXISTS org_copies(
     copy_id SERIAL PRIMARY KEY,
-    copy_custom_id 
-    depart_code VARCHAR,
-    local_code  VARCHAR,
-    FOREIGN KEY (depart_code) REFERENCES org_depart(depart_code),
-    FOREIGN KEY (local_code) REFERENCES org_local(local_code)
+    isbn VARCHAR(25) REFERENCES org_books(isbn),
+    depart_code VARCHAR REFERENCES org_depart(depart_code),
+    local_code  VARCHAR REFERENCES org_local(local_code),
+    copy_index INT NOT NULL,
+    copy_custom_id VARCHAR(60) GENERATED ALWAYS AS (isbn || depart_code || local_code || copy_index :: text) STORED,
+    status VARCHAR(20) DEFAULT 'DISPONÍVEL',
+    UNIQUE (isbn,copy_index)
 );
 
 CREATE TABLE IF NOT EXISTS org_users(

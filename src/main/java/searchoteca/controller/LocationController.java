@@ -41,7 +41,7 @@ public class LocationController {
     }
     @GetMapping("/{localCode}/livros")
     public ResponseEntity<?> getByBookCode(@PathVariable String localCode){
-        return ResponseEntity.ok(locationService.findBooksByLocalCode(localCode));
+        return ResponseEntity.ok(locationService.findBookByLocalCode(localCode));
     }
 }
 

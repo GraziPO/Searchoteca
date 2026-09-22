@@ -3,6 +3,7 @@ package searchoteca.service;
 import org.springframework.stereotype.Service;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.BookModel;
+import searchoteca.model.CopyModel;
 import searchoteca.repository.BookRepository;
 
 import java.util.ArrayList;
@@ -41,8 +42,6 @@ public class BookService {
         book.setRel_year((bookInfo.getRel_year()));
         book.setPublisher(bookInfo.getPublisher());
         book.setGenre(bookInfo.getGenre());
-        book.setDepartCode(bookInfo.getDepartCode());
-        book.setLocalCode(bookInfo.getLocalCode());
         return bookRepository.save(book);
     }
 
@@ -59,5 +58,19 @@ public class BookService {
             throw new ResourceNotFoundException("Nenhum livro encontrado");
         }
         return bookRepository.findByIsbn(isbn);
+    }
+    
+    public List<BookModel> findLocations(String isbn){
+        if (isbn == null){
+            throw new ResourceNotFoundException("Nenhum registro encontrado");
+        }
+        //fetches all the location codes linked to the book, and return them
+        List<String> isbnList = copyRepository.findByIsbn(isbn)
+                .stream()
+                .map(CopyModel::getIsbn)
+                .distinct()
+                .toList();
+
+        return bookRepository.findAllIsbns(isbnList);
     }
 }
