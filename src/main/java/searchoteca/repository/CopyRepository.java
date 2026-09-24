@@ -12,9 +12,9 @@ public interface CopyRepository extends CrudRepository<CopyModel,String> {
     List<CopyModel> findByDepartCode(String departCode);
     List<CopyModel> findByLocalCode(String localCode);
 
-    CopyModel findByIsbn(String isbn);
+    List<CopyModel> findByIsbn(String isbn);
 
-    void deleteByCustomId(String customId);
+    void deleteByCustomCode(String customId);
 
 
 }

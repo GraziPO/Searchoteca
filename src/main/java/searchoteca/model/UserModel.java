@@ -13,13 +13,15 @@ public class UserModel {
     @Id
     @Column("user_id")
     private Long id;
-    private String custom_id;
+    @Column("custom_id")
+    private String customId;
+
     private String username;
     private String completeName;
     private String email;
     private String password;
-    private String role;
-    private String accessLevel;
+    private String role_code;
+    private Boolean status;
 
     public UserModel() {}
 

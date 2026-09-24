@@ -10,6 +10,7 @@ import searchoteca.repository.BookRepository;
 import searchoteca.repository.CopyRepository;
 import searchoteca.repository.LocationRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -70,18 +71,23 @@ public class LocationService {
         locationRepository.deleteByLocalCode(localCode);
     }
 
-    public List<BookModel> findBookByLocalCode(String departCode){
-        if (departCode == null){
+    public List<BookModel> findBookByLocalCode(String localCode){
+        if (localCode == null){
             throw new ResourceNotFoundException("Nenhum registro encontrado");
         }
 
         //fetches all the copies linked to the localCode, searches the corresponding books and return them
-        List<String> isbnList = copyRepository.findByLocalCode(departCode)
+        List<String> isbnList = copyRepository.findByLocalCode(localCode)
                 .stream()
                 .map(CopyModel::getIsbn)
                 .distinct()
                 .toList();
 
-        return bookRepository.findAllIsbns(isbnList);
+        List<BookModel> books =  new ArrayList<>();
+        for (String isbn : isbnList) {
+           books.add(bookRepository.findByIsbn(isbn));
+        }
+
+        return books;
     }
 }

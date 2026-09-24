@@ -14,9 +14,4 @@ public interface BookRepository extends CrudRepository<BookModel,String>{
 
     void deleteByIsbn(String isbn);
 
-    List<BookModel> findAllIsbns(Collection<String> isbn);
-
-    List<BookModel> findByDepartCode(String departCode);
-
-    List<BookModel> findByLocalCode(String localCode);
 }

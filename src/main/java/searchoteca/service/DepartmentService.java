@@ -12,6 +12,7 @@ import searchoteca.repository.CopyRepository;
 import searchoteca.repository.DepartmentRepository;
 import searchoteca.repository.LocationRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -86,15 +87,19 @@ public class DepartmentService {
         if (departCode == null){
             throw new ResourceNotFoundException("Nenhum registro encontrado");
         }
-        //fetches all the copies linked to the departCode, searches the corresponding books and return them
-        List<String> isbnList = copyRepository.findByDepartCode(departCode)
+
+        //fetches all the copies linked to the localCode, searches the corresponding books and return them
+        List<String> isbnList = copyRepository.findByLocalCode(departCode)
                 .stream()
                 .map(CopyModel::getIsbn)
                 .distinct()
                 .toList();
 
-        return bookRepository.findAllIsbns(isbnList);
+        List<BookModel> books =  new ArrayList<>();
+        for (String isbn : isbnList) {
+            books.add(bookRepository.findByIsbn(isbn));
+        }
+
+        return books;
     }
-
-
 }

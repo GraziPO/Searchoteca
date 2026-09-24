@@ -24,5 +24,7 @@ public class CopyModel {
 
     private int index;
 
+    private String customCode;
+
     public CopyModel(){}
 }

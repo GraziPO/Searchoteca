@@ -5,6 +5,7 @@ import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.BookModel;
 import searchoteca.model.CopyModel;
 import searchoteca.repository.BookRepository;
+import searchoteca.repository.CopyRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.List;
 @Service
 public class BookService {
     private final BookRepository bookRepository;
+    private final CopyRepository copyRepository;
 
-    public BookService(BookRepository bookRepository){
+    public BookService(BookRepository bookRepository, CopyRepository copyRepository) {
         this.bookRepository=bookRepository;
+        this.copyRepository=copyRepository;
     }
 
     public List<BookModel> findAll(){
@@ -59,7 +62,7 @@ public class BookService {
         }
         return bookRepository.findByIsbn(isbn);
     }
-    
+
     public List<BookModel> findLocations(String isbn){
         if (isbn == null){
             throw new ResourceNotFoundException("Nenhum registro encontrado");
@@ -71,6 +74,11 @@ public class BookService {
                 .distinct()
                 .toList();
 
-        return bookRepository.findAllIsbns(isbnList);
+        List<BookModel> foundBooks =  new ArrayList<>();
+
+        for (String book : isbnList){
+            foundBooks.add(bookRepository.findByIsbn(book));
+        }
+        return foundBooks;
     }
 }
