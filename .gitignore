@@ -1,0 +1,7 @@
+.env
+*.xml
+<<<<<<< Updated upstream
+=======
+*.iml
+*.iml
+>>>>>>> Stashed changes
