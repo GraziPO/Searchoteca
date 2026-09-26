@@ -56,3 +56,10 @@ INSERT INTO sys_role_permissions (role_code, permission_code) VALUES
     ('loan_op', 'org_books:view'),
     ('loan_op', 'org_books:alter_quantity')
     ON CONFLICT DO NOTHING;
+
+-- ===== seed: usuário root inicial (bootstrap) =====
+-- senha: 'root123' -- TROCAR imediatamente após o primeiro login, isso é só pra destravar o primeiro acesso
+INSERT INTO org_users (custom_id, username, complete_name, email, password, role_code, status) VALUES
+    ('ROOT001', 'root', 'Administrador Root', 'root@searchoteca.local',
+     '$2b$10$qfAEE4NXf6S71kG5xVSVZ.elB96UNKE/1GQZY7NRlGahPxtDabz5K', 'root', TRUE)
+ON CONFLICT (username) DO NOTHING;

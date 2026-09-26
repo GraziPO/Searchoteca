@@ -1,6 +1,7 @@
 package searchoteca.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import searchoteca.model.UserModel;
 import searchoteca.service.UserService;
@@ -25,23 +26,26 @@ public class UserController {
 
         return ResponseEntity.ok(user);
     }
-
+    @PreAuthorize("hasAuthority('users:create')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody UserModel user){
         return ResponseEntity.ok(userService.create(user));
     }
 
+    @PreAuthorize("hasAuthority('users:edit')")
     @PutMapping("/{username}")
     public ResponseEntity<?> update(@PathVariable String username, @RequestBody UserModel userInfo){
         return ResponseEntity.ok(userService.update(username, userInfo));
     }
 
+    @PreAuthorize("hasAuthority('users:edit')")
     @PatchMapping("/{username}/status/ativar")
     public ResponseEntity<?> activate (@PathVariable String username){
         userService.activate(username);
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasAuthority('users:edit')")
     @PatchMapping("/{username}/status/desativar")
     public ResponseEntity<?> deactivate (@PathVariable String username){
         userService.deactivate(username);
