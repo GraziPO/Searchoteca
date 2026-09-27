@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import searchoteca.DTO.LoginRequest;
 import searchoteca.DTO.LoginResponse;
+import searchoteca.auditTrail.AuditLogService;
 import searchoteca.security.CustomUserDetails;
 import searchoteca.security.JWTService;
 
@@ -17,10 +18,12 @@ import searchoteca.security.JWTService;
 public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
+    private final AuditLogService auditLogService;
 
-    public AuthController(AuthenticationManager authenticationManager, JWTService jwtService) {
+    public AuthController(AuthenticationManager authenticationManager, JWTService jwtService, AuditLogService auditLogService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.auditLogService = auditLogService;
     }
 
     @PostMapping("/login")
@@ -31,6 +34,7 @@ public class AuthController {
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         String token = jwtService.generateToken(userDetails);
+        auditLogService.recordLogin(userDetails.getUsername());
 
         return ResponseEntity.ok(new LoginResponse(token, userDetails.getUsername(), userDetails.getRoleCode()));
     }

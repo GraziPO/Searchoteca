@@ -12,8 +12,27 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
-      data-locations: classpath:permissions.sql
+      data-locations: classpath:permissions.sql, classpath:auditTrail.sql
 
 jwt:
   secret: ${JWT_SECRET}
   expiration-ms: 3600000
+
+logging:
+  level:
+    root: INFO
+    searchoteca: DEBUG
+    AUDIT: INFO
+    org.springframework.security: WARN
+  pattern:
+    level: "%5p [req=%X{requestId:-}] [user=%X{user:-}]"
+  file:
+    name: logs/searchoteca.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+      total-size-cap: 500MB
+  structured:
+    format:
+      file: ecs

@@ -39,9 +39,11 @@ public class UserService {
         up_user.setUsername(username);
         up_user.setCompleteName(user.getCompleteName());
         up_user.setEmail(user.getEmail());
-        up_user.setPassword(user.getPassword());
         up_user.setRole_code(user.getRole_code());
 
+        if (user.getPassword() != null && !user.getPassword().isBlank()) {
+            up_user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
         return userRepository.save(up_user);
     }
 

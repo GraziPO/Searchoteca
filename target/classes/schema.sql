@@ -66,3 +66,11 @@ CREATE TABLE IF NOT EXISTS sys_role_permissions(
     permission_code VARCHAR(50) NOT NULL REFERENCES sys_permissions(permission_code) ON DELETE CASCADE,
     PRIMARY KEY (role_code, permission_code)
     );
+
+CREATE TABLE IF NOT EXISTS auditTrail_logs(
+    id BIGSERIAL PRIMARY KEY,
+    time_stamp TIMESTAMP NOT NULL,
+    username VARCHAR(30),
+    action VARCHAR(30) NOT NULL,
+    details TEXT
+    );
