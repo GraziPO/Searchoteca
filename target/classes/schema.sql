@@ -74,3 +74,26 @@ CREATE TABLE IF NOT EXISTS auditTrail_logs(
     action VARCHAR(30) NOT NULL,
     details TEXT
     );
+
+
+CREATE TABLE IF NOT EXISTS sys_mfa(
+    id BIGSERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES org_users(user_id) ON DELETE CASCADE,
+    code_hash VARCHAR(255) NOT NULL,        -- hash BCrypt do código, nunca o código em si
+    created_at TIMESTAMP NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    attempts INT NOT NULL DEFAULT 0,        -- tentativas erradas neste código
+    used_at TIMESTAMP                       -- preenchido quando usado ou invalidado
+);
+
+CREATE INDEX IF NOT EXISTS idx_mfa_user_created ON sys_mfa(user_id, created_at DESC);
+
+-- Aceite dos Termos de Uso e da Política de Privacidade (uma linha por versão aceita)
+CREATE TABLE IF NOT EXISTS sys_terms_acceptance(
+    id BIGSERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES org_users(user_id) ON DELETE CASCADE,
+    terms_version VARCHAR(20) NOT NULL,
+    privacy_version VARCHAR(20) NOT NULL,
+    accepted_at TIMESTAMP NOT NULL,
+    UNIQUE (user_id, terms_version, privacy_version)
+);

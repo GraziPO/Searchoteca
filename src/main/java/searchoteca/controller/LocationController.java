@@ -40,7 +40,7 @@ public class LocationController {
         return ResponseEntity.ok(locationService.create(location));
     }
 
-    @PreAuthorize("hasAuthority('org_local:update')")
+    @PreAuthorize("hasAuthority('org_local:edit')")
     @PutMapping("/{localCode}")
     public ResponseEntity<?> update(@PathVariable String localCode, @RequestBody LocationModel local){
         auditLogService.record(AuditAction.UPDATE,"location" + localCode);

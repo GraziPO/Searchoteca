@@ -18,7 +18,7 @@ public class BookModel {
     private String isbn;
     private String title;
     private String author;
-    private int rel_year;
+    private Integer rel_year;   // pode ficar em branco no cadastro
     private String publisher;
     private String genre;
 

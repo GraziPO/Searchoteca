@@ -7,13 +7,12 @@ import org.springframework.stereotype.Service;
 import searchoteca.security.CustomUserDetails;
 
 import java.time.LocalDateTime;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 
 @Service
 public class AuditLogService {
-    private static final Logger auditLog = LoggerFactory.getLogger("auditLog");
-    private static final Logger log  = LoggerFactory.getLogger(String.valueOf(AuditLogService.class));
+    private static final Logger auditLog = LoggerFactory.getLogger("AUDIT");
+    private static final Logger log  = LoggerFactory.getLogger(AuditLogService.class);
 
     private final AuditLogRepository LogRepository;
 
@@ -45,16 +44,17 @@ public class AuditLogService {
     public void save(String username, AuditAction action, String details){
         AuditLogModel audit = new AuditLogModel();
         audit.setTime_stamp(LocalDateTime.now());
-        audit.setUsername(username);
+        // username pode vir do corpo do login (valor digitado): limita ao tamanho da coluna
+        audit.setUsername(username != null && username.length() > 30 ? username.substring(0, 30) : username);
         audit.setAction(action.name());
         audit.setDetails(details);
 
-        auditLog.info("{}:: {} >>> {} -> {}");
+        auditLog.info("action={} user={} details={}", audit.getAction(), audit.getUsername(), audit.getDetails());
 
         try{
             LogRepository.save(audit);
         }catch(Exception e){
-            log.error(audit.getAction(), e, Level.parse("Falha ao gravar logs : {}"));
+            log.error("Falha ao gravar auditoria: {}", audit.getAction(), e);
         }
     }
 

@@ -1,6 +1,7 @@
 package searchoteca.service;
 
 import org.springframework.stereotype.Service;
+import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.BookModel;
 import searchoteca.model.CopyModel;
@@ -24,10 +25,7 @@ public class BookService {
         List<BookModel> books;
         books = (List<BookModel>) bookRepository.findAll();
 
-        if(books.isEmpty()) {
-            throw new ResourceNotFoundException("Nenhum livro cadastrado");
-        }
-        return books;
+        return books;   // lista vazia é resposta válida, não erro
     }
 
     public BookModel create(BookModel book){
@@ -52,6 +50,9 @@ public class BookService {
         BookModel book = bookRepository.findByIsbn(isbn);
         if (book == null) {
             throw new ResourceNotFoundException("Nenhum livro encontrado");
+        }
+        if (!copyRepository.findByIsbn(isbn).isEmpty()) {
+            throw new ResourceConflictException("Não é possível excluir: este livro tem exemplares cadastrados.");
         }
         bookRepository.deleteByIsbn(book.getIsbn());
     }

@@ -34,10 +34,7 @@ public class DepartmentService {
         List<DepartmentModel> departments;
         departments = (List<DepartmentModel>) departmentRepository.findAll();
 
-        if(departments.isEmpty()){
-            throw new ResourceNotFoundException("Não há departamentos cadastrados");
-        }
-        return departments;
+        return departments;   // lista vazia é resposta válida, não erro
     }
 
 
@@ -65,13 +62,16 @@ public class DepartmentService {
 
 
     public void delete(String departCode){
-        if (departCode == null){
+        DepartmentModel department = departCode == null ? null : departmentRepository.findByDepartCode(departCode);
+        if (department == null){
             throw new ResourceNotFoundException("Departamento não existente");
         }
-        if (!departCode.isEmpty()){
-            throw new ResourceConflictException("Este departamento não pode ser deletado, pois há registros ligados a ele");
+        // Só bloqueia se houver algo realmente ligado ao departamento
+        if (!locationRepository.findByDepartCode(departCode).isEmpty()
+                || !copyRepository.findByDepartCode(departCode).isEmpty()){
+            throw new ResourceConflictException("Este departamento não pode ser deletado, pois há localizações ou exemplares ligados a ele");
         }
-        departmentRepository.delete(departmentRepository.findByDepartCode(departCode));
+        departmentRepository.delete(department);
     }
 
 
@@ -89,7 +89,7 @@ public class DepartmentService {
         }
 
         //fetches all the copies linked to the localCode, searches the corresponding books and return them
-        List<String> isbnList = copyRepository.findByLocalCode(departCode)
+        List<String> isbnList = copyRepository.findByDepartCode(departCode)
                 .stream()
                 .map(CopyModel::getIsbn)
                 .distinct()

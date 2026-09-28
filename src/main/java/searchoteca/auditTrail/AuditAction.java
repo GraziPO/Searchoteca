@@ -12,4 +12,9 @@ public enum AuditAction {
     LOGIN_SUCCESS,
     LOGIN_FAILURE,
     ACCESS_DENIED,
+    MFA_CODE_SENT,
+    MFA_SUCCESS,
+    MFA_FAILURE,
+    MFA_LOCKED,
+    TERMS_ACCEPTED,
 }
