@@ -29,10 +29,7 @@ public class LocationService {
         List<LocationModel> location;
         location =  (List<LocationModel>) locationRepository.findAll();
 
-        if(location.isEmpty()){
-            throw new ResourceNotFoundException("Nenhuma localização cadastrada");
-        }
-        return location;
+        return location;   // lista vazia é resposta válida, não erro
     }
 
     public LocationModel findByLocalCode(String localCode){
@@ -43,8 +40,8 @@ public class LocationService {
     }
 
     public LocationModel create(LocationModel location){
-        if(location.getLocalCode() != null){
-            throw new ResourceConflictException("Livro já cadastrado");
+        if (location.getLocalCode() != null && locationRepository.existsByLocalCode(location.getLocalCode())) {
+            throw new ResourceConflictException("Já existe uma localização com esse código.");
         }
         return locationRepository.save(location);
     }
@@ -55,7 +52,7 @@ public class LocationService {
         if(location == null){
             throw new ResourceNotFoundException("Registro inexistente");
         }
-        location.setLocalName(localInfo.getLocalCode());
+        location.setLocalName(localInfo.getLocalName());
         location.setLocalDesc(localInfo.getLocalDesc());
         location.setDepartCode(localInfo.getDepartCode());
 
@@ -67,6 +64,9 @@ public class LocationService {
 
         if(local == null){
             throw new ResourceNotFoundException("registro não encontrado");
+        }
+        if (!copyRepository.findByLocalCode(localCode).isEmpty()) {
+            throw new ResourceConflictException("Não é possível excluir: há exemplares guardados nesta localização.");
         }
         locationRepository.deleteByLocalCode(localCode);
     }

@@ -12,8 +12,50 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
-      data-locations: classpath:permissions.sql
+      data-locations: classpath:permissions.sql, classpath:auditTrail.sql
 
 jwt:
   secret: ${JWT_SECRET}
   expiration-ms: 3600000
+
+# ===== Termos de Uso e Política de Privacidade =====
+# Ao publicar uma nova versão: atualize o arquivo em resources/legal/ E o número aqui.
+# Todos os usuários precisarão aceitar de novo no próximo login.
+legal:
+  terms-version: "1.0"
+  privacy-version: "1.0"
+  token-ttl-ms: 900000                # validade do termsToken (15 min)
+
+# ===== MFA por e-mail =====
+mfa:
+  enabled: ${MFA_ENABLED:true}
+  code-ttl-minutes: 10
+  max-attempts: 5
+  resend-cooldown-seconds: 60
+  max-codes-per-hour: 5
+  token-ttl-ms: 900000
+  mock-code: ${MFA_MOCK_CODE:}        # ex.: 123456 -> não envia e-mail e aceita esse código (SÓ para testes)
+
+resend:
+  api-key: ${RESEND_API_KEY:}
+  base-url: https://api.resend.com
+  from: "${MAIL_FROM:Searchoteca <no-reply@searchoteca.com.br>}"
+
+logging:
+  level:
+    root: INFO
+    searchoteca: DEBUG
+    AUDIT: INFO
+    org.springframework.security: WARN
+  pattern:
+    level: "%5p [req=%X{requestId:-}] [user=%X{user:-}]"
+  file:
+    name: logs/searchoteca.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
+      total-size-cap: 500MB
+  structured:
+    format:
+      file: ecs

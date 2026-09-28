@@ -1,0 +1,20 @@
+package searchoteca.auditTrail;
+
+public enum AuditAction {
+    ACCESS,
+    CREATE,
+    UPDATE,
+    DELETE,
+    ACTIVATE_USER,
+    DEACTIVATE_USER,
+    DEACTIVATE_REQUEST,
+    ACTIVATE_REQUEST,
+    LOGIN_SUCCESS,
+    LOGIN_FAILURE,
+    ACCESS_DENIED,
+    MFA_CODE_SENT,
+    MFA_SUCCESS,
+    MFA_FAILURE,
+    MFA_LOCKED,
+    TERMS_ACCEPTED,
+}
