@@ -21,9 +21,79 @@ CREATE TABLE IF NOT EXISTS org_books(
     author VARCHAR(100) NOT NULL,
     rel_year INT,
     publisher VARCHAR(50),
-    genre VARCHAR(50),
-    depart_code VARCHAR,
-    local_code  VARCHAR,
-    FOREIGN KEY (depart_code) REFERENCES org_depart(depart_code),
-    FOREIGN KEY (local_code) REFERENCES org_local(local_code)
+    genre VARCHAR(50)
+);
+
+CREATE TABLE IF NOT EXISTS org_copies(
+    copy_id SERIAL PRIMARY KEY,
+    isbn VARCHAR(25) REFERENCES org_books(isbn),
+    depart_code VARCHAR REFERENCES org_depart(depart_code),
+    local_code  VARCHAR REFERENCES org_local(local_code),
+    copy_index INT NOT NULL,
+    copy_custom_code VARCHAR(60) GENERATED ALWAYS AS (isbn || depart_code || local_code || copy_index :: text) STORED,
+    status VARCHAR(20) DEFAULT 'DISPONÍVEL',
+    UNIQUE (isbn,copy_index)
+);
+
+CREATE TABLE IF NOT EXISTS sys_roles(
+    role_id SERIAL PRIMARY KEY,
+    role_code VARCHAR(20) UNIQUE NOT NULL,
+    role_name VARCHAR(50) NOT NULL UNIQUE,
+    role_desc VARCHAR(100) NOT NULL,
+    is_root BOOLEAN NOT NULL DEFAULT FALSE
+    );
+CREATE TABLE IF NOT EXISTS org_users(
+    user_id SERIAL PRIMARY KEY,
+    custom_id VARCHAR(30) UNIQUE,
+    username VARCHAR(30) NOT NULL UNIQUE,
+    complete_name VARCHAR(100) NOT NULL,
+    email VARCHAR(40) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role_code VARCHAR(30) REFERENCES sys_roles(role_code),
+    status BOOLEAN NOT NULL DEFAULT TRUE
+    );
+
+CREATE TABLE IF NOT EXISTS sys_permissions(
+    permission_id SERIAL PRIMARY KEY,
+    permission_code VARCHAR(50) UNIQUE NOT NULL,  -- ex: 'org_books:create'
+    resource VARCHAR(30) NOT NULL,                -- ex: 'users', 'org_books'
+    action VARCHAR(30) NOT NULL,                  -- ex: 'create', 'view', 'alter_quantity'
+    description VARCHAR(100)
+    );
+
+CREATE TABLE IF NOT EXISTS sys_role_permissions(
+    role_code VARCHAR(20) NOT NULL REFERENCES sys_roles(role_code) ON DELETE CASCADE,
+    permission_code VARCHAR(50) NOT NULL REFERENCES sys_permissions(permission_code) ON DELETE CASCADE,
+    PRIMARY KEY (role_code, permission_code)
+    );
+
+CREATE TABLE IF NOT EXISTS auditTrail_logs(
+    id BIGSERIAL PRIMARY KEY,
+    time_stamp TIMESTAMP NOT NULL,
+    username VARCHAR(30),
+    action VARCHAR(30) NOT NULL,
+    details TEXT
+    );
+
+
+CREATE TABLE IF NOT EXISTS sys_mfa(
+    id BIGSERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES org_users(user_id) ON DELETE CASCADE,
+    code_hash VARCHAR(255) NOT NULL,        -- hash BCrypt do código, nunca o código em si
+    created_at TIMESTAMP NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    attempts INT NOT NULL DEFAULT 0,        -- tentativas erradas neste código
+    used_at TIMESTAMP                       -- preenchido quando usado ou invalidado
+);
+
+CREATE INDEX IF NOT EXISTS idx_mfa_user_created ON sys_mfa(user_id, created_at DESC);
+
+-- Aceite dos Termos de Uso e da Política de Privacidade (uma linha por versão aceita)
+CREATE TABLE IF NOT EXISTS sys_terms_acceptance(
+    id BIGSERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES org_users(user_id) ON DELETE CASCADE,
+    terms_version VARCHAR(20) NOT NULL,
+    privacy_version VARCHAR(20) NOT NULL,
+    accepted_at TIMESTAMP NOT NULL,
+    UNIQUE (user_id, terms_version, privacy_version)
 );
