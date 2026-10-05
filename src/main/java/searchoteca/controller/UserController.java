@@ -19,12 +19,14 @@ public class UserController {
         this.auditLogService = auditLogService;
     }
 
+    @PreAuthorize("hasAuthority('root')")
     @GetMapping
     public ResponseEntity<?> findAll() {
         auditLogService.record(AuditAction.ACCESS,"All Users");
         return ResponseEntity.ok(userService.findAll());
     }
 
+    @PreAuthorize("hasAuthority('root')")
     @GetMapping("/{username}")
     public ResponseEntity<?> findById(@PathVariable String username) {
         auditLogService.record(AuditAction.ACCESS,"users" + username);
@@ -32,6 +34,7 @@ public class UserController {
 
         return ResponseEntity.ok(user);
     }
+
     @PreAuthorize("hasAuthority('users:create')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody UserModel user){

@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS org_copies(
     depart_code VARCHAR REFERENCES org_depart(depart_code),
     local_code  VARCHAR REFERENCES org_local(local_code),
     copy_index INT NOT NULL,
-    copy_custom_code VARCHAR(60) GENERATED ALWAYS AS (isbn || depart_code || local_code || copy_index :: text) STORED,
+    copy_custom_code VARCHAR(60) GENERATED ALWAYS AS (depart_code || local_code || copy_index :: text) STORED,
     status VARCHAR(20) DEFAULT 'DISPONÍVEL',
     UNIQUE (isbn,copy_index)
 );
@@ -60,6 +60,8 @@ CREATE TABLE IF NOT EXISTS sys_permissions(
     action VARCHAR(30) NOT NULL,                  -- ex: 'create', 'view', 'alter_quantity'
     description VARCHAR(100)
     );
+
+-- ================================ Seguranca e LGPD ===========================
 
 CREATE TABLE IF NOT EXISTS sys_role_permissions(
     role_code VARCHAR(20) NOT NULL REFERENCES sys_roles(role_code) ON DELETE CASCADE,

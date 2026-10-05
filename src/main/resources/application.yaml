@@ -3,6 +3,10 @@ spring:
     name: v0
   config:
     import: "optional:file:.env[.proprieties]"
+
+  data:
+    mongodb:
+      uri:${MONGODB_URI}
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
