@@ -30,8 +30,8 @@ CREATE TABLE IF NOT EXISTS org_copies(
     depart_code VARCHAR REFERENCES org_depart(depart_code),
     local_code  VARCHAR REFERENCES org_local(local_code),
     copy_index INT NOT NULL,
-    copy_custom_code VARCHAR(60) GENERATED ALWAYS AS (depart_code || local_code || copy_index :: text) STORED,
-    status VARCHAR(20) DEFAULT 'DISPONÍVEL',
+    copy_custom_code VARCHAR(60) GENERATED ALWAYS AS (isbn || depart_code || local_code || copy_index :: text) STORED,
+    status VARCHAR(20) DEFAULT 'AVAILABLE',
     UNIQUE (isbn,copy_index)
 );
 
@@ -99,3 +99,38 @@ CREATE TABLE IF NOT EXISTS sys_terms_acceptance(
     accepted_at TIMESTAMP NOT NULL,
     UNIQUE (user_id, terms_version, privacy_version)
 );
+-- ============================================== alunos =====================================================
+
+CREATE IF NOT EXISTS org_students(
+    student_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE REFERENCES org_users(user_id),
+    ra VARCHAR(30) UNIQUE,
+    phone VARCHAR(20),
+    last_activity DATE
+);
+-- ============================================== empréstimos =====================================================
+CREATE TABLE IF NOT EXISTS org_loans (
+
+    loan_id SERIAL PRIMARY KEY,
+    loan_Date DATE;
+    private LocalDateTime loan_dueAt;
+    private String operator;
+    private String user;
+    private String items;
+    private String type_exit;
+    private String status DEFAULT 'AVAILABLE';
+);
+
+CREATE TABLE IF NOT EXISTS org_loan_items(
+    item_id SERIAL PRIMARY KEY,
+    register_id INT NOT NULL REFERENCES org_loans(loan_id),
+    copy_id INT NOT NULL REFERENCES org_copies(copy_id),
+    returned_at TIMESTAMP,
+    returned_to INT REFERENCES org_users(user_id)
+)
+
+CREATE UNIQUE INDEX IF NOT EXISTS copy_per_loan
+    ON org_loan_items(copy_id) WHERE returned_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS loans_student ON org_loans(student_id);
+CREATE INDEX IF NOT EXISTS loans_open ON org_loans(due_date) WHERE status = 'OPEN';

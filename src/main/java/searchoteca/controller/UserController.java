@@ -19,14 +19,14 @@ public class UserController {
         this.auditLogService = auditLogService;
     }
 
-    @PreAuthorize("hasAuthority('root')")
+    @PreAuthorize("hasAuthority('users:view')")
     @GetMapping
     public ResponseEntity<?> findAll() {
         auditLogService.record(AuditAction.ACCESS,"All Users");
         return ResponseEntity.ok(userService.findAll());
     }
 
-    @PreAuthorize("hasAuthority('root')")
+    @PreAuthorize("hasAuthority('users:view')")
     @GetMapping("/{username}")
     public ResponseEntity<?> findById(@PathVariable String username) {
         auditLogService.record(AuditAction.ACCESS,"users" + username);

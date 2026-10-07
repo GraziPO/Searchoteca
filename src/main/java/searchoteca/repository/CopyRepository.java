@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface CopyRepository extends CrudRepository<CopyModel,String> {
 
+    List<CopyModel> findByCopy_id(String id);
     List<CopyModel> findByDepartCode(String departCode);
     List<CopyModel> findByLocalCode(String localCode);
 

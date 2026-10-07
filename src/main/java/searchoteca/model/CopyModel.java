@@ -13,7 +13,7 @@ import org.springframework.data.relational.core.mapping.Table;
 public class CopyModel {
     @Id
     @Column("copy_id")
-    private Long copy_id;
+    private String copy_id;
 
     private String isbn;
 
