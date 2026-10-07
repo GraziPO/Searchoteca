@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import searchoteca.model.CopyModel;
 import searchoteca.model.LoanItemModel;
 import searchoteca.model.LoanModel;
+import searchoteca.model.UserModel;
 import searchoteca.model.status.CopyStatus;
 import searchoteca.model.status.LoanStatus;
 import searchoteca.repository.CopyRepository;
@@ -38,7 +39,8 @@ public class LoanService {
     }
 
     public List<LoanModel> findByUsername(String username) {
-        List<LoanModel> loans = loanRepository.findByUsername(username);
+        UserModel user = userRepository.findByUsername(username);
+        List<LoanModel> loans = loanRepository.findByUser_id(user.getId());
         return loans;
     }
 
@@ -57,7 +59,7 @@ public class LoanService {
     }
 
     @Transactional
-    public LoanModel cancelLoan(Long loanId, String operator) {
+    public LoanModel cancelLoan(Long loanId, Long operatorId) {
         LocalDateTime date = LocalDateTime.now();
 
         LoanModel loan = loanRepository.findById(loanId);

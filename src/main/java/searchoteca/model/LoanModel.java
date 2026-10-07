@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 @Table(name= "org_loans")
 public class LoanModel {
     @Id
-    @Column("loanID")
-    private Long loanId;
+    @Column("loan_id")
+    private Long loan_id;
     private LocalDateTime loan_Date;
     private LocalDateTime loan_dueAt;
     private String operator;

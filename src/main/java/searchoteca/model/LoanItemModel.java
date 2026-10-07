@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
 public class LoanItemModel {
 
     @Id
-    @Column("loanItem_id")
-    private String loanItemId;
+    @Column("item_id")
+    private Long item_id;
     private String copy_id;
     private LocalDateTime returned_at;
-    private LocalDateTime returned_to;
+    private Long returned_to;
 
     public LoanItemModel() {}
 }

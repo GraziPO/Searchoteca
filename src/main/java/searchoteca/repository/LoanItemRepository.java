@@ -9,6 +9,6 @@ import java.util.List;
 @Repository
 public interface LoanItemRepository extends CrudRepository<LoanItemModel,String> {
     List<LoanItemModel> findByLoanId(Long loanId);
-    LoanItemModel findById(Long id);
+    LoanItemModel findByItem_Id(Long id);
     LoanItemModel findByCopyId(Long itemId);
 }
