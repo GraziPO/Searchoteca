@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS org_copies(
     local_code  VARCHAR REFERENCES org_local(local_code),
     copy_index INT NOT NULL,
     copy_custom_code VARCHAR(60) GENERATED ALWAYS AS (isbn || depart_code || local_code || copy_index :: text) STORED,
-    status VARCHAR(20) DEFAULT 'DISPONÍVEL',
+    status VARCHAR(20) DEFAULT 'AVAILABLE',
     UNIQUE (isbn,copy_index)
 );
 
@@ -61,6 +61,8 @@ CREATE TABLE IF NOT EXISTS sys_permissions(
     description VARCHAR(100)
     );
 
+-- ================================ Seguranca e LGPD ===========================
+
 CREATE TABLE IF NOT EXISTS sys_role_permissions(
     role_code VARCHAR(20) NOT NULL REFERENCES sys_roles(role_code) ON DELETE CASCADE,
     permission_code VARCHAR(50) NOT NULL REFERENCES sys_permissions(permission_code) ON DELETE CASCADE,
@@ -75,7 +77,6 @@ CREATE TABLE IF NOT EXISTS auditTrail_logs(
     details TEXT
     );
 
-
 CREATE TABLE IF NOT EXISTS sys_mfa(
     id BIGSERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES org_users(user_id) ON DELETE CASCADE,
@@ -86,7 +87,8 @@ CREATE TABLE IF NOT EXISTS sys_mfa(
     used_at TIMESTAMP                       -- preenchido quando usado ou invalidado
 );
 
-CREATE INDEX IF NOT EXISTS idx_mfa_user_created ON sys_mfa(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_mfa_user_created
+    ON sys_mfa(user_id, created_at DESC);
 
 -- Aceite dos Termos de Uso e da Política de Privacidade (uma linha por versão aceita)
 CREATE TABLE IF NOT EXISTS sys_terms_acceptance(
@@ -97,3 +99,36 @@ CREATE TABLE IF NOT EXISTS sys_terms_acceptance(
     accepted_at TIMESTAMP NOT NULL,
     UNIQUE (user_id, terms_version, privacy_version)
 );
+-- ============================================== alunos =====================================================
+
+CREATE TABLE IF NOT EXISTS org_students(
+    student_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE REFERENCES org_users(user_id),
+    ra VARCHAR(30) UNIQUE,
+    phone VARCHAR(20),
+    last_activity DATE
+);
+-- ============================================== empréstimos =====================================================
+CREATE TABLE IF NOT EXISTS org_loans(
+
+    loan_id SERIAL PRIMARY KEY,
+    student_id INT NOT NULL REFERENCES org_users(user_id),
+    operator_id INT NOT NULL REFERENCES org_users(user_id),
+    loan_date TIMESTAMP NOT NULL,
+    due_date DATE NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'OPEN'
+);
+
+CREATE TABLE IF NOT EXISTS org_loan_items(
+    item_id SERIAL PRIMARY KEY,
+    loan_id INT NOT NULL REFERENCES org_loans(loan_id),
+    copy_id INT NOT NULL REFERENCES org_copies(copy_id),
+    returned_at TIMESTAMP,
+    returned_to INT REFERENCES org_users(user_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS copy_per_loan
+    ON org_loan_items(copy_id) WHERE returned_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS loans_student ON org_loans(student_id);
+CREATE INDEX IF NOT EXISTS loans_open ON org_loans(due_date) WHERE status = 'OPEN';

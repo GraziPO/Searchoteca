@@ -28,7 +28,7 @@ public class DepartmentController {
 
     @PreAuthorize("hasAuthority('org_depart:view')")
     @GetMapping("/{departCode}")
-    public ResponseEntity<?> getById(@PathVariable String departCode){
+    public ResponseEntity<?> getById(@PathVariable Long departCode){
         auditLogService.record(AuditAction.ACCESS,"department" + departCode);
         return ResponseEntity.ok(departmentService.findByDepartCode(departCode));
     }
@@ -42,14 +42,14 @@ public class DepartmentController {
 
     @PreAuthorize("hasAuthority('org_depart:edit')")
     @PutMapping("/{departCode}")
-    public ResponseEntity<?> update(@PathVariable String departCode, @RequestBody DepartmentModel departInfo){
+    public ResponseEntity<?> update(@PathVariable Long departCode, @RequestBody DepartmentModel departInfo){
         auditLogService.record(AuditAction.UPDATE,"department" + departCode);
         return ResponseEntity.ok(departmentService.update(departCode, departInfo));
     }
 
     @PreAuthorize("hasAuthority('org_depart:delete')")
     @DeleteMapping("/{departCode}")
-    public ResponseEntity<?> delete(@PathVariable String departCode){
+    public ResponseEntity<?> delete(@PathVariable Long departCode){
         departmentService.delete(departCode);
         auditLogService.record(AuditAction.DELETE,"department" + departCode);
         return ResponseEntity.noContent().build();
@@ -59,14 +59,14 @@ public class DepartmentController {
 
     @PreAuthorize("hasAuthority('org_depart:view')")
     @GetMapping("/{departCode}/livros")
-    public ResponseEntity<?> getBooksById(@PathVariable String departCode){
+    public ResponseEntity<?> getBooksById(@PathVariable Long departCode){
         auditLogService.record(AuditAction.ACCESS,"Books in department: " + departCode);
         return ResponseEntity.ok(departmentService.findBookByDepartCode(departCode));
     }
 
     @PreAuthorize("hasAuthority('org_depart:view')")
     @GetMapping("/{departCode}/localizacoes")
-    public ResponseEntity<?> getLocationById(@PathVariable String departCode){
+    public ResponseEntity<?> getLocationById(@PathVariable Long departCode){
         auditLogService.record(AuditAction.ACCESS,"Locations in department: " + departCode);
         return ResponseEntity.ok(departmentService.findLocalByDepartCode(departCode));
     }

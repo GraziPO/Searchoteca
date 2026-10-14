@@ -3,6 +3,7 @@ spring:
     name: v0
   config:
     import: "optional:file:.env[.proprieties]"
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}

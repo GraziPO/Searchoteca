@@ -10,5 +10,5 @@ import java.util.List;
 public interface LoanItemRepository extends CrudRepository<LoanItemModel,Long> {
     List<LoanItemModel> findByLoanId(Long loanId);
     LoanItemModel findByItem_Id(Long id);
-    LoanItemModel findByCopyId(Long itemId);
+    LoanItemModel findByCopy_Id(Long itemId);
 }

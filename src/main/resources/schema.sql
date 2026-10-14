@@ -87,7 +87,8 @@ CREATE TABLE IF NOT EXISTS sys_mfa(
     used_at TIMESTAMP                       -- preenchido quando usado ou invalidado
 );
 
-CREATE INDEX IF NOT EXISTS idx_mfa_user_created ON sys_mfa(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_mfa_user_created
+    ON sys_mfa(user_id, created_at DESC);
 
 -- Aceite dos Termos de Uso e da Política de Privacidade (uma linha por versão aceita)
 CREATE TABLE IF NOT EXISTS sys_terms_acceptance(
@@ -100,7 +101,7 @@ CREATE TABLE IF NOT EXISTS sys_terms_acceptance(
 );
 -- ============================================== alunos =====================================================
 
-CREATE IF NOT EXISTS org_students(
+CREATE TABLE IF NOT EXISTS org_students(
     student_id SERIAL PRIMARY KEY,
     user_id INT NOT NULL UNIQUE REFERENCES org_users(user_id),
     ra VARCHAR(30) UNIQUE,
@@ -108,14 +109,14 @@ CREATE IF NOT EXISTS org_students(
     last_activity DATE
 );
 -- ============================================== empréstimos =====================================================
-CREATE TABLE IF NOT EXISTS org_loans (
+CREATE TABLE IF NOT EXISTS org_loans(
 
     loan_id SERIAL PRIMARY KEY,
     student_id INT NOT NULL REFERENCES org_users(user_id),
-    operator_id INT NOT NULL REFERENCES org_uers(user_id),
+    operator_id INT NOT NULL REFERENCES org_users(user_id),
     loan_date TIMESTAMP NOT NULL,
     due_date DATE NOT NULL,
-    status VARCHAR(20) NOT NULL     DEFAULT 'OPEN';
+    status VARCHAR(20) NOT NULL DEFAULT 'OPEN'
 );
 
 CREATE TABLE IF NOT EXISTS org_loan_items(

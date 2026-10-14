@@ -83,7 +83,7 @@ public class LoanService {
                 continue;
             }
 
-            CopyModel copy = copyRepository.findByCopyId(item.getCopy_id());
+            CopyModel copy = copyRepository.findByCopy_Id(item.getCopy_id());
             copy.setStatus(CopyStatus.AVAILABLE.name());
             copyRepository.save(copy);
 
