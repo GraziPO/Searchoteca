@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Repository
-public interface BookRepository extends CrudRepository<BookModel,String>{
+public interface BookRepository extends CrudRepository<BookModel,Long>{
 
     BookModel findByIsbn(String Isbn);
 

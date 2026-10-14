@@ -5,12 +5,12 @@ import searchoteca.model.LocationModel;
 
 import java.util.List;
 
-public interface LocationRepository extends CrudRepository<LocationModel,String> {
-    LocationModel findByLocalCode(String localCode);
+public interface LocationRepository extends CrudRepository<LocationModel,Long> {
+    LocationModel findByLocalCode(Long localCode);
 
-    void deleteByLocalCode(String localCode);
+    void deleteByLocalCode(Long localCode);
 
-    boolean existsByLocalCode(String localCode);
+    boolean existsByLocalCode(Long localCode);
 
-    List<LocationModel> findByDepartCode(String departCode);
+    List<LocationModel> findByDepartCode(Long departCode);
 }

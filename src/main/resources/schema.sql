@@ -77,7 +77,6 @@ CREATE TABLE IF NOT EXISTS auditTrail_logs(
     details TEXT
     );
 
-
 CREATE TABLE IF NOT EXISTS sys_mfa(
     id BIGSERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES org_users(user_id) ON DELETE CASCADE,
@@ -112,22 +111,20 @@ CREATE IF NOT EXISTS org_students(
 CREATE TABLE IF NOT EXISTS org_loans (
 
     loan_id SERIAL PRIMARY KEY,
-    loan_Date DATE;
-    private LocalDateTime loan_dueAt;
-    private String operator;
-    private String user;
-    private String items;
-    private String type_exit;
-    private String status DEFAULT 'AVAILABLE';
+    student_id INT NOT NULL REFERENCES org_users(user_id),
+    operator_id INT NOT NULL REFERENCES org_uers(user_id),
+    loan_date TIMESTAMP NOT NULL,
+    due_date DATE NOT NULL,
+    status VARCHAR(20) NOT NULL     DEFAULT 'OPEN';
 );
 
 CREATE TABLE IF NOT EXISTS org_loan_items(
     item_id SERIAL PRIMARY KEY,
-    register_id INT NOT NULL REFERENCES org_loans(loan_id),
+    loan_id INT NOT NULL REFERENCES org_loans(loan_id),
     copy_id INT NOT NULL REFERENCES org_copies(copy_id),
     returned_at TIMESTAMP,
     returned_to INT REFERENCES org_users(user_id)
-)
+);
 
 CREATE UNIQUE INDEX IF NOT EXISTS copy_per_loan
     ON org_loan_items(copy_id) WHERE returned_at IS NULL;

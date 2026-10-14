@@ -4,7 +4,7 @@ INSERT INTO sys_roles (role_code, role_name, role_desc, is_root) VALUES
     ('admin_users', 'Administrador de Usuários', 'Gerencia usuários; sem acesso ao acervo', FALSE),
     ('warehouse_op', 'Operador de Acervo', 'Gerencia departamentos, locais e livros; sem acesso a usuários', FALSE),
     ('loan_op', 'Operador de Empréstimo', 'Consulta acervo e controla quantidade de livros', FALSE),
-    ('student', 'student', 'Consulta Acervo e empréstimos de usuário', FALSE),
+    ('students', 'students', 'Consulta Acervo e empréstimos de usuário', FALSE)
 ON CONFLICT (role_code) DO NOTHING;
 
 -- ==================================== ACESSOS BASE ====================================
@@ -37,7 +37,7 @@ INSERT INTO sys_permissions (permission_code, resource, action, description) VAL
     ('loans:view_own', 'loans', 'view_own', 'Visualizar próprios emprestimos'),
 
     ('students:create', 'students', 'create', 'cadastrar aluno'),
-    ('students:view', 'students', 'view', 'Visualizar aluno'),
+    ('students:view', 'students', 'view', 'Visualizar aluno')
 ON CONFLICT(permission_code) DO NOTHING;
 
 -- ===== seed: role x permission =====
@@ -63,10 +63,9 @@ INSERT INTO sys_role_permissions (role_code, permission_code) VALUES
     ('warehouse_op', 'org_books:view'),
     ('warehouse_op', 'org_books:delete'),
 
-    ('loan_op', 'org_local:create'),
-    ('loan_op', 'org_depart:edit'),
+    ('loan_op', 'org_depart:view'),
+    ('loan_op', 'org_local:view'),
     ('loan_op', 'org_books:view'),
-    ('loan_op', 'org_books:alter_quantity'),
 
     ('loan_op', 'loans:create'),
     ('loan_op', 'loans:return'),
@@ -76,7 +75,7 @@ INSERT INTO sys_role_permissions (role_code, permission_code) VALUES
     ('loan_op', 'students:create'),
     ('loan_op', 'students:view'),
 
-    ('students', 'loans:view_own'),
+    ('students', 'loans:view_own')
     ON CONFLICT DO NOTHING;
 
 -- ===== seed: usuário root inicial (bootstrap) =====

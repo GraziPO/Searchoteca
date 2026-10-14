@@ -7,15 +7,15 @@ import searchoteca.model.CopyModel;
 import java.util.List;
 
 @Repository
-public interface CopyRepository extends CrudRepository<CopyModel,String> {
+public interface CopyRepository extends CrudRepository<CopyModel,Long> {
 
-    List<CopyModel> findByCopy_id(String id);
-    List<CopyModel> findByDepartCode(String departCode);
-    List<CopyModel> findByLocalCode(String localCode);
+    CopyModel findByCopyId(Long id);
+    List<CopyModel> findByDepartCode(Long departCode);
+    List<CopyModel> findByLocalCode(Long localCode);
 
-    List<CopyModel> findByIsbn(String isbn);
+    List<CopyModel> findByIsbn(Long isbn);
 
-    void deleteByCustomCode(String customId);
+    void deleteByCustomCode(Long customId);
 
 
 }

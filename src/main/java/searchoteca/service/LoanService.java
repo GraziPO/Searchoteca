@@ -2,6 +2,8 @@ package searchoteca.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import searchoteca.exception.ResourceConflictException;
+import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.CopyModel;
 import searchoteca.model.LoanItemModel;
 import searchoteca.model.LoanModel;
@@ -13,7 +15,6 @@ import searchoteca.repository.LoanItemRepository;
 import searchoteca.repository.LoanRepository;
 import searchoteca.repository.UserRepository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -38,14 +39,20 @@ public class LoanService {
         return loans;
     }
 
+    //specific get for loans by student
+    public LoanModel findAllByStudent(Long studentId) {
+        List<LoanModel> loans =  loanRepository.findByUserid(studentId);
+        return (LoanModel) loans;
+    }
+
     public List<LoanModel> findByUsername(String username) {
         UserModel user = userRepository.findByUsername(username);
-        List<LoanModel> loans = loanRepository.findByUser_id(user.getId());
+        List<LoanModel> loans = loanRepository.findByUserid(user.getId());
         return loans;
     }
 
-    public LoanModel findById(String id) {
-        LoanModel loan = loanRepository.findById(id).orElse(null);
+    public LoanModel findById(Long id) {
+        LoanModel loan = loanRepository.findByLoanId(id);
         return loan;
     }
 
@@ -60,23 +67,33 @@ public class LoanService {
 
     @Transactional
     public LoanModel cancelLoan(Long loanId, Long operatorId) {
+        LoanModel loan = loanRepository.findByLoanId(loanId);
+        if (loan == null) {
+            throw new ResourceNotFoundException("Registro não encontrado");
+        }
+
+        if(!LoanStatus.OPEN.name().equals(loan.getStatus())) {
+            throw new ResourceConflictException("impossível realizar operação. Verifique o status do pedido.");
+        }
         LocalDateTime date = LocalDateTime.now();
 
-        LoanModel loan = loanRepository.findById(loanId);
-        List<String> items = loanItemRepository.findByLoanId(loanId)
-                .stream()
-                .map(LoanItemModel ::getCopy_id)
-                .distinct()
-                .toList();
+        for(LoanItemModel item: loanItemRepository.findByLoanId(loanId)){
 
-        //set status of each loaned copy back to default (AVAILABLE)
-         for (String item : items) {
-             CopyModel copy = (CopyModel) copyRepository.findByCopy_id(item);
-             copy.setStatus(String.valueOf(CopyStatus.AVAILABLE));
-         }
+            if(item.getReturned_at() != null){
+                continue;
+            }
 
-         //change the Loan Status to (Canceled)
-        loan.setStatus(String.valueOf(LoanStatus.CANCELLED));
-         return loanRepository.save(loan);
+            CopyModel copy = copyRepository.findByCopyId(item.getCopy_id());
+            copy.setStatus(CopyStatus.AVAILABLE.name());
+            copyRepository.save(copy);
+
+            item.setReturned_to(operatorId);
+            item.setReturned_at(date);
+            loanItemRepository.save(item);
+        }
+
+        //change the Loan Status to (Canceled)
+        loan.setStatus(LoanStatus.CANCELLED.name());
+        return loanRepository.save(loan);
     }
 }

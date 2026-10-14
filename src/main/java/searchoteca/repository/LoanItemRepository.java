@@ -7,7 +7,7 @@ import searchoteca.model.LoanItemModel;
 import java.util.List;
 
 @Repository
-public interface LoanItemRepository extends CrudRepository<LoanItemModel,String> {
+public interface LoanItemRepository extends CrudRepository<LoanItemModel,Long> {
     List<LoanItemModel> findByLoanId(Long loanId);
     LoanItemModel findByItem_Id(Long id);
     LoanItemModel findByCopyId(Long itemId);
