@@ -4,16 +4,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
-import searchoteca.model.CopyModel;
-import searchoteca.model.LoanItemModel;
-import searchoteca.model.LoanModel;
-import searchoteca.model.UserModel;
+import searchoteca.model.*;
 import searchoteca.model.status.CopyStatus;
 import searchoteca.model.status.LoanStatus;
-import searchoteca.repository.CopyRepository;
-import searchoteca.repository.LoanItemRepository;
-import searchoteca.repository.LoanRepository;
-import searchoteca.repository.UserRepository;
+import searchoteca.repository.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,14 +19,16 @@ public class LoanService {
     private final LoanRepository loanRepository;
     private final LoanItemRepository loanItemRepository;
     private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
     private final CopyRepository copyRepository;
 ;
 
-    public LoanService(LoanRepository loanRepository, LoanItemRepository loanItemRepository, UserRepository userRepository,  CopyRepository copyRepository) {
+    public LoanService(LoanRepository loanRepository, LoanItemRepository loanItemRepository, UserRepository userRepository,  CopyRepository copyRepository, StudentRepository studentRepository) {
         this.loanRepository = loanRepository;
         this.loanItemRepository = loanItemRepository;
         this.userRepository = userRepository;
         this.copyRepository = copyRepository;
+        this.studentRepository = studentRepository;
     }
 
     public List<LoanModel> findAll() {
@@ -55,11 +51,15 @@ public class LoanService {
         return loan.orElse(null);
     }
 
-    public LoanModel create(LoanModel loan) {
+    public LoanModel create(LoanModel loan, String ra) {
         LocalDateTime date = LocalDateTime.now();
+        StudentModel student = studentRepository.findByRa(ra);
 
+        student.setLastActivity(date);
         loan.setStatus(String.valueOf(LoanStatus.OPEN));
         loan.setLoan_Date(date);
+
+        studentRepository.save(student);
 
         return loanRepository.save(loan);
     }
@@ -93,6 +93,13 @@ public class LoanService {
 
         //change the Loan Status to (Canceled)
         loan.setStatus(LoanStatus.CANCELLED.name());
+
+        //set student last activity
+        UserModel user = userRepository.findByUsername(loan.getUser());
+        StudentModel student = studentRepository.findByStudentId(user.getId());
+        student.setLastActivity(date);
+
+        studentRepository.save(student);
         return loanRepository.save(loan);
     }
 }

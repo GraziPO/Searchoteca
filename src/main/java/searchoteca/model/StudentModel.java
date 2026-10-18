@@ -5,9 +5,9 @@ import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
-import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -19,7 +19,7 @@ public class StudentModel {
     private Long userId;
     private String ra;
     private String phone;
-    private LocalDate lastActivity;
+    private LocalDateTime lastActivity;
 
     public StudentModel() { }
 
