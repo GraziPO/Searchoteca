@@ -17,6 +17,7 @@ import searchoteca.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LoanService {
@@ -40,20 +41,18 @@ public class LoanService {
     }
 
     //specific get for loans by student
-    public LoanModel findAllByStudent(Long studentId) {
-        List<LoanModel> loans =  loanRepository.findByUserid(studentId);
-        return (LoanModel) loans;
+    public List<LoanModel> findAllByStudent(Long studentId) {
+        return loanRepository.findByUser(studentId);
     }
 
     public List<LoanModel> findByUsername(String username) {
         UserModel user = userRepository.findByUsername(username);
-        List<LoanModel> loans = loanRepository.findByUserid(user.getId());
-        return loans;
+        return loanRepository.findByUser(user.getId());
     }
 
     public LoanModel findById(Long id) {
-        LoanModel loan = loanRepository.findByLoanId(id);
-        return loan;
+        Optional<LoanModel> loan = loanRepository.findById(id);
+        return loan.orElse(null);
     }
 
     public LoanModel create(LoanModel loan) {
@@ -83,7 +82,7 @@ public class LoanService {
                 continue;
             }
 
-            CopyModel copy = copyRepository.findByCopy_Id(item.getCopy_id());
+            CopyModel copy = copyRepository.findByCopyId(item.getCopyId());
             copy.setStatus(CopyStatus.AVAILABLE.name());
             copyRepository.save(copy);
 

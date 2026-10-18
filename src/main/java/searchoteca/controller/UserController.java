@@ -64,4 +64,13 @@ public class UserController {
         auditLogService.record(AuditAction.DEACTIVATE_USER,"users" + username);
         return ResponseEntity.ok().build();
     }
+
+    //======================= cria usuários do tipo "aluno" =======================
+
+    @PreAuthorize("hasAuthority('students:create')")
+    @PostMapping
+    public ResponseEntity<?> createStudent(@RequestBody UserModel user){
+        auditLogService.record(AuditAction.CREATE,"student" + user.getUsername());
+        return ResponseEntity.ok(userService.create(user));
+    }
 }

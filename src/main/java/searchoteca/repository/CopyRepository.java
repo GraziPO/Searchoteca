@@ -9,13 +9,12 @@ import java.util.List;
 @Repository
 public interface CopyRepository extends CrudRepository<CopyModel,Long> {
 
-    CopyModel findByCopy_Id(Long id);
+    CopyModel findByCopyId(Long id);
     List<CopyModel> findByDepartCode(Long departCode);
     List<CopyModel> findByLocalCode(Long localCode);
 
     List<CopyModel> findByIsbn(String isbn);
 
-    void deleteByCustomCode(Long customId);
 
 
 }

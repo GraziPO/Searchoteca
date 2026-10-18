@@ -15,8 +15,9 @@ public class LoanItemModel {
 
     @Id
     @Column("item_id")
-    private Long item_id;
-    private Long copy_id;
+    private Long itemId;
+    private Long loanId;
+    private Long copyId;
     private LocalDateTime returned_at;
     private Long returned_to;
 

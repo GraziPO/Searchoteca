@@ -32,10 +32,11 @@ public class LoanController {
 
 
     //endpoint exclusivo para os alunos
-    @PreAuthorize("hasAuthority('students:view')")
-    @GetMapping("/alunos/{studentId}")
-    public ResponseEntity<?> findByStudentId(@PathVariable String id) {
-        return ResponseEntity.ok(loanService.findByUsername(id));
+    @PreAuthorize("hasAuthority('students:view_own')")
+    @GetMapping("/historico")
+    public ResponseEntity<?> findOwn(Authentication authentication) {
+        CustomUserDetails student = (CustomUserDetails) authentication.getPrincipal();
+        return ResponseEntity.ok(loanService.findAllByStudent(student.getUserId()));
     }
 
     @PreAuthorize("hasAuthority('loans:create')")

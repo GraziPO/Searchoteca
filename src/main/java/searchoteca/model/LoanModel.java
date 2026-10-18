@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class LoanModel {
     @Id
     @Column("loan_id")
-    private Long loan_id;
+    private Long loanId;
     private LocalDateTime loan_Date;
     private LocalDateTime loan_dueAt;
     private String operator;
