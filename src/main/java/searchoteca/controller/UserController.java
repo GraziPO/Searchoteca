@@ -5,18 +5,22 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
+import searchoteca.model.StudentModel;
 import searchoteca.model.UserModel;
+import searchoteca.service.StudentService;
 import searchoteca.service.UserService;
 
 @RestController
 @RequestMapping("/api/usuarios")
 public class UserController {
     private final UserService userService;
+    private final StudentService studentService;
     private final AuditLogService auditLogService;
 
-    public UserController(UserService userService,  AuditLogService auditLogService) {
+    public UserController(UserService userService,  AuditLogService auditLogService, StudentService studentService) {
         this.userService = userService;
         this.auditLogService = auditLogService;
+        this.studentService = studentService;
     }
 
     @PreAuthorize("hasAuthority('users:view')")
@@ -68,9 +72,12 @@ public class UserController {
     //======================= cria usuários do tipo "aluno" =======================
 
     @PreAuthorize("hasAuthority('students:create')")
-    @PostMapping
-    public ResponseEntity<?> createStudent(@RequestBody UserModel user){
+    @PostMapping("/aluno")
+    public ResponseEntity<?> createStudent(@RequestBody UserModel user, StudentModel studentInfo){
+        userService.create(user);
+        auditLogService.record(AuditAction.CREATE,"user" + user.getUsername());
+        studentService.create(studentInfo);
         auditLogService.record(AuditAction.CREATE,"student" + user.getUsername());
-        return ResponseEntity.ok(userService.create(user));
+        return ResponseEntity.ok().build();
     }
 }

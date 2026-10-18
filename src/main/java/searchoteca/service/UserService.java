@@ -2,7 +2,9 @@ package searchoteca.service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import searchoteca.model.StudentModel;
 import searchoteca.model.UserModel;
+import searchoteca.repository.StudentRepository;
 import searchoteca.repository.UserRepository;
 
 import java.util.List;
@@ -52,10 +54,10 @@ public class UserService {
         user.setStatus(true);
         userRepository.save(user);
     }
+
     public void deactivate(String username){
         UserModel user = userRepository.findByUsername(username);
         user.setStatus(false);
         userRepository.save(user);
     }
-
 }
