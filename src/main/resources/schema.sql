@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS org_books(
 );
 
 CREATE TABLE IF NOT EXISTS org_copies(
-    copyId SERIAL PRIMARY KEY,
+    copy_id SERIAL PRIMARY KEY,
     isbn VARCHAR(25) REFERENCES org_books(isbn),
     depart_code VARCHAR REFERENCES org_depart(depart_code),
     local_code  VARCHAR REFERENCES org_local(local_code),

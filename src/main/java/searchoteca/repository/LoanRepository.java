@@ -10,7 +10,7 @@ import java.util.List;
 public interface LoanRepository extends CrudRepository<LoanModel,Long> {
     List<LoanModel> findAll();
 
-    List<LoanModel> findByUser(Long user_id);
+    List<LoanModel> findByStudentId(Long user_id);
 
     LoanModel findByLoanId(Long loan_id);
 }

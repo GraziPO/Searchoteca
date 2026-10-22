@@ -6,11 +6,11 @@ import searchoteca.model.LocationModel;
 import java.util.List;
 
 public interface LocationRepository extends CrudRepository<LocationModel,Long> {
-    LocationModel findByLocalCode(Long localCode);
+    LocationModel findByLocalCode(String localCode);
 
-    void deleteByLocalCode(Long localCode);
+    void deleteByLocalCode(String localCode);
 
-    boolean existsByLocalCode(Long localCode);
+    boolean existsByLocalCode(String localCode);
 
-    List<LocationModel> findByDepartCode(Long departCode);
+    List<LocationModel> findByDepartCode(String departCode);
 }

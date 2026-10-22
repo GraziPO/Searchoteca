@@ -32,18 +32,17 @@ public class LoanService {
     }
 
     public List<LoanModel> findAll() {
-        List<LoanModel> loans = loanRepository.findAll();
-        return loans;
+        return loanRepository.findAll();
     }
 
     //specific get for loans by student
     public List<LoanModel> findAllByStudent(Long studentId) {
-        return loanRepository.findByUser(studentId);
+        return loanRepository.findByStudentId(studentId);
     }
 
     public List<LoanModel> findByUsername(String username) {
         UserModel user = userRepository.findByUsername(username);
-        return loanRepository.findByUser(user.getId());
+        return loanRepository.findByStudentId(user.getId());
     }
 
     public LoanModel findById(Long id) {
@@ -57,7 +56,7 @@ public class LoanService {
 
         student.setLastActivity(date);
         loan.setStatus(String.valueOf(LoanStatus.OPEN));
-        loan.setLoan_Date(date);
+        loan.setLoanDate(date);
 
         studentRepository.save(student);
 
@@ -95,7 +94,7 @@ public class LoanService {
         loan.setStatus(LoanStatus.CANCELLED.name());
 
         //set student last activity
-        UserModel user = userRepository.findByUsername(loan.getUser());
+        UserModel user = userRepository.findByStudentId(loan.getStudentId());
         StudentModel student = studentRepository.findByStudentId(user.getId());
         student.setLastActivity(date);
 

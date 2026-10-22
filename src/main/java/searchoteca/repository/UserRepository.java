@@ -5,8 +5,10 @@ import searchoteca.model.UserModel;
 
 import java.util.List;
 
-public interface UserRepository extends CrudRepository<UserModel, String> {
+public interface UserRepository extends CrudRepository<UserModel, Long> {
     UserModel findByUsername(String username);
+
+    UserModel findByStudentId(Long studentId);
 
     UserModel getUserByCompleteName(String username);
 

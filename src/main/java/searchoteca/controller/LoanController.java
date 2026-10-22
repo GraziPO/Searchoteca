@@ -32,7 +32,7 @@ public class LoanController {
 
 
     //endpoint exclusivo para os alunos
-    @PreAuthorize("hasAuthority('students:view_own')")
+    @PreAuthorize("hasAuthority('loans:view_own')")
     @GetMapping("/historico")
     public ResponseEntity<?> findOwn(Authentication authentication) {
         CustomUserDetails student = (CustomUserDetails) authentication.getPrincipal();
@@ -41,15 +41,14 @@ public class LoanController {
 
     @PreAuthorize("hasAuthority('loans:create')")
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody LoanModel loanModel) {
-        return ResponseEntity.ok(loanService.create(loanModel));
+    public ResponseEntity<?> create(@RequestBody LoanModel loanModel, String ra) {
+        return ResponseEntity.ok(loanService.create(loanModel, ra));
     }
 
     @PreAuthorize("hasAuthority('loans:cancel')")
     @PostMapping("{loan_id}/cancelar")
-    public ResponseEntity<?> cancel(@PathVariable Long loanId, Authentication authentication) {
+    public ResponseEntity<?> cancel(@PathVariable Long loan_id, Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
-        LoanModel loan = loanService.cancelLoan(loanId, user.getUserId());
-        return ResponseEntity.ok(loan);
+        return ResponseEntity.ok( loanService.cancelLoan(loan_id,user.getUserId()));
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
@@ -15,10 +16,10 @@ public class LoanModel {
     @Id
     @Column("loan_id")
     private Long loanId;
-    private LocalDateTime loan_Date;
-    private LocalDateTime loan_dueAt;
-    private String operator;
-    private String user;
+    private LocalDateTime loanDate;
+    private LocalDate dueDate;
+    private Long operatorId;
+    private Long studentId;
     private String items;
     private String type_exit;
     private String status;

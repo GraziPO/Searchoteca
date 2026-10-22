@@ -3,6 +3,7 @@ package searchoteca.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import searchoteca.DTO.StudentRequest;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
 import searchoteca.model.StudentModel;
@@ -73,11 +74,9 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('students:create')")
     @PostMapping("/aluno")
-    public ResponseEntity<?> createStudent(@RequestBody UserModel user, StudentModel studentInfo){
-        userService.create(user);
-        auditLogService.record(AuditAction.CREATE,"user" + user.getUsername());
+    public ResponseEntity<?> createStudent(@RequestBody StudentRequest studentInfo){
         studentService.create(studentInfo);
-        auditLogService.record(AuditAction.CREATE,"student" + user.getUsername());
+        auditLogService.record(AuditAction.CREATE,"student" + studentInfo.ra());
         return ResponseEntity.ok().build();
     }
 }

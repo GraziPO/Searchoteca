@@ -28,7 +28,7 @@ public class LocationController {
 
     @PreAuthorize("hasAuthority('org_local:view')")
     @GetMapping("/{localCode}")
-    public ResponseEntity<?> getById(@PathVariable Long localCode){
+    public ResponseEntity<?> getById(@PathVariable String localCode){
         auditLogService.record(AuditAction.ACCESS,"location" + localCode);
         return ResponseEntity.ok(locationService.findByLocalCode(localCode));
     }
@@ -42,14 +42,14 @@ public class LocationController {
 
     @PreAuthorize("hasAuthority('org_local:edit')")
     @PutMapping("/{localCode}")
-    public ResponseEntity<?> update(@PathVariable Long localCode, @RequestBody LocationModel local){
+    public ResponseEntity<?> update(@PathVariable String localCode, @RequestBody LocationModel local){
         auditLogService.record(AuditAction.UPDATE,"location" + localCode);
         return ResponseEntity.ok(locationService.update(localCode, local));
     }
 
     @PreAuthorize("hasAuthority('org_local:delete')")
     @DeleteMapping("/{localCode}")
-    public ResponseEntity<?> delete(@PathVariable Long localCode){
+    public ResponseEntity<?> delete(@PathVariable String localCode){
         auditLogService.record(AuditAction.DELETE,"location" + localCode);
         locationService.delete(localCode);
         return ResponseEntity.noContent().build();
@@ -57,7 +57,7 @@ public class LocationController {
 
     @PreAuthorize("hasAuthority('org_local:view')")
     @GetMapping("/{localCode}/livros")
-    public ResponseEntity<?> getByBookCode(@PathVariable Long localCode){
+    public ResponseEntity<?> getByBookCode(@PathVariable String localCode){
         auditLogService.record(AuditAction.ACCESS,"Books in location: " + localCode);
         return ResponseEntity.ok(locationService.findBookByLocalCode(localCode));
     }

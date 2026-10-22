@@ -38,7 +38,7 @@ public class DepartmentService {
     }
 
 
-    public DepartmentModel findByDepartCode(Long departCode){
+    public DepartmentModel findByDepartCode(String departCode){
         if(departmentRepository.findByDepartCode(departCode)==null){
             throw new ResourceNotFoundException("Departamento não encontrado / não existente");
         }
@@ -48,7 +48,7 @@ public class DepartmentService {
         return departmentRepository.save(department);
     }
 
-    public DepartmentModel update(Long departCode, DepartmentModel departInfo){
+    public DepartmentModel update(String departCode, DepartmentModel departInfo){
         DepartmentModel department = departmentRepository.findByDepartCode(departCode);
 
         if (department ==null){
@@ -60,7 +60,7 @@ public class DepartmentService {
     }
 
 
-    public void delete(Long departCode){
+    public void delete(String departCode){
         DepartmentModel department = departCode == null ? null : departmentRepository.findByDepartCode(departCode);
         if (department == null){
             throw new ResourceNotFoundException("Departamento não existente");
@@ -74,7 +74,7 @@ public class DepartmentService {
     }
 
 
-    public List<LocationModel> findLocalByDepartCode(Long localCode){
+    public List<LocationModel> findLocalByDepartCode(String localCode){
         if (localCode == null){
             throw new ResourceNotFoundException("Nenhum registro encontrado");
         }
@@ -82,7 +82,7 @@ public class DepartmentService {
     }
 
 
-    public List<BookModel> findBookByDepartCode(Long departCode){
+    public List<BookModel> findBookByDepartCode(String departCode){
         if (departCode == null){
             throw new ResourceNotFoundException("Nenhum registro encontrado");
         }

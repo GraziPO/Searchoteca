@@ -5,6 +5,6 @@ import searchoteca.model.DepartmentModel;
 
 public interface DepartmentRepository extends CrudRepository<DepartmentModel,Long> {
 
-    DepartmentModel findByDepartCode(Long departCode);
+    DepartmentModel findByDepartCode(String departCode);
 
 }

@@ -32,7 +32,7 @@ public class LocationService {
         return location;   // lista vazia é resposta válida, não erro
     }
 
-    public LocationModel findByLocalCode(Long localCode){
+    public LocationModel findByLocalCode(String localCode){
         if(localCode == null){
             throw new ResourceNotFoundException("Nenhum livro encontrado");
         }
@@ -40,13 +40,13 @@ public class LocationService {
     }
 
     public LocationModel create(LocationModel location){
-        if (location.getLocalCode() != null && locationRepository.existsByLocalCode(Long.valueOf(location.getLocalCode()))) {
+        if (location.getLocalCode() != null && locationRepository.existsByLocalCode(location.getLocalCode())) {
             throw new ResourceConflictException("Já existe uma localização com esse código.");
         }
         return locationRepository.save(location);
     }
 
-    public LocationModel update(Long localCode, LocationModel localInfo){
+    public LocationModel update(String localCode, LocationModel localInfo){
         LocationModel location = locationRepository.findByLocalCode(localCode);
 
         if(location == null){
@@ -59,7 +59,7 @@ public class LocationService {
         return locationRepository.save(location);
     }
 
-    public void delete(Long localCode){
+    public void delete(String localCode){
         LocationModel local =  locationRepository.findByLocalCode(localCode);
 
         if(local == null){
@@ -71,7 +71,7 @@ public class LocationService {
         locationRepository.deleteByLocalCode(localCode);
     }
 
-    public List<BookModel> findBookByLocalCode(Long localCode){
+    public List<BookModel> findBookByLocalCode(String localCode){
         if (localCode == null){
             throw new ResourceNotFoundException("Nenhum registro encontrado");
         }
