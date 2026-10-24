@@ -125,4 +125,43 @@ public class LoanService {
         studentRepository.save(student);
         return loanRepository.save(loan);
     }
+
+    private void releaseItem(LoanItemModel item, Long operatorId, LocalDateTime now){
+        CopyModel copy = copyRepository.findById(item.getCopyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Exemplar não existente"));
+        copy.setStatus(CopyStatus.AVAILABLE.name());
+        copyRepository.save(copy);
+
+        item.setReturned_to(operatorId);
+        item.setReturned_at(now);
+        loanItemRepository.save(item);
+    }
+
+    @Transactional
+    public LoanModel returnItem(Long copyId, Long operatorId){
+        LoanItemModel item = loanItemRepository.findOpenByCopyId(copyId)
+                .orElseThrow(()-> new ResourceConflictException("Não existe registro de empréstimo relacionado a esta cópia"));
+
+        LoanModel loan = loanRepository.findById(item.getLoanId())
+                .orElseThrow(() -> new ResourceNotFoundException("Empréstimo não encontrado"));
+        if(!LoanStatus.OPEN.name().equals(loan.getStatus())) {
+            throw new ResourceConflictException("Registro não está aberto");
+        }
+
+
+        LocalDateTime now = LocalDateTime.now();
+
+        releaseItem(item, operatorId, now);
+
+        if(loanItemRepository.countOpenItemsByLoanId(loan.getLoanId()) == 0){
+            loan.setStatus(LoanStatus.CLOSED.name());
+        }
+
+        StudentModel student = studentRepository.findByStudentId(loan.getStudentId());
+        if(student != null){
+            student.setLastActivity(now);
+            studentRepository.save(student);
+        }
+        return loanRepository.save(loan);
+    }
 }

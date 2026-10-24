@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import searchoteca.DTO.LoanRequest;
+import searchoteca.auditTrail.AuditLogService;
 import searchoteca.model.LoanModel;
 import searchoteca.security.CustomUserDetails;
 import searchoteca.service.LoanService;
@@ -14,10 +15,12 @@ import searchoteca.service.LoanService;
 @RequestMapping("api/emprestimos")
 public class LoanController {
     private final LoanService loanService;
+    private final AuditLogService auditLogService;
 
 
-    public LoanController(LoanService loanService) {
+    public LoanController(LoanService loanService, AuditLogService auditLogService) {
         this.loanService = loanService;
+        this.auditLogService = auditLogService;
     }
 
     @PreAuthorize("hasAuthority('loans:view')")
@@ -54,5 +57,13 @@ public class LoanController {
     public ResponseEntity<?> cancel(@PathVariable Long loan_id, Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         return ResponseEntity.ok( loanService.cancelLoan(loan_id,user.getUserId()));
+    }
+
+    @PreAuthorize("hasAuthority('loans:return')")
+    @PostMapping("/devolucao/{copyId}")
+    public ResponseEntity<?> returnItem(@PathVariable Long copyId, Authentication authentication) {
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        LoanModel loan = loanService.returnItem(copyId,user.getUserId());
+        return ResponseEntity.ok(loan);
     }
 }
