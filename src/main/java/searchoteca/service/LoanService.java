@@ -2,6 +2,7 @@ package searchoteca.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import searchoteca.DTO.LoanRequest;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.*;
@@ -21,7 +22,7 @@ public class LoanService {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final CopyRepository copyRepository;
-;
+
 
     public LoanService(LoanRepository loanRepository, LoanItemRepository loanItemRepository, UserRepository userRepository,  CopyRepository copyRepository, StudentRepository studentRepository) {
         this.loanRepository = loanRepository;
@@ -40,27 +41,50 @@ public class LoanService {
         return loanRepository.findByStudentId(studentId);
     }
 
-    public List<LoanModel> findByUsername(String username) {
-        UserModel user = userRepository.findByUsername(username);
-        return loanRepository.findByStudentId(user.getId());
-    }
-
     public LoanModel findById(Long id) {
         Optional<LoanModel> loan = loanRepository.findById(id);
         return loan.orElse(null);
     }
 
-    public LoanModel create(LoanModel loan, String ra) {
-        LocalDateTime date = LocalDateTime.now();
-        StudentModel student = studentRepository.findByRa(ra);
+    @Transactional
+    public LoanModel create(LoanRequest request, Long operatorId) {
+        StudentModel student = studentRepository.findByRa(request.ra());
+        if(student == null) {
+            throw new ResourceNotFoundException("Aluno não encontrado");
+        }
+        if(request.items() == null || request.items().isEmpty()){
+            throw new ResourceConflictException("INforme ao menos um exemplar");
+        }
 
-        student.setLastActivity(date);
-        loan.setStatus(String.valueOf(LoanStatus.OPEN));
-        loan.setLoanDate(date);
+        LocalDateTime now = LocalDateTime.now();
+        LoanModel loan = new LoanModel();
+        loan.setStudentId(student.getStudentId());
+        loan.setOperatorId(operatorId);
+        loan.setLoanDate(now);
+        loan.setDueDate(now.toLocalDate().plusDays(15)); //standard value just for testing. the period may be adjusted by an admin user in later versions.
+        loan.setStatus(LoanStatus.OPEN.name());
 
+        loan = loanRepository.save(loan);
+
+        for(Long copyId : request.items()){
+            CopyModel copy = copyRepository.findById(copyId)
+                    .orElseThrow(()-> new ResourceNotFoundException("Exemplar não existente"));
+            if(!CopyStatus.AVAILABLE.name().equals(copy.getStatus())){
+                throw new ResourceConflictException("Esemplar não disponivel");
+            }
+
+            copy.setStatus(CopyStatus.LOANED.name());
+            copyRepository.save(copy);
+
+            LoanItemModel item = new LoanItemModel();
+            item.setLoanId(loan.getLoanId());
+            item.setCopyId(copy.getCopyId());
+            loanItemRepository.save(item);
+        }
+
+        student.setLastActivity(now);
         studentRepository.save(student);
-
-        return loanRepository.save(loan);
+        return loan;
     }
 
     @Transactional

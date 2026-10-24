@@ -3,7 +3,9 @@ package searchoteca.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import searchoteca.DTO.LoanRequest;
 import searchoteca.model.LoanModel;
 import searchoteca.security.CustomUserDetails;
 import searchoteca.service.LoanService;
@@ -41,8 +43,10 @@ public class LoanController {
 
     @PreAuthorize("hasAuthority('loans:create')")
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody LoanModel loanModel, String ra) {
-        return ResponseEntity.ok(loanService.create(loanModel, ra));
+    public ResponseEntity<?> create(@RequestBody LoanRequest request, Authentication auth) {
+        CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+
+        return ResponseEntity.ok(loanService.create(request, user.getUserId()));
     }
 
     @PreAuthorize("hasAuthority('loans:cancel')")
