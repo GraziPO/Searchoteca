@@ -20,8 +20,6 @@ public class LoanModel {
     private LocalDate dueDate;
     private Long operatorId;
     private Long studentId;
-    private String items;
-    private String type_exit;
     private String status;
 
 

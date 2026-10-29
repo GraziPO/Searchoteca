@@ -38,7 +38,10 @@ public class LoanService {
 
     //specific get for loans by student
     public List<LoanModel> findAllByStudent(Long studentId) {
-        return loanRepository.findByStudentId(studentId);
+        UserModel user = userRepository.findByUserId(studentId);
+        StudentModel student = studentRepository.findByUserId(user.getId());
+
+        return loanRepository.findByStudentId(student.getStudentId());
     }
 
     public LoanModel findById(Long id) {
@@ -118,7 +121,7 @@ public class LoanService {
         loan.setStatus(LoanStatus.CANCELLED.name());
 
         //set student last activity
-        UserModel user = userRepository.findByStudentId(loan.getStudentId());
+        UserModel user = userRepository.findByUserId(loan.getStudentId());
         StudentModel student = studentRepository.findByStudentId(user.getId());
         student.setLastActivity(date);
 
@@ -126,6 +129,7 @@ public class LoanService {
         return loanRepository.save(loan);
     }
 
+    @Transactional
     private void releaseItem(LoanItemModel item, Long operatorId, LocalDateTime now){
         CopyModel copy = copyRepository.findById(item.getCopyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Exemplar não existente"));

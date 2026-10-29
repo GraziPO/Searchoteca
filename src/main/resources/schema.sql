@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS org_students(
 CREATE TABLE IF NOT EXISTS org_loans(
 
     loan_id SERIAL PRIMARY KEY,
-    student_id INT NOT NULL REFERENCES org_users(user_id),
+    student_id INT NOT NULL REFERENCES org_students(student_id),
     operator_id INT NOT NULL REFERENCES org_users(user_id),
     loan_date TIMESTAMP NOT NULL,
     due_date DATE NOT NULL,

@@ -6,17 +6,23 @@ import org.springframework.web.bind.annotation.*;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
 import searchoteca.model.BookModel;
+import searchoteca.repository.CopyRepository;
 import searchoteca.service.BookService;
+import searchoteca.service.CopyService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/livro")
 public class BookController {
 
     private final BookService bookService;
+    private final CopyService copyService;
     private final AuditLogService auditLogService;
 
-    public BookController(BookService bookService, AuditLogService auditLogService) {
+    public BookController(BookService bookService, CopyService copyService, AuditLogService auditLogService) {
         this.bookService=bookService;
+        this.copyService=copyService;
         this.auditLogService=auditLogService;
     }
 
@@ -56,5 +62,13 @@ public class BookController {
         bookService.delete(isbn);
         auditLogService.record(AuditAction.DELETE,"org_books" + isbn);
         return ResponseEntity.noContent().build();
+    }
+
+    //rotas específicas pra impressão de etiquetas
+    @PreAuthorize("hasAuthority('copies:view')")
+    @GetMapping("/etiquetas")
+    public ResponseEntity<?> printLabels(@RequestParam List<Long> labels){
+        auditLogService.record(AuditAction.ACCESS,"reipressão de etiquetas: " + labels);
+        return ResponseEntity.ok(copyService.findLabels(labels));
     }
 }
