@@ -2,13 +2,17 @@ package searchoteca.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import searchoteca.DTO.LoanRequest;
+import searchoteca.DTO.archive.LoanRequest;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.*;
 import searchoteca.model.status.CopyStatus;
 import searchoteca.model.status.LoanStatus;
-import searchoteca.repository.*;
+import searchoteca.repository.users.UserRepository;
+import searchoteca.repository.catalog.CopyRepository;
+import searchoteca.repository.users.StudentRepository;
+import searchoteca.repository.wms.LoanItemRepository;
+import searchoteca.repository.wms.LoanRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +28,7 @@ public class LoanService {
     private final CopyRepository copyRepository;
 
 
-    public LoanService(LoanRepository loanRepository, LoanItemRepository loanItemRepository, UserRepository userRepository,  CopyRepository copyRepository, StudentRepository studentRepository) {
+    public LoanService(LoanRepository loanRepository, LoanItemRepository loanItemRepository, UserRepository userRepository, CopyRepository copyRepository, StudentRepository studentRepository) {
         this.loanRepository = loanRepository;
         this.loanItemRepository = loanItemRepository;
         this.userRepository = userRepository;
@@ -39,7 +43,7 @@ public class LoanService {
     //specific get for loans by student
     public List<LoanModel> findAllByStudent(Long studentId) {
         UserModel user = userRepository.findByUserId(studentId);
-        StudentModel student = studentRepository.findByUserId(user.getId());
+        StudentModel student = studentRepository.findByUserId(user.getUserId());
 
         return loanRepository.findByStudentId(student.getStudentId());
     }
@@ -121,15 +125,14 @@ public class LoanService {
         loan.setStatus(LoanStatus.CANCELLED.name());
 
         //set student last activity
-        UserModel user = userRepository.findByUserId(loan.getStudentId());
-        StudentModel student = studentRepository.findByStudentId(user.getId());
+        StudentModel student = studentRepository.findByStudentId(loan.getStudentId());
         student.setLastActivity(date);
 
         studentRepository.save(student);
         return loanRepository.save(loan);
     }
 
-    @Transactional
+
     private void releaseItem(LoanItemModel item, Long operatorId, LocalDateTime now){
         CopyModel copy = copyRepository.findById(item.getCopyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Exemplar não existente"));

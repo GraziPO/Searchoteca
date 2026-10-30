@@ -3,13 +3,12 @@ package searchoteca.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import searchoteca.DTO.StudentRequest;
+import searchoteca.DTO.users.StudentRequest;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
-import searchoteca.model.StudentModel;
 import searchoteca.model.UserModel;
-import searchoteca.service.StudentService;
-import searchoteca.service.UserService;
+import searchoteca.service.users.StudentService;
+import searchoteca.service.users.UserService;
 
 @RestController
 @RequestMapping("/api/usuarios")

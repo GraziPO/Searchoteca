@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
 import searchoteca.model.LocationModel;
-import searchoteca.service.LocationService;
+import searchoteca.service.wms.LocationService;
 
 @RestController
 @RequestMapping("/api/localizacao")

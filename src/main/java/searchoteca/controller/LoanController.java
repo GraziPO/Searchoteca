@@ -3,9 +3,8 @@ package searchoteca.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import searchoteca.DTO.LoanRequest;
+import searchoteca.DTO.archive.LoanRequest;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
 import searchoteca.model.LoanModel;
@@ -58,8 +57,9 @@ public class LoanController {
     @PostMapping("{loan_id}/cancelar")
     public ResponseEntity<?> cancel(@PathVariable Long loan_id, Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        LoanModel loan = loanService.cancelLoan(loan_id,user.getUserId());
         auditLogService.save(user.getUsername(), AuditAction.UPDATE,"registro de empréstimo" + "cancelado por "+ user.getUsername());
-        return ResponseEntity.ok( loanService.cancelLoan(loan_id,user.getUserId()));
+        return ResponseEntity.ok(loan);
     }
 
     @PreAuthorize("hasAuthority('loans:return')")

@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS org_copies(
     UNIQUE (isbn,copy_index)
 );
 
+CREATE INDEX IF NOT EXISTS idx_copies_isbn ON org_copies(isbn);
+
 CREATE TABLE IF NOT EXISTS sys_roles(
     role_id SERIAL PRIMARY KEY,
     role_code VARCHAR(20) UNIQUE NOT NULL,

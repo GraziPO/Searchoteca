@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import searchoteca.DTO.LegalDocumentResponse;
+import searchoteca.DTO.legal.LegalDocumentResponse;
 
 /** Público: os documentos precisam poder ser lidos antes do login. */
 @RestController

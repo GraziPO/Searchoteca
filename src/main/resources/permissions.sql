@@ -30,10 +30,10 @@ INSERT INTO sys_permissions (permission_code, resource, action, description) VAL
     ('org_books:delete', 'org_books', 'delete', 'Excluir livro'),
     ('org_books:alter_quantity', 'org_books', 'alter_quantity', 'Alterar quantidade em estoque do livro'),
 
-    ('copies:create', 'org_books', 'delete', 'Criar cópia de livro'),
-    ('copies:view', 'org_books', 'delete', 'Visualizar cópia de livro'),
-    ('copies:edit', 'org_books', 'delete', 'Editar cópia de livro'),
-    ('copies:delete', 'org_books', 'delete', 'Desativar cópia de livro'),
+    ('copies:create', 'copies', 'create', 'Criar cópia de livro'),
+    ('copies:view', 'copies', 'view', 'Visualizar cópia de livro'),
+    ('copies:edit', 'copies', 'edit', 'Editar cópia de livro'),
+    ('copies:delete', 'copies', 'delete', 'Desativar cópia de livro'),
 
 
     ('loans:create', 'loans', 'create', 'Criar emprestimo'),

@@ -6,11 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
 import searchoteca.model.BookModel;
-import searchoteca.repository.CopyRepository;
-import searchoteca.service.BookService;
-import searchoteca.service.CopyService;
-
-import java.util.List;
+import searchoteca.service.catalog.BookService;
+import searchoteca.service.catalog.CopyService;
 
 @RestController
 @RequestMapping("/api/livro")
@@ -52,8 +49,9 @@ public class BookController {
     @PreAuthorize("hasAuthority('org_books:edit')")
     @PutMapping("/{isbn}")
     public ResponseEntity<?> update(@PathVariable String isbn, @RequestBody BookModel bookInfo){
+        bookService.update(isbn, bookInfo);
         auditLogService.record(AuditAction.UPDATE,"org_books" + isbn + " " + bookInfo);
-        return ResponseEntity.ok(bookService.update(isbn, bookInfo));
+        return ResponseEntity.ok().build();
     }
 
     @PreAuthorize("hasAuthority('org_books:delete')")
