@@ -64,17 +64,10 @@ public class BookController {
         return ResponseEntity.noContent().build();
     }
 
+
     //rota de busca por localização.
-    @GetMapping("/{isbn}")
+    @GetMapping("/{isbn}/locais")
     public ResponseEntity<?> findByLocation(@PathVariable String isbn){
         return ResponseEntity.ok(bookService.findLocationByIsbn(isbn));
-    }
-
-    //rotas específicas pra impressão de etiquetas
-    @PreAuthorize("hasAuthority('copies:view')")
-    @GetMapping("/etiquetas")
-    public ResponseEntity<?> printLabels(@RequestParam List<Long> labels){
-        auditLogService.record(AuditAction.ACCESS,"reipressão de etiquetas: " + labels);
-        return ResponseEntity.ok(copyService.findLabels(labels));
     }
 }
