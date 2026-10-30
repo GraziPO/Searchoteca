@@ -64,6 +64,9 @@ INSERT INTO sys_role_permissions (role_code, permission_code) VALUES
     ('warehouse_op', 'org_depart:view'),
     ('warehouse_op', 'org_depart:delete'),
 
+    ('warehouse_op', 'copies:create'),
+    ('warehouse_op', 'copies:view'),
+
     ('warehouse_op', 'org_books:create'),
     ('warehouse_op', 'org_books:edit'),
     ('warehouse_op', 'org_books:view'),
