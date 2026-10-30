@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import searchoteca.DTO.LoanRequest;
+import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
 import searchoteca.model.LoanModel;
 import searchoteca.security.CustomUserDetails;
@@ -41,6 +42,7 @@ public class LoanController {
     @GetMapping("/historico")
     public ResponseEntity<?> findOwn(Authentication authentication) {
         CustomUserDetails student = (CustomUserDetails) authentication.getPrincipal();
+        auditLogService.record(AuditAction.ACCESS,"Acesso ao histórico do usuario");
         return ResponseEntity.ok(loanService.findAllByStudent(student.getUserId()));
     }
 
@@ -48,7 +50,7 @@ public class LoanController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody LoanRequest request, Authentication auth) {
         CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-
+        auditLogService.save(user.getUsername(), AuditAction.CREATE,"usuário do tipo "+ user.getRoleCode()+ " criado");
         return ResponseEntity.ok(loanService.create(request, user.getUserId()));
     }
 
@@ -56,6 +58,7 @@ public class LoanController {
     @PostMapping("{loan_id}/cancelar")
     public ResponseEntity<?> cancel(@PathVariable Long loan_id, Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        auditLogService.save(user.getUsername(), AuditAction.UPDATE,"registro de empréstimo" + "cancelado por "+ user.getUsername());
         return ResponseEntity.ok( loanService.cancelLoan(loan_id,user.getUserId()));
     }
 
@@ -64,6 +67,7 @@ public class LoanController {
     public ResponseEntity<?> returnItem(@PathVariable Long copyId, Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         LoanModel loan = loanService.returnItem(copyId,user.getUserId());
+        auditLogService.save(user.getUsername(), AuditAction.UPDATE,"registro de empréstimo" + "devovido ao usuario "+ user.getUsername());
         return ResponseEntity.ok(loan);
     }
 }

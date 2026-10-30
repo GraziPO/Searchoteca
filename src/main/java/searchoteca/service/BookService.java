@@ -64,7 +64,7 @@ public class BookService {
         return bookRepository.findByIsbn(isbn);
     }
 
-    public List<BookModel> findLocations(String isbn){
+    public List<BookModel> findLocationByIsbn(String isbn){
         if (isbn == null){
             throw new ResourceNotFoundException("Nenhum registro encontrado");
         }

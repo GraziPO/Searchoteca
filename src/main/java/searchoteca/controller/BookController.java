@@ -32,7 +32,7 @@ public class BookController {
         return ResponseEntity.ok(bookService.findAll());
     }
 
-    @PreAuthorize("hasAuthority('org_books:view')")
+
     @GetMapping("/{isbn}")
     public ResponseEntity<?> getByIsbn(@PathVariable String isbn){
         BookModel book = bookService.findByIsbn(isbn);
@@ -62,6 +62,12 @@ public class BookController {
         bookService.delete(isbn);
         auditLogService.record(AuditAction.DELETE,"org_books" + isbn);
         return ResponseEntity.noContent().build();
+    }
+
+    //rota de busca por localização.
+    @GetMapping("/{isbn}")
+    public ResponseEntity<?> findByLocation(@PathVariable String isbn){
+        return ResponseEntity.ok(bookService.findLocationByIsbn(isbn));
     }
 
     //rotas específicas pra impressão de etiquetas

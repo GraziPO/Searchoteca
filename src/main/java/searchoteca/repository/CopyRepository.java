@@ -13,6 +13,8 @@ public interface CopyRepository extends CrudRepository<CopyModel,Long> {
     CopyModel findByCopyId(Long id);
     List<CopyModel> findByDepartCode(String departCode);
     List<CopyModel> findByLocalCode(String localCode);
+
+    List<CopyModel> findByIsbn(String isbn);
     List<CopyModel> findAllByIsbn(String isbn);
 
     @Query("COALESCE(MAX(copy_index), 0) FROM org_copies WHERE isbn = :isbn")
