@@ -9,8 +9,8 @@ import searchoteca.model.DepartmentModel;
 import searchoteca.model.LocationModel;
 import searchoteca.repository.catalog.BookRepository;
 import searchoteca.repository.catalog.CopyRepository;
-import searchoteca.repository.wms.DepartmentRepository;
-import searchoteca.repository.wms.LocationRepository;
+import searchoteca.repository.archive.DepartmentRepository;
+import searchoteca.repository.archive.LocationRepository;
 
 import java.util.ArrayList;
 import java.util.List;

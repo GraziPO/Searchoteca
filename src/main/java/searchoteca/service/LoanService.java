@@ -11,8 +11,8 @@ import searchoteca.model.status.LoanStatus;
 import searchoteca.repository.users.UserRepository;
 import searchoteca.repository.catalog.CopyRepository;
 import searchoteca.repository.users.StudentRepository;
-import searchoteca.repository.wms.LoanItemRepository;
-import searchoteca.repository.wms.LoanRepository;
+import searchoteca.repository.archive.LoanItemRepository;
+import searchoteca.repository.archive.LoanRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,4 +1,4 @@
-package searchoteca.repository.wms;
+package searchoteca.repository.archive;
 
 import org.springframework.data.repository.CrudRepository;
 import searchoteca.model.DepartmentModel;

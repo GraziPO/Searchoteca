@@ -12,7 +12,7 @@ import searchoteca.model.LocationModel;
 import searchoteca.model.status.CopyStatus;
 import searchoteca.repository.catalog.BookRepository;
 import searchoteca.repository.catalog.CopyRepository;
-import searchoteca.repository.wms.LocationRepository;
+import searchoteca.repository.archive.LocationRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
