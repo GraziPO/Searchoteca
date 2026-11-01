@@ -13,7 +13,7 @@ import org.springframework.data.relational.core.mapping.Table;
 public class CopyModel {
     @Id
     @Column("copy_id")
-    private Long id;
+    private Long copyId;
 
     private String isbn;
 
@@ -24,12 +24,12 @@ public class CopyModel {
     private String localCode;
 
     @Column("copy_index")
-    private int index;
+    private int copy_index;
 
     // Coluna calculada pelo banco (GENERATED ALWAYS): só leitura
     @ReadOnlyProperty
     @Column("copy_custom_code")
-    private String customCode;
+    private String copy_custom_code;
 
     private String status;
 

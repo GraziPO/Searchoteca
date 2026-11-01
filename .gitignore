@@ -2,3 +2,9 @@
 *.iml
 target/
 .idea/
+logs/
+logs/searchoteca.log
+/logs
+logs/searchoteca.log
+logs/searchoteca.log
+/logs
