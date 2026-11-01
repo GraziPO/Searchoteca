@@ -2,6 +2,7 @@ package searchoteca.service.users;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.UserModel;
 import searchoteca.repository.users.UserRepository;
 
@@ -31,11 +32,15 @@ public class UserService {
     }
 
     public UserModel findByUsername(String username){
-        return userRepository.findByUsername(username);
+        UserModel user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new ResourceNotFoundException("Usuário não encontrado");
+        }
+        return user;
     }
 
     public UserModel update(String username, UserModel user){
-        UserModel up_user = userRepository.findByUsername(username);
+        UserModel up_user = findByUsername(username);
         up_user.setUsername(username);
         up_user.setCompleteName(user.getCompleteName());
         up_user.setEmail(user.getEmail());
@@ -48,13 +53,13 @@ public class UserService {
     }
 
     public void activate (String username){
-        UserModel user = userRepository.findByUsername(username);
+        UserModel user = findByUsername(username);
         user.setStatus(true);
         userRepository.save(user);
     }
 
     public void deactivate(String username){
-        UserModel user = userRepository.findByUsername(username);
+        UserModel user = findByUsername(username);
         user.setStatus(false);
         userRepository.save(user);
     }

@@ -34,9 +34,13 @@ public class LocationService {
 
     public LocationModel findByLocalCode(String localCode){
         if(localCode == null){
-            throw new ResourceNotFoundException("Nenhum livro encontrado");
+            throw new ResourceNotFoundException("Localização não encontrada");
         }
-        return locationRepository.findByLocalCode(localCode);
+        LocationModel location = locationRepository.findByLocalCode(localCode);
+        if (location == null){
+            throw new ResourceNotFoundException("Localização não encontrada");
+        }
+        return location;
     }
 
     public LocationModel create(LocationModel location){
