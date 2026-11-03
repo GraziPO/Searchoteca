@@ -3,7 +3,7 @@ package searchoteca.service.users;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import searchoteca.DTO.users.StudentRequest;
+import searchoteca.DTO.users.student.StudentRequest;
 import searchoteca.model.StudentModel;
 import searchoteca.model.UserModel;
 import searchoteca.repository.users.StudentRepository;

@@ -3,9 +3,9 @@ package searchoteca.controller.archive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import searchoteca.auditTrail.AuditAction;
-import searchoteca.auditTrail.AuditLogService;
-import searchoteca.model.BookModel;
+import searchoteca.DTO.auditTrail.AuditAction;
+import searchoteca.DTO.auditTrail.AuditLogService;
+import searchoteca.model.Books.BookModel;
 import searchoteca.service.catalog.BookService;
 import searchoteca.service.catalog.CopyService;
 
@@ -67,5 +67,12 @@ public class BookController {
     @GetMapping("/{isbn}/locais")
     public ResponseEntity<?> findByLocation(@PathVariable String isbn){
         return ResponseEntity.ok(bookService.findLocationByIsbn(isbn));
+    }
+
+    //rota de alteração de preço
+    @PreAuthorize("hasAuthority('org:books:edit_price')")
+    @PostMapping("/{isbn}/preco")
+    public ResponseEntity<?> updatePrice(@PathVariable String isbn, @RequestBody PriceRequest request){
+        return ResponseEntity.ok(bookService.updatePrice(isbn, request.salePrice()));
     }
 }

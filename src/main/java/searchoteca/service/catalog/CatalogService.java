@@ -5,7 +5,7 @@ import searchoteca.DTO.archive.publicSearch.BookDetail;
 import searchoteca.DTO.archive.publicSearch.BookSearchResult;
 import searchoteca.DTO.archive.publicSearch.PageResponse;
 import searchoteca.exception.ResourceNotFoundException;
-import searchoteca.model.BookModel;
+import searchoteca.model.Books.BookModel;
 import searchoteca.repository.archive.CatalogRepository;
 import searchoteca.repository.catalog.BookRepository;
 

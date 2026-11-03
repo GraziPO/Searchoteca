@@ -1,4 +1,4 @@
-package searchoteca.model.status;
+package searchoteca.model.Books.status;
 
 public enum LoanStatus {
     OPEN,

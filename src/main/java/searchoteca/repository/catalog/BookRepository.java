@@ -2,7 +2,7 @@ package searchoteca.repository.catalog;
 
 import org.springframework.data.repository.*;
 import org.springframework.stereotype.Repository;
-import searchoteca.model.BookModel;
+import searchoteca.model.Books.BookModel;
 
 import java.util.Collection;
 import java.util.List;

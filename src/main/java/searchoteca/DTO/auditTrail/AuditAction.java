@@ -1,4 +1,4 @@
-package searchoteca.auditTrail;
+package searchoteca.DTO.auditTrail;
 
 public enum AuditAction {
     ACCESS,

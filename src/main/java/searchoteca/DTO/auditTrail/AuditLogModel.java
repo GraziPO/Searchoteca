@@ -1,4 +1,4 @@
-package searchoteca.auditTrail;
+package searchoteca.DTO.auditTrail;
 
 import lombok.Getter;
 import lombok.Setter;

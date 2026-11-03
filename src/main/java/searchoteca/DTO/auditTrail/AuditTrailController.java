@@ -1,4 +1,4 @@
-package searchoteca.auditTrail;
+package searchoteca.DTO.auditTrail;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

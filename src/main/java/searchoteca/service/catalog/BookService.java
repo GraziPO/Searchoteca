@@ -1,13 +1,19 @@
 package searchoteca.service.catalog;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import searchoteca.DTO.auditTrail.AuditAction;
+import searchoteca.DTO.auditTrail.AuditDiff;
+import searchoteca.DTO.auditTrail.AuditLogService;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
-import searchoteca.model.BookModel;
-import searchoteca.model.CopyModel;
+import searchoteca.model.Books.BookModel;
+import searchoteca.model.Books.CopyModel;
 import searchoteca.repository.catalog.BookRepository;
 import searchoteca.repository.catalog.CopyRepository;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,10 +21,12 @@ import java.util.List;
 public class BookService {
     private final BookRepository bookRepository;
     private final CopyRepository copyRepository;
+    private final AuditLogService auditLogService;
 
-    public BookService(BookRepository bookRepository, CopyRepository copyRepository) {
+    public BookService(BookRepository bookRepository, CopyRepository copyRepository, AuditLogService auditLogService) {
         this.bookRepository=bookRepository;
         this.copyRepository=copyRepository;
+        this.auditLogService=auditLogService;
     }
 
     public List<BookModel> findAll(){
@@ -29,6 +37,7 @@ public class BookService {
     }
 
     public BookModel create(BookModel book){
+        book.setSalePrice(null);
         return bookRepository.save(book);
     }
 
@@ -81,5 +90,29 @@ public class BookService {
             foundBooks.add(bookRepository.findByIsbn(book));
         }
         return foundBooks;
+    }
+
+    // ================== exclusive service to sales functions ====================
+
+    @Transactional
+    public BookModel updatePrice(String isbn, BigDecimal newPrice){
+        if(!salesEnabled){
+            throw new ResourceConflictException("Vendas não habilitado para esta organização");
+        }
+        BookModel book = bookRepository.findByIsbn(isbn);
+        if(book == null){
+            throw new ResourceNotFoundException("Nenhum livro encontrado");
+        }
+        if((newPrice != null) && (newPrice.signum() < 0)){
+            throw new ResourceConflictException("O preço não pode ser negativo");
+        }
+
+        BigDecimal normalized = newPrice == null ? null : newPrice.setScale(2, RoundingMode.HALF_UP);
+        String diff = new AuditDiff().field("salePrice", book.getSalePrice(), normalized).toString();
+
+        book.setSalePrice(normalized);
+        bookRepository.save(book);
+        auditLogService.record(AuditAction.UPDATE,"preço do livro"+ isbn + ": " + diff);
+        return book;
     }
 }

@@ -1,4 +1,4 @@
-package searchoteca.model;
+package searchoteca.model.Books;
 
 import lombok.Getter;
 import lombok.Setter;

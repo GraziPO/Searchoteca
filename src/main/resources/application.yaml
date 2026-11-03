@@ -42,6 +42,9 @@ resend:
   base-url: https://api.resend.com
   from: "${MAIL_FROM:Searchoteca <no-reply@searchoteca.com.br>}"
 
+sales:
+  enabled:${SALES_ENABLED:false} #true / false caso a organização realize vendas de exemplares
+
 logging:
   level:
     root: INFO

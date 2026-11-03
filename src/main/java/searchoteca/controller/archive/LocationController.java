@@ -3,8 +3,8 @@ package searchoteca.controller.archive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import searchoteca.auditTrail.AuditAction;
-import searchoteca.auditTrail.AuditLogService;
+import searchoteca.DTO.auditTrail.AuditAction;
+import searchoteca.DTO.auditTrail.AuditLogService;
 import searchoteca.model.LocationModel;
 import searchoteca.service.wms.LocationService;
 

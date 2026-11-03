@@ -1,4 +1,4 @@
-package searchoteca.DTO.users;
+package searchoteca.DTO.users.student;
 
 public record StudentRequest(
         String username,
