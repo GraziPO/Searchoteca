@@ -29,6 +29,7 @@ INSERT INTO sys_permissions (permission_code, resource, action, description) VAL
     ('org_books:view', 'org_books', 'view', 'Visualizar livro'),
     ('org_books:delete', 'org_books', 'delete', 'Excluir livro'),
     ('org_books:alter_quantity', 'org_books', 'alter_quantity', 'Alterar quantidade em estoque do livro'),
+    ('org_books:edit_price', 'org_books', 'edit_price', 'Alterar preço de venda'),
 
     ('copies:create', 'copies', 'create', 'Criar cópia de livro'),
     ('copies:view', 'copies', 'view', 'Visualizar cópia de livro'),
@@ -43,7 +44,10 @@ INSERT INTO sys_permissions (permission_code, resource, action, description) VAL
     ('loans:view_own', 'loans', 'view_own', 'Visualizar próprios emprestimos'),
 
     ('students:create', 'students', 'create', 'cadastrar aluno'),
-    ('students:view', 'students', 'view', 'Visualizar aluno')
+    ('students:view', 'students', 'view', 'Visualizar aluno'),
+
+    ('exits:create', 'exits', 'create', 'Registrar venda, doação ou baixa'),
+    ('receipts:view', 'receipts', 'view', 'Consultar comprovantes')
 ON CONFLICT(permission_code) DO NOTHING;
 
 -- ===== seed: role x permission =====
@@ -82,6 +86,10 @@ INSERT INTO sys_role_permissions (role_code, permission_code) VALUES
     ('loan_op', 'loans:return'),
     ('loan_op', 'loans:view'),
     ('loan_op', 'loans:cancel'),
+
+    ('loan_op', 'exits:create'),
+
+    ('loan_op', 'receipts:view'),
 
     ('loan_op', 'students:create'),
     ('loan_op', 'students:view'),
