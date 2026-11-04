@@ -43,7 +43,7 @@ resend:
   from: "${MAIL_FROM:Searchoteca <no-reply@searchoteca.com.br>}"
 
 sales:
-  enabled: ${SalesEnabled:false} #true / false caso a organização realize vendas de exemplares
+  enabled: ${Sales_enabled:false} #true / false caso a organização realize vendas de exemplares
 
 logging:
   level:

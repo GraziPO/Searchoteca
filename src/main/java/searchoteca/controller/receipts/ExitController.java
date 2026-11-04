@@ -11,16 +11,16 @@ import searchoteca.DTO.auditTrail.AuditAction;
 import searchoteca.DTO.auditTrail.AuditLogService;
 import searchoteca.security.CustomUserDetails;
 import searchoteca.service.ReceiptService;
-import searchoteca.service.exitService;
+import searchoteca.service.ExitService;
 
 @RestController
 @RequestMapping("/api/saidas")
 public class ExitController {
-    private final exitService exitService;
+    private final ExitService exitService;
     private final AuditLogService auditLogService;
     private final ReceiptService receiptService;
 
-    public ExitController(exitService exitService, AuditLogService auditLogService, ReceiptService receiptService) {
+    public ExitController(ExitService exitService, AuditLogService auditLogService, ReceiptService receiptService) {
         this.exitService = exitService;
         this.auditLogService = auditLogService;
         this.receiptService = receiptService;

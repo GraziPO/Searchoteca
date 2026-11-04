@@ -26,26 +26,6 @@ CREATE TABLE IF NOT EXISTS org_books(
 
 ALTER TABLE org_books ADD COLUMN IF NOT EXISTS sale_price NUMERIC(10,2);
 
-CREATE SEQUENCE IF NOT EXISTS reecipt_seq;
-
-CREATE TABLE IF NOT EXISTS receipt_seq;
-    receipt_id BIGINT PRIMARY KEY,
-    receipt_code VARCHAR(30) NOT NULL UNIQUE,
-    exit_type VARCHAR(20) NOT NULL,
-    operator_id INT NOT NULL FEREFENCES org_users(user_id),
-    loan_id INT REFERENCES org_loans(lian_id),
-    total NUMERIC(10,2),
-    created_at TIMESTAMP NOT NULL,
-    snapshot JSONB NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS org_receipt_items(
-    receipt_id BIGINT NOT NULL REFERENCES org_receipts(receipt_id),
-    copy_id INT NOT NULL REFERENCES org_copies(copy_id),
-    unit_price NUMERIC(10,2),
-    PRIMARY KEY (receipt_id, copy_id)
-);
-
 CREATE TABLE IF NOT EXISTS org_copies(
     copy_id SERIAL PRIMARY KEY,
     isbn VARCHAR(25) REFERENCES org_books(isbn),
@@ -156,3 +136,23 @@ CREATE UNIQUE INDEX IF NOT EXISTS copy_per_loan
 
 CREATE INDEX IF NOT EXISTS loans_student ON org_loans(student_id);
 CREATE INDEX IF NOT EXISTS loans_open ON org_loans(due_date) WHERE status = 'OPEN';
+
+CREATE SEQUENCE IF NOT EXISTS receipt_seq;
+
+CREATE TABLE IF NOT EXISTS org_receipts(
+receipt_id BIGINT PRIMARY KEY,
+    receipt_code VARCHAR(30) NOT NULL UNIQUE,
+    exit_type VARCHAR(20) NOT NULL,
+    operator_id INT NOT NULL REFERENCES org_users(user_id),
+    loan_id INT REFERENCES org_loans(loan_id),
+    total NUMERIC(10,2),
+    created_at TIMESTAMP NOT NULL,
+    snapshot JSONB NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS org_receipt_items(
+    receipt_id BIGINT NOT NULL REFERENCES org_receipts(receipt_id),
+    copy_id INT NOT NULL REFERENCES org_copies(copy_id),
+    unit_price NUMERIC(10,2),
+    PRIMARY KEY (receipt_id, copy_id)
+);

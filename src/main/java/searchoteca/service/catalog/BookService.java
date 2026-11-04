@@ -1,5 +1,6 @@
 package searchoteca.service.catalog;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import searchoteca.DTO.auditTrail.AuditAction;
@@ -22,11 +23,13 @@ public class BookService {
     private final BookRepository bookRepository;
     private final CopyRepository copyRepository;
     private final AuditLogService auditLogService;
+    private final boolean salesEnabled;
 
-    public BookService(BookRepository bookRepository, CopyRepository copyRepository, AuditLogService auditLogService) {
+    public BookService(BookRepository bookRepository, CopyRepository copyRepository, AuditLogService auditLogService, @Value("${sales.enabled:false}")  boolean salesEnabled) {
         this.bookRepository=bookRepository;
         this.copyRepository=copyRepository;
         this.auditLogService=auditLogService;
+        this.salesEnabled=salesEnabled;
     }
 
     public List<BookModel> findAll(){

@@ -1,10 +1,12 @@
 package searchoteca.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import searchoteca.DTO.archive.SalesNExists.ExitRequest;
 import searchoteca.DTO.archive.SalesNExists.ReceiptItem;
 import searchoteca.DTO.archive.SalesNExists.ReceiptSnapshot;
+import searchoteca.DTO.auditTrail.AuditLogService;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.Books.BookModel;
@@ -20,18 +22,23 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class exitService {
+public class ExitService {
     private final CopyRepository copyRepository;
     private final BookRepository bookRepository;
+    private final ReceiptService receiptService;
+    private final boolean salesEnabled;
 
-    public exitService(CopyRepository copyRepository, BookRepository bookRepository) {
+    public ExitService(CopyRepository copyRepository, BookRepository bookRepository, ReceiptService receiptService, @Value("${sales.enabled:false}") boolean salesEnabled) {
         this.copyRepository = copyRepository;
         this.bookRepository = bookRepository;
+        this.receiptService = receiptService;
+        this.salesEnabled = salesEnabled;
     }
 
     @Transactional
     public ReceiptSnapshot register(ExitRequest request, CustomUserDetails operator) {
         ExitType type = request.type();
+
         if(type == null || type ==ExitType.LOAN){
             throw new ResourceConflictException("Informe o tipo de saída. Empréstimos não são contabilizados aqui");
         }
@@ -59,7 +66,7 @@ public class exitService {
             throw new ResourceNotFoundException("Um ou mais exemplares não existem");
         }
 
-        Map<String, BookModel> books = bookRepository.findByIsbn(
+        Map<String, BookModel> books = bookRepository.findByIsbnIn(
                         copies.stream().map(CopyModel::getIsbn).collect(Collectors.toSet()))
                 .stream().collect(Collectors.toMap(BookModel::getIsbn, b -> b));
 
@@ -83,6 +90,6 @@ public class exitService {
         }
 
         copyRepository.saveAll(copies);
-        return ReceiptService.issue(type,operator, null, null, null, items, request.notes());
+        return receiptService.issue(type,operator, null, null, null, items, request.notes());
     }
 }

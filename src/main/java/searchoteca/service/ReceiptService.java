@@ -31,15 +31,13 @@ public class ReceiptService {
     public ReceiptService(ReceiptRepository receiptRepository, JsonMapper jsonMapper, CopyRepository copyRepository, BookRepository bookRepository) {
         this.receiptRepository = receiptRepository;
         this.jsonMapper = jsonMapper;
-        this.copyRepository = copyRepository;
-        this.bookRepository = bookRepository;
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
     public ReceiptSnapshot issue(ExitType type, CustomUserDetails operator, StudentInfo student, LocalDate dueDate, Long loanId, List<ReceiptItem> items, String notes) {
         LocalDateTime now  = LocalDateTime.now();
         long id = receiptRepository.nextId();
-        String code = "CMP-" + now.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" String.format("%06d", id);
+        String code = "CMP-" + now.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + String.format("%06d", id);
 
         BigDecimal total = items.stream()
                 .map(ReceiptItem::unitPrice).filter(Objects::nonNull)
@@ -52,7 +50,7 @@ public class ReceiptService {
         receiptRepository.insert(id, code, type, operator.getUserId(), loanId, total, now, jsonMapper.writeValueAsString(snapshot));
 
         for (ReceiptItem item : items) {
-            receiptRepository.insertItem((id, item.copyId(),item.unitPrice());
+            receiptRepository.insertItem(id, item.copyId(),item.unitPrice());
         }
 
         return snapshot;

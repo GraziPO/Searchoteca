@@ -71,13 +71,13 @@ public class MFAService {
         }
     }
 
-    /** Etapa 1: senha já conferida. Envia o código e devolve o mfaToken. */
+    //Envia o código e devolve o mfaToken
     public MfaChallengeResponse startChallenge(CustomUserDetails user) {
         issueCode(user);
         return challengeResponse(user, jwtService.generateMFAToken(user));
     }
 
-    /** Reenvio, respeitando o intervalo mínimo entre e-mails. */
+    //Reenvio, respeitando o intervalo mínimo entre e-mails
     public MfaChallengeResponse resend(String mfaToken) {
         CustomUserDetails user = loadFromMfaToken(mfaToken);
 
@@ -93,7 +93,7 @@ public class MFAService {
         return challengeResponse(user, mfaToken);
     }
 
-    /** Etapa 2: confere o código. Se estiver certo, devolve o usuário para gerar o JWT completo. */
+    //Confere o código. Se estiver certo, devolve o usuário para gerar o JWT completo. */
     public CustomUserDetails verify(String mfaToken, String code) {
         CustomUserDetails user = loadFromMfaToken(mfaToken);
 
