@@ -36,6 +36,14 @@ mfa:
   token-ttl-ms: 900000
   mock-code: ${MFA_MOCK_CODE:}        # ex.: 123456 -> não envia e-mail e aceita esse código (SÓ para testes)
 
+# ===== RESET DE SENHA =====
+
+password-reset:
+    code-ttl-minutes: 15
+    max-attempts: 5
+    cooldown-seconds: 60
+    max-codes-per-hour: 5
+
 resend:
   api-key: ${RESEND_API_KEY:}
   base-url: https://api.resend.com

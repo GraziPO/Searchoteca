@@ -4,6 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import searchoteca.model.UserModel;
 import searchoteca.repository.UserRepository;
+import searchoteca.resetPassword.PasswordPolicy;
 
 import java.util.List;
 
@@ -12,15 +13,18 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PasswordPolicy passwordPolicy;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PasswordPolicy passwordPolicy) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.passwordPolicy = passwordPolicy;
     }
 
     //====== métodos CRUD padrão =======
 
     public UserModel create(UserModel user){
+        passwordPolicy.validatePassword(user.getPassword());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setStatus(true);
         return userRepository.save(user);
@@ -42,6 +46,7 @@ public class UserService {
         up_user.setRole_code(user.getRole_code());
 
         if (user.getPassword() != null && !user.getPassword().isBlank()) {
+            passwordPolicy.validatePassword(user.getPassword());
             up_user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         return userRepository.save(up_user);

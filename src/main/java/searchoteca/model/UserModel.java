@@ -12,7 +12,7 @@ import org.springframework.data.relational.core.mapping.Column;
 public class UserModel {
     @Id
     @Column("user_id")
-    private Long id;
+    private Long userId;
     @Column("custom_id")
     private String customId;
 
