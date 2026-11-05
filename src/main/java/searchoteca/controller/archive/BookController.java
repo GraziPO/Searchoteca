@@ -64,7 +64,7 @@ public class BookController {
     }
 
     //rota de alteração de preço
-    @PreAuthorize("hasAuthority('org:books:edit_price')")
+    @PreAuthorize("hasAuthority('org_books:edit_price')")
     @PostMapping("/{isbn}/preco")
     public ResponseEntity<?> updatePrice(@PathVariable String isbn, @RequestBody PriceRequest request){
         return ResponseEntity.ok(bookService.updatePrice(isbn, request.salePrice()));
