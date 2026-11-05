@@ -8,6 +8,7 @@ import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.*;
 import searchoteca.model.Books.CopyModel;
 import searchoteca.model.Books.status.CopyStatus;
+import searchoteca.model.Books.status.ExitType;
 import searchoteca.model.Books.status.LoanStatus;
 import searchoteca.repository.users.UserRepository;
 import searchoteca.repository.catalog.CopyRepository;
@@ -27,14 +28,21 @@ public class LoanService {
     private final UserRepository userRepository;
     private final StudentRepository studentRepository;
     private final CopyRepository copyRepository;
+    private final ReceiptService receiptService;
 
 
-    public LoanService(LoanRepository loanRepository, LoanItemRepository loanItemRepository, UserRepository userRepository, CopyRepository copyRepository, StudentRepository studentRepository) {
+    public LoanService(LoanRepository loanRepository,
+                       LoanItemRepository loanItemRepository,
+                       UserRepository userRepository,
+                       CopyRepository copyRepository,
+                       StudentRepository studentRepository,
+                       ReceiptService receiptService) {
         this.loanRepository = loanRepository;
         this.loanItemRepository = loanItemRepository;
         this.userRepository = userRepository;
         this.copyRepository = copyRepository;
         this.studentRepository = studentRepository;
+        this.receiptService = receiptService;
     }
 
     public List<LoanModel> findAll() {
@@ -92,6 +100,8 @@ public class LoanService {
 
         student.setLastActivity(now);
         studentRepository.save(student);
+
+        receiptService.issue(ExitType.LOAN,operatorId);
         return loan;
     }
 

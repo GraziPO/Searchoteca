@@ -23,13 +23,14 @@ public class BookController {
         this.auditLogService=auditLogService;
     }
 
+    @PreAuthorize("hasAuthorization('org_books:view')")
     @GetMapping
     public ResponseEntity<?> getAll(){
         auditLogService.record(AuditAction.ACCESS,"All books");
         return ResponseEntity.ok(bookService.findAll());
     }
 
-
+    @PreAuthorize("hasAuthorization('org_books:view')")
     @GetMapping("/{isbn}")
     public ResponseEntity<?> getByIsbn(@PathVariable String isbn){
         BookModel book = bookService.findByIsbn(isbn);
@@ -60,13 +61,6 @@ public class BookController {
         bookService.delete(isbn);
         auditLogService.record(AuditAction.DELETE,"org_books" + isbn);
         return ResponseEntity.noContent().build();
-    }
-
-
-    //rota de busca por localização.
-    @GetMapping("/{isbn}/locais")
-    public ResponseEntity<?> findByLocation(@PathVariable String isbn){
-        return ResponseEntity.ok(bookService.findLocationByIsbn(isbn));
     }
 
     //rota de alteração de preço

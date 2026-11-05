@@ -27,6 +27,8 @@ public class UserService {
     public UserModel create(UserModel user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setStatus(true);
+        user.setMust_change_password(true);
+
         return userRepository.save(user);
     }
 

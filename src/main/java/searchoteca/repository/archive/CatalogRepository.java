@@ -26,8 +26,8 @@ public class CatalogRepository {
     public List<BookSearchResult> search(String pattern, int limit, int offset) {
         String sql = """
                 SELECT b.isbn, b.title, b.author, b.publisher, b.genre, b.relYear,
-                    COUNT(c.copy_id) AS total_copies
-                    COUNT(c.copy_id) FILTER (WHERE c.status = 'AVAILABLE') AS available_copies'
+                    COUNT(c.copy_id) AS total_copies,
+                    COUNT(c.copy_id) FILTER (WHERE c.status = 'AVAILABLE') AS available_copies
                 FROM org_books b
                 LEFT JOIN org_copies c ON c.isbn = b.isbn
                 """ + WHERE + """
@@ -41,8 +41,8 @@ public class CatalogRepository {
                 rs.getString("title"),
                 rs.getString("author"),
                 rs.getString("publisher"),
-                rs.getString("genre"),rs.
-                getObject("relYear", Integer.class),
+                rs.getString("genre"),
+                rs.getObject("rel_year", Integer.class),
                 rs.getInt("total_copies"),
                 rs.getInt("available_copies")));
     }

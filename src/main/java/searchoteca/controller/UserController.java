@@ -2,12 +2,16 @@ package searchoteca.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import searchoteca.DTO.ChangePasswordRequest;
 import searchoteca.DTO.users.UserResponse;
 import searchoteca.DTO.users.student.StudentRequest;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
 import searchoteca.model.UserModel;
+import searchoteca.resetPassword.PasswordChangeService;
+import searchoteca.security.CustomUserDetails;
 import searchoteca.service.users.StudentService;
 import searchoteca.service.users.UserService;
 
@@ -19,11 +23,13 @@ public class UserController {
     private final UserService userService;
     private final StudentService studentService;
     private final AuditLogService auditLogService;
+    private final PasswordChangeService passwordChangeService;
 
-    public UserController(UserService userService,  AuditLogService auditLogService, StudentService studentService) {
+    public UserController(UserService userService,  AuditLogService auditLogService, StudentService studentService, PasswordChangeService passwordChangeService) {
         this.userService = userService;
         this.auditLogService = auditLogService;
         this.studentService = studentService;
+        this.passwordChangeService = passwordChangeService;
     }
 
     @PreAuthorize("hasAuthority('users:view')")
@@ -80,5 +86,12 @@ public class UserController {
         studentService.create(studentInfo);
         auditLogService.record(AuditAction.CREATE,"student" + studentInfo.ra());
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/me/senha")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request, Authentication auth) {
+        CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
+        passwordChangeService.changeOwnPassword(user.getUserId(), request.currentPassword(),  request.newPassword());
+        return ResponseEntity.noContent().build();
     }
 }

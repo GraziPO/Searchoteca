@@ -54,7 +54,7 @@ public class CopyService {
 
         List<CopyModel> copies = new ArrayList<>();
 
-        for(int i = 1; i < request.quantity(); i++) {
+        for(int i = 1; i <= request.quantity(); i++) {
             CopyModel copy = new CopyModel();
             copy.setIsbn(request.isbn());
             copy.setLocalCode(request.localCode());

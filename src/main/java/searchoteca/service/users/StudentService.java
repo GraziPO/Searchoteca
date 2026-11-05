@@ -32,6 +32,7 @@ public class StudentService {
         basicUser.setPassword(passwordEncoder.encode(request.password()));
         basicUser.setRole_code("students");
         basicUser.setStatus(true);
+        basicUser.setMust_change_password(true);
 
         basicUser = userRepository.save(basicUser);
 

@@ -1,6 +1,7 @@
 package searchoteca.service.catalog;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import searchoteca.auditTrail.AuditAction;
@@ -39,11 +40,13 @@ public class BookService {
         return books;   // lista vazia é resposta válida, não erro
     }
 
+    @PreAuthorize("hasAuthorization('org_books:create')")
     public BookModel create(BookModel book){
         book.setSalePrice(null);
         return bookRepository.save(book);
     }
 
+    @PreAuthorize("hasAuthorization('org_books:edit')")
     public BookModel update (String isbn, BookModel bookInfo){
         BookModel book = bookRepository.findByIsbn(isbn);
 
@@ -57,7 +60,7 @@ public class BookService {
         book.setGenre(bookInfo.getGenre());
         return bookRepository.save(book);
     }
-
+    @PreAuthorize("hasAuthorization('org_books:delete')")
     public void delete (String isbn){
         BookModel book = bookRepository.findByIsbn(isbn);
         if (book == null) {
@@ -74,25 +77,6 @@ public class BookService {
             throw new ResourceNotFoundException("Nenhum livro encontrado");
         }
         return bookRepository.findByIsbn(isbn);
-    }
-
-    public List<BookModel> findLocationByIsbn(String isbn){
-        if (isbn == null){
-            throw new ResourceNotFoundException("Nenhum registro encontrado");
-        }
-        //fetches all the location codes linked to the book, and return them
-        List<String> isbnList = copyRepository.findByIsbn(isbn)
-                .stream()
-                .map(CopyModel::getLocalCode)
-                .distinct()
-                .toList();
-
-        List<BookModel> foundBooks =  new ArrayList<>();
-
-        for (String book : isbnList){
-            foundBooks.add(bookRepository.findByIsbn(book));
-        }
-        return foundBooks;
     }
 
     // ================== exclusive service to sales functions ====================

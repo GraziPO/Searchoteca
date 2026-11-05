@@ -55,6 +55,6 @@ public class CatalogService {
     }
 
     private static String escapeLike(String s){
-        return s.replaceAll("\\", "\\\\").replace("%","\\%").replace("_","\\_");
+        return s.replace("\\", "\\\\").replace("%","\\%").replace("_","\\_");
     }
 }

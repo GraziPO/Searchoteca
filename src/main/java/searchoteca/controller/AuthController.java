@@ -146,10 +146,10 @@ public class AuthController {
         return issueFullToken(userDetails);
     }
 
-    @PostMapping("/me/senha")
-    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request, Authentication auth) {
-        CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-        passwordChangeService.changeOwnPassword(user.getUserId(), request.currentPassword(),  request.newPassword());
-        return ResponseEntity.noContent().build();
+    @PostMapping("/senha/primeiro-acesso")
+    public ResponseEntity<LoginResponse> firstAccess(@RequestBody FirstAccessRequest request) {
+        CustomUserDetails userDetails = passwordChangeService.completeFirstAccess(
+                request.passwordChangeToken(), request.newPassword());
+        return ResponseEntity.ok(issueFullToken(userDetails));
     }
 }
