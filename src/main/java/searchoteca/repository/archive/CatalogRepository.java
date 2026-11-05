@@ -25,7 +25,7 @@ public class CatalogRepository {
 
     public List<BookSearchResult> search(String pattern, int limit, int offset) {
         String sql = """
-                SELECT b.isbn, b.title, b.author, b.publisher, b.genre, b.relYear,
+                SELECT b.isbn, b.title, b.author, b.publisher, b.genre, b.rel_year,
                     COUNT(c.copy_id) AS total_copies,
                     COUNT(c.copy_id) FILTER (WHERE c.status = 'AVAILABLE') AS available_copies
                 FROM org_books b
