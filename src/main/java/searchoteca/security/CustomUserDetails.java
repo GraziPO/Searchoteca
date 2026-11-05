@@ -33,9 +33,11 @@ public class CustomUserDetails implements UserDetails{
     public String getEmail(){
         return user.getEmail();
     }
-
     public String getCompleteName(){
         return user.getCompleteName();
+    }
+    public Boolean mustChangePassword(){
+        return Boolean.TRUE.equals(user.getMust_change_password());
     }
 
     @Override

@@ -80,4 +80,54 @@ public class EmailService {
             log.error("Falha ao enviar código de MFA para {}", masked, e);
         }
     }
+
+    @Async
+    public void sendPasswordResetCode(String to, String name, String code, long ttlMinutes){
+        String text = "Olá, " + name + "!\n\n"
+                + "Recebemos um pedido para redefinir sua senha imediatamente.\n"
+                + "Seu código é: " + code + "\n"
+                + "Ele expira em " + ttlMinutes + " minutos.\n\n"
+                + "Se não foi você, ignore este e-mail.";
+
+        String html = "<p>Ola,  " + HtmlUtils.htmlEscape(name) + "!</p>"
+                + "<p>Recebemos um pedido para redefinir sua senha. Seu código é:</p>"
+                + "<p style=\"font-size:28px;font-weight:bold;letter-spacing:6px\">" + code + "</p>"
+                + "<p>Ele expira em " + ttlMinutes + " minutos.</p>"
+                + "<p style=\"color:#666\">Se não foi você, ignore este e-mail. Sua senha continua a mesma.</p>";
+
+        sendResetCode(to, "Redefinição de Senha - Searchtec", text, html);
+    }
+
+    private void sendResetCode(String to, String subject, String text, String html){
+        String masked = EmailMasker.mask(to);
+
+        if (apiKey == null || apiKey.isBlank()) {
+            log.error("RESEND_API_KEY não configurada: código de MFA NÃO enviado para {}", masked);
+            return;
+        }
+
+        Map<String, Object> body = Map.of(
+                "from", from,
+                "to", List.of(to),
+                "subject", "Seu código de acesso - Searchoteca",
+                "text", text,
+                "html", html
+        );
+
+        try {
+            restClient.post()
+                    .uri(baseUrl + "/emails")
+                    .headers(h -> h.setBearerAuth(apiKey))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .toBodilessEntity();
+            log.info("Código de MFA enviado para {}", masked);
+        } catch (RestClientResponseException e) {
+            log.error("Resend recusou o envio para {}: HTTP {} - {}",
+                    masked, e.getStatusCode().value(), e.getResponseBodyAsString());
+        } catch (Exception e) {
+            log.error("Falha ao enviar código de MFA para {}", masked, e);
+        }
+    }
 }

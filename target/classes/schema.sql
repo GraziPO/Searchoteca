@@ -24,8 +24,10 @@ CREATE TABLE IF NOT EXISTS org_books(
     genre VARCHAR(50)
 );
 
+ALTER TABLE org_books ADD COLUMN IF NOT EXISTS sale_price NUMERIC(10,2);
+
 CREATE TABLE IF NOT EXISTS org_copies(
-    copyId SERIAL PRIMARY KEY,
+    copy_id SERIAL PRIMARY KEY,
     isbn VARCHAR(25) REFERENCES org_books(isbn),
     depart_code VARCHAR REFERENCES org_depart(depart_code),
     local_code  VARCHAR REFERENCES org_local(local_code),
@@ -34,6 +36,8 @@ CREATE TABLE IF NOT EXISTS org_copies(
     status VARCHAR(20) DEFAULT 'AVAILABLE',
     UNIQUE (isbn,copy_index)
 );
+
+CREATE INDEX IF NOT EXISTS idx_copies_isbn ON org_copies(isbn);
 
 CREATE TABLE IF NOT EXISTS sys_roles(
     role_id SERIAL PRIMARY KEY,
@@ -50,7 +54,8 @@ CREATE TABLE IF NOT EXISTS org_users(
     email VARCHAR(40) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     role_code VARCHAR(30) REFERENCES sys_roles(role_code),
-    status BOOLEAN NOT NULL DEFAULT TRUE
+    status BOOLEAN NOT NULL DEFAULT TRUE,
+    must_change_password BOOLEAN NOT NULL DEFAULT FALSE
     );
 
 CREATE TABLE IF NOT EXISTS sys_permissions(
@@ -112,7 +117,7 @@ CREATE TABLE IF NOT EXISTS org_students(
 CREATE TABLE IF NOT EXISTS org_loans(
 
     loan_id SERIAL PRIMARY KEY,
-    student_id INT NOT NULL REFERENCES org_users(user_id),
+    student_id INT NOT NULL REFERENCES org_students(student_id),
     operator_id INT NOT NULL REFERENCES org_users(user_id),
     loan_date TIMESTAMP NOT NULL,
     due_date DATE NOT NULL,
@@ -132,3 +137,23 @@ CREATE UNIQUE INDEX IF NOT EXISTS copy_per_loan
 
 CREATE INDEX IF NOT EXISTS loans_student ON org_loans(student_id);
 CREATE INDEX IF NOT EXISTS loans_open ON org_loans(due_date) WHERE status = 'OPEN';
+
+CREATE SEQUENCE IF NOT EXISTS receipt_seq;
+
+CREATE TABLE IF NOT EXISTS org_receipts(
+receipt_id BIGINT PRIMARY KEY,
+    receipt_code VARCHAR(30) NOT NULL UNIQUE,
+    exit_type VARCHAR(20) NOT NULL,
+    operator_id INT NOT NULL REFERENCES org_users(user_id),
+    loan_id INT REFERENCES org_loans(loan_id),
+    total NUMERIC(10,2),
+    created_at TIMESTAMP NOT NULL,
+    snapshot JSONB NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS org_receipt_items(
+    receipt_id BIGINT NOT NULL REFERENCES org_receipts(receipt_id),
+    copy_id INT NOT NULL REFERENCES org_copies(copy_id),
+    unit_price NUMERIC(10,2),
+    PRIMARY KEY (receipt_id, copy_id)
+);

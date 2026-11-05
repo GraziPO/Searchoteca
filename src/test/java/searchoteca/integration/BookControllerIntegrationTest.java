@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import searchoteca.model.BookModel;
+import searchoteca.model.Books.BookModel;
 import searchoteca.repository.catalog.BookRepository;
 
 import java.util.List;

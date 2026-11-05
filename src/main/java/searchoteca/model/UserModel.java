@@ -24,6 +24,7 @@ public class UserModel {
     private String password;
     private String role_code;
     private Boolean status;
+    private Boolean must_change_password;
 
     public UserModel() {}
 
