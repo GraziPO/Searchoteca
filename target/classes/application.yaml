@@ -48,6 +48,8 @@ password-reset:
 password-change:
   token-ttl-ms: 900000
 
+sales:
+  enabled: ${SALES_ENABLED:false}
 
 resend:
   api-key: ${RESEND_API_KEY:}

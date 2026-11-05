@@ -70,6 +70,7 @@ INSERT INTO sys_role_permissions (role_code, permission_code) VALUES
 
     ('warehouse_op', 'copies:create'),
     ('warehouse_op', 'copies:view'),
+    ('warehouse_op', 'copies:edit'),
 
     ('warehouse_op', 'org_books:create'),
     ('warehouse_op', 'org_books:edit'),
@@ -99,7 +100,7 @@ INSERT INTO sys_role_permissions (role_code, permission_code) VALUES
 
 -- ===== seed: usuário root inicial (bootstrap) =====
 -- senha: 'root123' -- TROCAR imediatamente após o primeiro login, isso é só pra destravar o primeiro acesso
-INSERT INTO org_users (custom_id, username, complete_name, email, password, role_code, status) VALUES
+INSERT INTO org_users (custom_id, username, complete_name, email, password, role_code, status, must_change_password) VALUES
     ('ROOT001', 'root', 'Administrador Root', 'graziela.pereira925@gmail.com',
      '$2b$10$qfAEE4NXf6S71kG5xVSVZ.elB96UNKE/1GQZY7NRlGahPxtDabz5K', 'root', TRUE, TRUE)
 ON CONFLICT (username) DO NOTHING;

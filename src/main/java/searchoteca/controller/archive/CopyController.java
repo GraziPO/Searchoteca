@@ -3,6 +3,7 @@ package searchoteca.controller.archive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import searchoteca.DTO.archive.BatchMoveRequest;
 import searchoteca.DTO.archive.CopyLabel;
 import searchoteca.DTO.archive.CopyRequest;
 import searchoteca.auditTrail.AuditAction;
@@ -38,5 +39,11 @@ public class CopyController {
         List<CopyLabel> label = copyService.findLabels(labels);
         auditLogService.record(AuditAction.ACCESS,"reipressão de etiquetas: " + labels);
         return ResponseEntity.ok(label);
+    }
+
+    @PreAuthorize("hasAuthority('copies:edit')")
+    @PostMapping("/movimentacao")
+    public ResponseEntity<?> moveBatch(@RequestBody BatchMoveRequest request) {
+        return ResponseEntity.ok(copyService.moveBatch(request));
     }
 }

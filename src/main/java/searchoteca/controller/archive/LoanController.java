@@ -50,7 +50,7 @@ public class LoanController {
     public ResponseEntity<?> create(@RequestBody LoanRequest request, Authentication auth) {
         CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
         auditLogService.save(user.getUsername(), AuditAction.CREATE,"usuário do tipo "+ user.getRoleCode()+ " criado");
-        return ResponseEntity.ok(loanService.create(request, user.getUserId()));
+        return ResponseEntity.ok(loanService.create(request, user));
     }
 
     @PreAuthorize("hasAuthority('loans:cancel')")

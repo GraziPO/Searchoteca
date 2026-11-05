@@ -3,22 +3,30 @@ package searchoteca.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import searchoteca.DTO.archive.LoanRequest;
+import searchoteca.DTO.archive.SalesNExists.ReceiptItem;
+import searchoteca.DTO.users.student.StudentInfo;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.*;
+import searchoteca.model.Books.BookModel;
 import searchoteca.model.Books.CopyModel;
 import searchoteca.model.Books.status.CopyStatus;
 import searchoteca.model.Books.status.ExitType;
 import searchoteca.model.Books.status.LoanStatus;
+import searchoteca.repository.catalog.BookRepository;
 import searchoteca.repository.users.UserRepository;
 import searchoteca.repository.catalog.CopyRepository;
 import searchoteca.repository.users.StudentRepository;
 import searchoteca.repository.archive.LoanItemRepository;
 import searchoteca.repository.archive.LoanRepository;
+import searchoteca.security.CustomUserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class LoanService {
@@ -29,6 +37,7 @@ public class LoanService {
     private final StudentRepository studentRepository;
     private final CopyRepository copyRepository;
     private final ReceiptService receiptService;
+    private final BookRepository bookRepository;
 
 
     public LoanService(LoanRepository loanRepository,
@@ -36,13 +45,15 @@ public class LoanService {
                        UserRepository userRepository,
                        CopyRepository copyRepository,
                        StudentRepository studentRepository,
-                       ReceiptService receiptService) {
+                       ReceiptService receiptService,
+                       BookRepository bookRepository) {
         this.loanRepository = loanRepository;
         this.loanItemRepository = loanItemRepository;
         this.userRepository = userRepository;
         this.copyRepository = copyRepository;
         this.studentRepository = studentRepository;
         this.receiptService = receiptService;
+        this.bookRepository = bookRepository;
     }
 
     public List<LoanModel> findAll() {
@@ -63,7 +74,7 @@ public class LoanService {
     }
 
     @Transactional
-    public LoanModel create(LoanRequest request, Long operatorId) {
+    public LoanModel create(LoanRequest request, CustomUserDetails operator) {
         StudentModel student = studentRepository.findByRa(request.ra());
         if(student == null) {
             throw new ResourceNotFoundException("Aluno não encontrado");
@@ -75,12 +86,14 @@ public class LoanService {
         LocalDateTime now = LocalDateTime.now();
         LoanModel loan = new LoanModel();
         loan.setStudentId(student.getStudentId());
-        loan.setOperatorId(operatorId);
+        loan.setOperatorId(operator.getUserId());
         loan.setLoanDate(now);
         loan.setDueDate(now.toLocalDate().plusDays(15)); //standard value just for testing. the period may be adjusted by an admin user in later versions.
         loan.setStatus(LoanStatus.OPEN.name());
 
         loan = loanRepository.save(loan);
+
+        List<CopyModel> loaned = new ArrayList<>();
 
         for(Long copyId : request.items()){
             CopyModel copy = copyRepository.findById(copyId)
@@ -90,6 +103,8 @@ public class LoanService {
             }
 
             copy.setStatus(CopyStatus.LOANED.name());
+            loaned.add(copy);
+
             copyRepository.save(copy);
 
             LoanItemModel item = new LoanItemModel();
@@ -98,10 +113,27 @@ public class LoanService {
             loanItemRepository.save(item);
         }
 
+        Map<String, BookModel> books = bookRepository.findByIsbnIn(
+                        loaned.stream().map(CopyModel::getIsbn).collect(Collectors.toSet()))
+                .stream().collect(Collectors.toMap(BookModel::getIsbn, b -> b));
+
+        List<ReceiptItem> items = loaned.stream().map(c -> {
+            BookModel b = books.get(c.getIsbn());
+            return new ReceiptItem(c.getCopyId(), c.getCopy_custom_code(),
+                    b.getIsbn(), b.getTitle(), b.getAuthor(), null);   // empréstimo não tem preço
+        }).toList();
+
+        UserModel studentUser = userRepository.findById(student.getUserId()).orElseThrow();
+        receiptService.issue(ExitType.LOAN, operator,
+                new StudentInfo(student.getRa(), studentUser.getCompleteName()),
+                loan.getDueDate(), loan.getLoanId(), items, null);
+
         student.setLastActivity(now);
+
         studentRepository.save(student);
 
-        receiptService.issue(ExitType.LOAN,operatorId);
+        receiptService.issue(ExitType.LOAN, operator, null, loan.getDueDate(), loan.getLoanId(), null, null);
+
         return loan;
     }
 
