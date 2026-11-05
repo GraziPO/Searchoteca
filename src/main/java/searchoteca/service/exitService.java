@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import searchoteca.DTO.archive.SalesNExists.ExitRequest;
 import searchoteca.DTO.archive.SalesNExists.ReceiptItem;
 import searchoteca.DTO.archive.SalesNExists.ReceiptSnapshot;
-import searchoteca.DTO.auditTrail.AuditLogService;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.Books.BookModel;

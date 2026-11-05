@@ -3,12 +3,15 @@ package searchoteca.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import searchoteca.DTO.users.UserResponse;
 import searchoteca.DTO.users.student.StudentRequest;
-import searchoteca.DTO.auditTrail.AuditAction;
-import searchoteca.DTO.auditTrail.AuditLogService;
+import searchoteca.auditTrail.AuditAction;
+import searchoteca.auditTrail.AuditLogService;
 import searchoteca.model.UserModel;
 import searchoteca.service.users.StudentService;
 import searchoteca.service.users.UserService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -26,17 +29,17 @@ public class UserController {
     @PreAuthorize("hasAuthority('users:view')")
     @GetMapping
     public ResponseEntity<?> findAll() {
+        List<UserResponse> user = userService.findAll().stream().map(UserResponse::from).toList();
         auditLogService.record(AuditAction.ACCESS,"All Users");
-        return ResponseEntity.ok(userService.findAll());
+        return ResponseEntity.ok(user);
     }
 
     @PreAuthorize("hasAuthority('users:view')")
     @GetMapping("/{username}")
     public ResponseEntity<?> findById(@PathVariable String username) {
-        auditLogService.record(AuditAction.ACCESS,"users" + username);
         UserModel user = userService.findByUsername(username);
-
-        return ResponseEntity.ok(user);
+        auditLogService.record(AuditAction.ACCESS,"users" + username);
+        return ResponseEntity.ok(UserResponse.from(user));
     }
 
     @PreAuthorize("hasAuthority('users:create')")

@@ -1,4 +1,4 @@
-package searchoteca.DTO.auditTrail;
+package searchoteca.auditTrail;
 
 import java.util.Objects;
 import java.util.StringJoiner;

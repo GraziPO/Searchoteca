@@ -1,4 +1,4 @@
-package searchoteca.DTO.auditTrail;
+package searchoteca.auditTrail;
 
 public enum AuditAction {
     ACCESS,
@@ -17,4 +17,7 @@ public enum AuditAction {
     MFA_FAILURE,
     MFA_LOCKED,
     TERMS_ACCEPTED,
+    PASSWORD_RESET_REQUESTED,
+    PASSWORD_RESET_FAILURE,
+    PASSWORD_RESET_SUCCESS, PASSWORD_CHANGED,
 }
