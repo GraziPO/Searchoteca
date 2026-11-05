@@ -5,8 +5,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import searchoteca.DTO.archive.CopyLabel;
 import searchoteca.DTO.archive.CopyRequest;
-import searchoteca.DTO.auditTrail.AuditAction;
-import searchoteca.DTO.auditTrail.AuditLogService;
+import searchoteca.auditTrail.AuditAction;
+import searchoteca.auditTrail.AuditLogService;
 import searchoteca.service.catalog.CopyService;
 
 import java.util.List;

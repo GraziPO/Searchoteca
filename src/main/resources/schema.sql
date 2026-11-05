@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS org_users(
     password VARCHAR(255) NOT NULL,
     role_code VARCHAR(30) REFERENCES sys_roles(role_code),
     status BOOLEAN NOT NULL DEFAULT TRUE,
-    must_change_password BOOLEAN NOT NULL DEFAULT FALSE;
+    must_change_password BOOLEAN NOT NULL DEFAULT FALSE
     );
 
 CREATE TABLE IF NOT EXISTS sys_permissions(

@@ -12,7 +12,7 @@ import org.springframework.security.access.AccessDeniedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import searchoteca.DTO.auditTrail.AuditLogService;
+import searchoteca.auditTrail.AuditLogService;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

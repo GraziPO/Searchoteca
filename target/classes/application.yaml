@@ -3,7 +3,6 @@ spring:
     name: v0
   config:
     import: "optional:file:.env[.proprieties]"
-
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
@@ -37,13 +36,23 @@ mfa:
   token-ttl-ms: 900000
   mock-code: ${MFA_MOCK_CODE:}        # ex.: 123456 -> não envia e-mail e aceita esse código (SÓ para testes)
 
+# ===== RESET DE SENHA =====
+
+password-reset:
+  code-ttl-minutes: 15
+  max-attempts: 5
+  cooldown-seconds: 60
+  max-codes-per-hour: 5
+
+# ============== TROCA DE SENHA ===============
+password-change:
+  token-ttl-ms: 900000
+
+
 resend:
   api-key: ${RESEND_API_KEY:}
   base-url: https://api.resend.com
   from: "${MAIL_FROM:Searchoteca <no-reply@searchoteca.com.br>}"
-
-sales:
-  enabled: ${Sales_enabled:false} #true / false caso a organização realize vendas de exemplares
 
 logging:
   level:
