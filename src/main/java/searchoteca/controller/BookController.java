@@ -20,6 +20,10 @@ public class BookController {
         this.auditLogService=auditLogService;
     }
 
+<<<<<<< Updated upstream:src/main/java/searchoteca/controller/BookController.java
+=======
+    @PreAuthorize("hasAuthority('org_books:view')")
+>>>>>>> Stashed changes:src/main/java/searchoteca/controller/archive/BookController.java
     @GetMapping
     public ResponseEntity<?> getAll(){
         auditLogService.record(AuditAction.ACCESS,"All books");
