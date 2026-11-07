@@ -104,6 +104,19 @@ CREATE TABLE IF NOT EXISTS sys_terms_acceptance(
     accepted_at TIMESTAMP NOT NULL,
     UNIQUE (user_id, terms_version, privacy_version)
 );
+
+CREATE TABLE IF NOT EXISTS sys_password_reset(
+    id BIGSERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES org_users(user_id) ON DELETE CASCADE,
+    code_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    attempts INT NOT NULL DEFAULT 0,
+    used_at TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_reset_user_created
+    ON sys_password_reset(user_id, created_at DESC);
 -- ============================================== alunos =====================================================
 
 CREATE TABLE IF NOT EXISTS org_students(
