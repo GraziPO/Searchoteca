@@ -1,4 +1,4 @@
-package searchoteca.controller;
+package searchoteca.controller.archive;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
