@@ -1,0 +1,27 @@
+package searchoteca.model;
+
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@Table(name= "org_loans")
+public class LoanModel {
+    @Id
+    @Column("loan_id")
+    private Long loanId;
+    private LocalDateTime loanDate;
+    private LocalDate dueDate;
+    private Long operatorId;
+    private Long studentId;
+    private String status;
+
+
+    public LoanModel() {}
+}
