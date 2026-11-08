@@ -39,10 +39,17 @@ mfa:
 # ===== RESET DE SENHA =====
 
 password-reset:
-    code-ttl-minutes: 15
-    max-attempts: 5
-    cooldown-seconds: 60
-    max-codes-per-hour: 5
+  code-ttl-minutes: 15
+  max-attempts: 5
+  cooldown-seconds: 60
+  max-codes-per-hour: 5
+
+# ============== TROCA DE SENHA ===============
+password-change:
+  token-ttl-ms: 900000
+
+sales:
+  enabled: ${SALES_ENABLED:false}
 
 resend:
   api-key: ${RESEND_API_KEY:}

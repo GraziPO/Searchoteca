@@ -1,16 +1,6 @@
 .env
 *.iml
 target/
-<<<<<<< Updated upstream
 .idea/
-=======
-.idea/
-logs/
 logs/searchoteca.log
 /logs
-logs/searchoteca.log
-logs/searchoteca.log
-/logs
-logs/searchoteca.log
-/logs
->>>>>>> Stashed changes
