@@ -35,13 +35,13 @@ public class ReceiptRepository {
 
         jdbc.update("""
                 INSERT INTO org_receipts
-                    (receipt_id, receipt_code, exit_type, operator_id, loan_id, total, create_at, snapshot)
+                    (receipt_id, receipt_code, exit_type, operator_id, loan_id, total, created_at, snapshot)
                 VALUES (:id, :code, :type, :operatorId, :loanId, :total, :createdAt, CAST(:snapshot AS jsonb))
                 """, params);
     }
 
     public void insertItem(long receiptId, Long copyId, BigDecimal unitPrice){
-        jdbc.update("INSERT INTO org_receipt_items (receipt_id, copyy_id, unit_price) VALUES (:r, :c, :p)",
+        jdbc.update("INSERT INTO org_receipt_items (receipt_id, copy_id, unit_price) VALUES (:r, :c, :p)",
         new MapSqlParameterSource()
                 .addValue("r", receiptId)
                 .addValue("c", copyId)

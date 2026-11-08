@@ -95,7 +95,9 @@ INSERT INTO sys_role_permissions (role_code, permission_code) VALUES
     ('loan_op', 'students:create'),
     ('loan_op', 'students:view'),
 
-    ('students', 'loans:view_own')
+    ('students', 'loans:view_own'),
+
+    ('dashboard:view', 'dashboard', 'view', 'Visualizar dashboard administrativo')
     ON CONFLICT DO NOTHING;
 
 -- ===== seed: usuário root inicial (bootstrap) =====
