@@ -11,10 +11,5 @@ public interface UserRepository extends CrudRepository<UserModel, Long> {
     UserModel findByUserId(Long id);
 
     UserModel findByEmail(String email);
-
-    UserModel getUserByCompleteName(String username);
-
-    List<UserModel> findByCustomId(String customId);
-
-    void deleteByUsername(String username);
+    
 }
