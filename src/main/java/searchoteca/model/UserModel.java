@@ -1,6 +1,5 @@
 package searchoteca.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -20,11 +19,9 @@ public class UserModel {
     private String username;
     private String completeName;
     private String email;
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)   // aceita no cadastro, nunca devolve o hash
     private String password;
     private String role_code;
     private Boolean status;
-    private Boolean must_change_password;
 
     public UserModel() {}
 
