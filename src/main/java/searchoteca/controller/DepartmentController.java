@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
 import searchoteca.model.DepartmentModel;
-import searchoteca.service.DepartmentService;
+import searchoteca.service.wms.DepartmentService;
 
 @RestController
 @RequestMapping("/api/departamento")

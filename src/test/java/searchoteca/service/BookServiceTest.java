@@ -7,10 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
-import searchoteca.model.BookModel;
-import searchoteca.model.CopyModel;
-import searchoteca.repository.BookRepository;
-import searchoteca.repository.CopyRepository;
+import searchoteca.repository.catalog.BookRepository;
 
 import java.util.List;
 

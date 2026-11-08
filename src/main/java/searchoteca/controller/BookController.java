@@ -5,8 +5,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
-import searchoteca.model.BookModel;
-import searchoteca.service.BookService;
+import searchoteca.model.Books.BookModel;
+import searchoteca.service.catalog.BookService;
 
 @RestController
 @RequestMapping("/api/livro")
@@ -20,10 +20,7 @@ public class BookController {
         this.auditLogService=auditLogService;
     }
 
-<<<<<<< Updated upstream:src/main/java/searchoteca/controller/BookController.java
-=======
     @PreAuthorize("hasAuthority('org_books:view')")
->>>>>>> Stashed changes:src/main/java/searchoteca/controller/archive/BookController.java
     @GetMapping
     public ResponseEntity<?> getAll(){
         auditLogService.record(AuditAction.ACCESS,"All books");

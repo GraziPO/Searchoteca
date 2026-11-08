@@ -6,7 +6,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import searchoteca.model.Books.CopyModel;
 
-import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -22,8 +21,5 @@ public interface CopyRepository extends CrudRepository<CopyModel,Long> {
     int findMaxIndexByIsbn(@Param("isbn")String isbn);
 
     long countByIsbn(String isbn);
-
-    @Query("SELECT * FROM org_copies WHERE copy_custom_code IN (:codes)")
-    List<CopyModel> findByCustomCodes(@Param("codes") Collection<String> codes);
 }
 

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
 import searchoteca.model.UserModel;
-import searchoteca.service.UserService;
+import searchoteca.service.users.UserService;
 
 @RestController
 @RequestMapping("/api/usuarios")

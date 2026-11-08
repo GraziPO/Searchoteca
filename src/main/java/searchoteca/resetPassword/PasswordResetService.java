@@ -10,7 +10,7 @@ import searchoteca.mfa.EmailMasker;
 import searchoteca.mfa.EmailService;
 import searchoteca.mfa.MfaException;
 import searchoteca.model.UserModel;
-import searchoteca.repository.UserRepository;
+import searchoteca.repository.users.UserRepository;
 
 import java.security.SecureRandom;
 import java.time.Duration;

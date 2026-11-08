@@ -1,7 +1,6 @@
 package searchoteca.service.catalog;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import searchoteca.auditTrail.AuditAction;
@@ -10,13 +9,13 @@ import searchoteca.auditTrail.AuditLogService;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.Books.BookModel;
-import searchoteca.model.Books.CopyModel;
+
 import searchoteca.repository.catalog.BookRepository;
 import searchoteca.repository.catalog.CopyRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
+
 import java.util.List;
 
 @Service

@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import searchoteca.model.PermissionModel;
 import searchoteca.model.RoleModel;
 import searchoteca.model.UserModel;
-import searchoteca.repository.AuthorizationRepository;
-import searchoteca.repository.PermissionRepository;
-import searchoteca.repository.RoleRepository;
-import searchoteca.repository.UserRepository;
+import searchoteca.repository.auth.AuthorizationRepository;
+import searchoteca.repository.auth.PermissionRepository;
+import searchoteca.repository.auth.RoleRepository;
+import searchoteca.repository.users.UserRepository;
 
 import java.util.List;
 import java.util.stream.StreamSupport;
