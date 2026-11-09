@@ -1,0 +1,405 @@
+Index: src/main/resources/schema.sql
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>CREATE TABLE IF NOT EXISTS org_depart(\r\n    depart_id SERIAL PRIMARY KEY,\r\n    depart_code VARCHAR(20) UNIQUE,\r\n    depart_name VARCHAR(100) NOT NULL UNIQUE,\r\n    depart_desc VARCHAR(100) NOT NULL\r\n);\r\n\r\nCREATE TABLE IF NOT EXISTS org_local(\r\n    local_id SERIAL PRIMARY KEY,\r\n    local_code VARCHAR(20) UNIQUE,\r\n    local_name VARCHAR(100) NOT NULL UNIQUE,\r\n    local_desc VARCHAR(100) NOT NULL,\r\n    depart_code VARCHAR,\r\n    FOREIGN KEY (depart_code) REFERENCES org_depart(depart_code)\r\n);\r\n\r\nCREATE TABLE IF NOT EXISTS org_books(\r\n    book_id SERIAL PRIMARY KEY,\r\n    isbn VARCHAR(15) NOT NULL UNIQUE,\r\n    title VARCHAR(100) NOT NULL,\r\n    author VARCHAR(100) NOT NULL,\r\n    rel_year INT,\r\n    publisher VARCHAR(50),\r\n<<<<<<< Updated upstream\r\n    genre VARCHAR(50),\r\n    depart_code VARCHAR,\r\n    local_code  VARCHAR,\r\n    FOREIGN KEY (depart_code) REFERENCES org_depart(depart_code),\r\n    FOREIGN KEY (local_code) REFERENCES org_local(local_code)\r\n=======\r\n    genre VARCHAR(50)\r\n);\r\n\r\nCREATE TABLE IF NOT EXISTS org_copies(\r\n    copy_id SERIAL PRIMARY KEY,\r\n    isbn VARCHAR(15) REFERENCES org_books(isbn),\r\n    depart_code VARCHAR REFERENCES org_depart(depart_code),\r\n    local_code VARCHAR REFERENCES org_local(local_code),\r\n    copy_index INT NOT NULL,\r\n    custom_id VARCHAR(60) GENERATED ALWAYS AS (isbn || depart_code || local_code || copy_index :: text) STORED,\r\n    status VARCHAR(20) NOT NULL DEFAULT 'AVALIABLE',\r\n    UNIQUE (isbn, copy_index)\r\n>>>>>>> Stashed changes\r\n);\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/schema.sql b/src/main/resources/schema.sql
+--- a/src/main/resources/schema.sql	(revision b5236a2cdde227cf5532924aff0103b3a5166a6b)
++++ b/src/main/resources/schema.sql	(date 1789938635155)
+@@ -21,24 +21,99 @@
+     author VARCHAR(100) NOT NULL,
+     rel_year INT,
+     publisher VARCHAR(50),
+-<<<<<<< Updated upstream
+-    genre VARCHAR(50),
++    genre VARCHAR(50)
++);
++
++CREATE TABLE IF NOT EXISTS org_copies(
++    copy_id SERIAL PRIMARY KEY,
++    copy_custom_id
+     depart_code VARCHAR,
+     local_code  VARCHAR,
+     FOREIGN KEY (depart_code) REFERENCES org_depart(depart_code),
+     FOREIGN KEY (local_code) REFERENCES org_local(local_code)
+-=======
+-    genre VARCHAR(50)
++);
++
++CREATE TABLE IF NOT EXISTS org_users(
++    user_id SERIAL PRIMARY KEY,
++    custom_id VARCHAR(20) UNIQUE,
++    username VARCHAR(20) NOT NULL UNIQUE,
++    complete_name VARCHAR(100) NOT NULL,
++    email VARCHAR(40) NOT NULL UNIQUE,
++    password VARCHAR(255) NOT NULL,
++    role_code VARCHAR(20) NOT NULL,
++    FOREIGN KEY (role_code) REFERENCES sys_roles(role_code)
+ );
+ 
+-CREATE TABLE IF NOT EXISTS org_copies(
+-    copy_id SERIAL PRIMARY KEY,
+-    isbn VARCHAR(15) REFERENCES org_books(isbn),
+-    depart_code VARCHAR REFERENCES org_depart(depart_code),
+-    local_code VARCHAR REFERENCES org_local(local_code),
+-    copy_index INT NOT NULL,
+-    custom_id VARCHAR(60) GENERATED ALWAYS AS (isbn || depart_code || local_code || copy_index :: text) STORED,
+-    status VARCHAR(20) NOT NULL DEFAULT 'AVALIABLE',
+-    UNIQUE (isbn, copy_index)
+->>>>>>> Stashed changes
++CREATE TABLE IF NOT EXISTS sys_roles(
++    role_id SERIAL PRIMARY KEY,
++    role_code VARCHAR(20) UNIQUE NOT NULL,
++    role_name VARCHAR(50) NOT NULL UNIQUE,
++    role_desc VARCHAR(100) NOT NULL,
++    is_root BOOLEAN NOT NULL DEFAULT FALSE
+ );
++
++
++CREATE TABLE IF NOT EXISTS sys_role_permissions(
++    role_code VARCHAR(20) NOT NULL REFERENCES sys_roles(role_code) ON DELETE CASCADE,
++    permission_code VARCHAR(50) NOT NULL REFERENCES sys_permissions(permission_code) ON DELETE CASCADE,
++    PRIMARY KEY (role_code, permission_code)
++);
++
++-- ===== seed: roles =====
++INSERT INTO sys_roles (role_code, role_name, role_desc, is_root) VALUES
++    ('root', 'Root', 'Administrador principal com acesso total ao sistema', TRUE),
++    ('local_admin', 'Administrador local', 'Gerencia usuários e acervo', FALSE),
++    ('warehouse_op', 'Operador de Acervo', 'Gerencia departamentos, locais e livros; sem acesso a usuários', FALSE),
++    ('loan_op', 'Operador de Empréstimo', 'Consulta acervo e controla quantidade de livros', FALSE)
++    ON CONFLICT (role_code) DO NOTHING;
++
++-- ===== seed: permissions (resource:action) =====
++INSERT INTO sys_permissions (permission_code, resource, action, description) VALUES
++    ('org_users:create', 'org_users', 'create', 'Criar usuários'),
++    ('org_users:edit', 'org_users', 'edit', 'Editar usuários'),
++    ('org_users:view', 'org_users', 'view', 'Visualizar usuários'),
++    ('org_users:delete', 'org_users', 'delete', 'Excluir usuários'),
++
++    ('org_local:create', 'org_local', 'create', 'Criar locais'),
++    ('org_local:edit', 'org_local', 'edit', 'Editar locais'),
++    ('org_local:view', 'org_local', 'view', 'Visualizar locais'),
++    ('org_local:delete', 'org_local', 'delete', 'Excluir locais'),
++
++    ('org_depart:create', 'org_depart', 'create', 'Criar departamentos'),
++    ('org_depart:edit', 'org_depart', 'edit', 'Editar departamentos'),
++    ('org_depart:view', 'org_depart', 'view', 'Visualizar departamentos'),
++    ('org_depart:delete', 'org_depart', 'delete', 'Excluir departamentos'),
++
++    ('org_books:create', 'org_books', 'create', 'Cadastrar livros'),
++    ('org_books:edit', 'org_books', 'edit', 'Editar livros'),
++    ('org_books:view', 'org_books', 'view', 'Visualizar livros'),
++    ('org_books:delete', 'org_books', 'delete', 'Excluir livros'),
++    ('org_books:alter_quantity', 'org_books', 'alter_quantity', 'Alterar quantidade em estoque do livro')
++    ON CONFLICT (permission_code) DO NOTHING;
++
++-- ===== seed: role x permission =====
++-- root: nao precisa de linhas aqui, is_root=true faz bypass na checagem
++INSERT INTO sys_role_permissions (role_code, permission_code) VALUES
++    ('admin_users', 'users:create'),
++    ('admin_users', 'users:edit'),
++    ('admin_users', 'users:view'),
++    ('admin_users', 'users:delete'),
++
++    ('warehouse_op', 'org_local:create'),
++    ('warehouse_op', 'org_local:edit'),
++    ('warehouse_op', 'org_local:view'),
++    ('warehouse_op', 'org_local:delete'),
++    ('warehouse_op', 'org_depart:create'),
++    ('warehouse_op', 'org_depart:edit'),
++    ('warehouse_op', 'org_depart:view'),
++    ('warehouse_op', 'org_depart:delete'),
++    ('warehouse_op', 'org_books:create'),
++    ('warehouse_op', 'org_books:edit'),
++    ('warehouse_op', 'org_books:view'),
++    ('warehouse_op', 'org_books:delete'),
++
++    ('loan_op', 'org_local:view'),
++    ('loan_op', 'org_depart:view'),
++    ('loan_op', 'org_books:view'),
++    ('loan_op', 'org_books:alter_quantity')
++    ON CONFLICT DO NOTHING;
+\ No newline at end of file
+Index: src/main/java/searchoteca/service/LocationService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/searchoteca/service/LocationService.java b/src/main/java/searchoteca/service/LocationService.java
+deleted file mode 100644
+--- a/src/main/java/searchoteca/service/LocationService.java	(revision b5236a2cdde227cf5532924aff0103b3a5166a6b)
++++ /dev/null	(revision b5236a2cdde227cf5532924aff0103b3a5166a6b)
+@@ -1,87 +0,0 @@
+-package searchoteca.service;
+-
+-import org.springframework.stereotype.Service;
+-import searchoteca.exception.ResourceConflictException;
+-import searchoteca.exception.ResourceNotFoundException;
+-import searchoteca.model.BookModel;
+-import searchoteca.model.CopyModel;
+-import searchoteca.model.LocationModel;
+-import searchoteca.repository.BookRepository;
+-import searchoteca.repository.CopyRepository;
+-import searchoteca.repository.LocationRepository;
+-
+-import java.util.ArrayList;
+-import java.util.List;
+-
+-@Service
+-public class LocationService {
+-    private final LocationRepository locationRepository;
+-    private final BookRepository bookRepository;
+-    private final CopyRepository copyRepository;
+-
+-    public LocationService(LocationRepository locationRepository, BookRepository bookRepository, CopyRepository copyRepository) {
+-        this.locationRepository= locationRepository;
+-        this.bookRepository= bookRepository;
+-        this.copyRepository = copyRepository;
+-    }
+-
+-    public List<LocationModel> findAll(){
+-        List<LocationModel> location;
+-        location =  (List<LocationModel>) locationRepository.findAll();
+-
+-        if(location.isEmpty()){
+-            throw new ResourceNotFoundException("Nenhuma localização cadastrada");
+-        }
+-        return location;
+-    }
+-
+-    public LocationModel findByLocalCode(String localCode){
+-        if(localCode == null){
+-            throw new ResourceNotFoundException("Nenhum registro encontrado");
+-        }
+-        return locationRepository.findByLocalCode(localCode);
+-    }
+-
+-    public LocationModel create(LocationModel location){
+-        if(location.getLocalCode() != null){
+-            throw new ResourceConflictException("Local já cadastrado");
+-        }
+-        return locationRepository.save(location);
+-    }
+-
+-    public LocationModel update(String localCode, LocationModel localInfo){
+-        LocationModel location = locationRepository.findByLocalCode(localCode);
+-
+-        if(location == null){
+-            throw new ResourceNotFoundException("Registro inexistente");
+-        }
+-        location.setLocalName(localInfo.getLocalCode());
+-        location.setLocalDesc(localInfo.getLocalDesc());
+-        location.setDepartCode(localInfo.getDepartCode());
+-
+-        return locationRepository.save(location);
+-    }
+-
+-    public void delete(String localCode){
+-        LocationModel local =  locationRepository.findByLocalCode(localCode);
+-
+-        if(local == null){
+-            throw new ResourceNotFoundException("registro não encontrado");
+-        }
+-        locationRepository.deleteByLocalCode(localCode);
+-    }
+-
+-    public List<BookModel> findBooksByLocalCode(String localCode){
+-        if (localCode == null){
+-            throw new ResourceNotFoundException("Nenhum registro encontrado");
+-        }
+-        //captura o isbn de todas as cópias na localização e devolve o registro de livros
+-        List<CopyModel> copies = copyRepository.findByLocalCode(localCode);
+-        List<BookModel> books = new ArrayList<>();
+-
+-        for (CopyModel copy : copies) {
+-            books.add(bookRepository.findByIsbn(copy.getIsbn()));
+-        }
+-        return books;
+-    }
+-}
+Index: src/main/java/searchoteca/v0/service/DepartmentService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package searchoteca.v0.service;\r\n\r\nimport org.springframework.stereotype.Service;\r\n<<<<<<< Updated upstream:src/main/java/searchoteca/v0/service/DepartmentService.java\r\nimport searchoteca.v0.model.BookModel;\r\nimport searchoteca.v0.model.DepartmentModel;\r\nimport searchoteca.v0.model.LocationModel;\r\nimport searchoteca.v0.repository.BookRepository;\r\nimport searchoteca.v0.repository.DepartmentRepository;\r\nimport searchoteca.v0.repository.LocationRepository;\r\n=======\r\nimport searchoteca.exception.ResourceConflictException;\r\nimport searchoteca.exception.ResourceNotFoundException;\r\nimport searchoteca.model.BookModel;\r\nimport searchoteca.model.CopyModel;\r\nimport searchoteca.model.DepartmentModel;\r\nimport searchoteca.model.LocationModel;\r\nimport searchoteca.repository.BookRepository;\r\nimport searchoteca.repository.CopyRepository;\r\nimport searchoteca.repository.DepartmentRepository;\r\nimport searchoteca.repository.LocationRepository;\r\n>>>>>>> Stashed changes:src/main/java/searchoteca/service/DepartmentService.java\r\n\r\nimport java.util.List;\r\n\r\n@Service\r\npublic class DepartmentService {\r\n    private final DepartmentRepository departmentRepository;\r\n    private final BookRepository bookRepository;\r\n    private final CopyRepository copyRepository;\r\n    private final LocationRepository locationRepository;\r\n    \r\n    public DepartmentService(DepartmentRepository departmentRepository, BookRepository bookRepository, LocationRepository locationRepository, CopyRepository copyRepository) {\r\n        this.departmentRepository = departmentRepository;\r\n        this.bookRepository = bookRepository;\r\n        this.locationRepository = locationRepository;\r\n        this.copyRepository = copyRepository;\r\n    }\r\n\r\n    public List<DepartmentModel> findAll(){\r\n        return (List<DepartmentModel>) departmentRepository.findAll();\r\n    }\r\n\r\n    public DepartmentModel findByDepartCode(String departCode){\r\n        return departmentRepository.findByDepartCode(departCode);\r\n    }\r\n    public DepartmentModel create(DepartmentModel department){\r\n        return departmentRepository.save(department);\r\n    }\r\n\r\n    public DepartmentModel update(String departCode, DepartmentModel departInfo){\r\n        DepartmentModel department = departmentRepository.findByDepartCode(departCode);\r\n        department.setDepartName(departInfo.getDepartName());\r\n        department.setDepartDesc(departInfo.getDepartDesc());\r\n        return departmentRepository.save(department);\r\n    }\r\n\r\n    public void delete(String departCode){\r\n        departmentRepository.delete(departmentRepository.findByDepartCode(departCode));\r\n    }\r\n\r\n    public List<LocationModel> findLocalByDepartCode(String localCode){\r\n        return locationRepository.findByDepartCode(localCode);\r\n    }\r\n    public List<BookModel> findBookByDepartCode(String departCode){\r\n<<<<<<< Updated upstream:src/main/java/searchoteca/v0/service/DepartmentService.java\r\n        return bookRepository.findByDepartCode(departCode);\r\n=======\r\n        if (departCode == null){\r\n            throw new ResourceNotFoundException(\"Nenhum registro encontrado\");\r\n        }\r\n         //captura o isbn de todas as cópias no departamento e devolve o registro de livros\r\n        List<CopyModel> copies = copyRepository.findByDepartCode(departCode);\r\n        List<BookModel> books = new ArrayList<>();\r\n        for (CopyModel copy : copies) {\r\n            books.add(bookRepository.findByIsbn(copy.getIsbn()));\r\n        }\r\n        return books;\r\n>>>>>>> Stashed changes:src/main/java/searchoteca/service/DepartmentService.java\r\n    }\r\n\r\n\r\n}\r\n
+===================================================================
+diff --git a/src/main/java/searchoteca/v0/service/DepartmentService.java b/src/main/java/searchoteca/v0/service/DepartmentService.java
+--- a/src/main/java/searchoteca/v0/service/DepartmentService.java	(revision b5236a2cdde227cf5532924aff0103b3a5166a6b)
++++ b/src/main/java/searchoteca/v0/service/DepartmentService.java	(date 1789938136213)
+@@ -1,26 +1,19 @@
+ package searchoteca.v0.service;
+ 
+ import org.springframework.stereotype.Service;
+-<<<<<<< Updated upstream:src/main/java/searchoteca/v0/service/DepartmentService.java
+ import searchoteca.v0.model.BookModel;
+ import searchoteca.v0.model.DepartmentModel;
+ import searchoteca.v0.model.LocationModel;
+ import searchoteca.v0.repository.BookRepository;
+ import searchoteca.v0.repository.DepartmentRepository;
+ import searchoteca.v0.repository.LocationRepository;
+-=======
+-import searchoteca.exception.ResourceConflictException;
+-import searchoteca.exception.ResourceNotFoundException;
+-import searchoteca.model.BookModel;
+-import searchoteca.model.CopyModel;
+-import searchoteca.model.DepartmentModel;
+-import searchoteca.model.LocationModel;
+-import searchoteca.repository.BookRepository;
+-import searchoteca.repository.CopyRepository;
+-import searchoteca.repository.DepartmentRepository;
+-import searchoteca.repository.LocationRepository;
+->>>>>>> Stashed changes:src/main/java/searchoteca/service/DepartmentService.java
++
++import searchoteca.v0.model.CopyModel;
+ 
++import searchoteca.v0.repository.CopyRepository;
++
++
++import java.util.ArrayList;
+ import java.util.List;
+ 
+ @Service
+@@ -63,11 +56,8 @@
+         return locationRepository.findByDepartCode(localCode);
+     }
+     public List<BookModel> findBookByDepartCode(String departCode){
+-<<<<<<< Updated upstream:src/main/java/searchoteca/v0/service/DepartmentService.java
+-        return bookRepository.findByDepartCode(departCode);
+-=======
+         if (departCode == null){
+-            throw new ResourceNotFoundException("Nenhum registro encontrado");
++            return null;
+         }
+          //captura o isbn de todas as cópias no departamento e devolve o registro de livros
+         List<CopyModel> copies = copyRepository.findByDepartCode(departCode);
+@@ -76,7 +66,7 @@
+             books.add(bookRepository.findByIsbn(copy.getIsbn()));
+         }
+         return books;
+->>>>>>> Stashed changes:src/main/java/searchoteca/service/DepartmentService.java
++
+     }
+ 
+ 
+Index: src/main/java/searchoteca/v0/repository/CopyRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package searchoteca.repository;\r\n\r\nimport org.springframework.data.repository.CrudRepository;\r\nimport org.springframework.stereotype.Repository;\r\nimport searchoteca.model.CopyModel;\r\n\r\nimport java.util.List;\r\n\r\n@Repository\r\npublic interface CopyRepository extends CrudRepository<CopyModel, String> {\r\n\r\n    List<CopyModel> findByIsbn (String isbn);\r\n\r\n    CopyModel findByCustomId(String custom_id);\r\n\r\n    List<CopyModel> findByDepartCode(String departCode);\r\n\r\n    List<CopyModel> findByLocalCode(String localCode);\r\n\r\n    void deleteByCustomId(String custom_id);\r\n}\r\n
+===================================================================
+diff --git a/src/main/java/searchoteca/v0/repository/CopyRepository.java b/src/main/java/searchoteca/v0/repository/CopyRepository.java
+--- a/src/main/java/searchoteca/v0/repository/CopyRepository.java	(revision b5236a2cdde227cf5532924aff0103b3a5166a6b)
++++ b/src/main/java/searchoteca/v0/repository/CopyRepository.java	(date 1789937917064)
+@@ -1,8 +1,8 @@
+-package searchoteca.repository;
++package searchoteca.v0.repository;
+ 
+ import org.springframework.data.repository.CrudRepository;
+ import org.springframework.stereotype.Repository;
+-import searchoteca.model.CopyModel;
++import searchoteca.v0.model.CopyModel;
+ 
+ import java.util.List;
+ 
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"1daaa145-8aa5-4e40-a263-9fcd9df2d4de\" name=\"Changes\" comment=\"\">\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/searchoteca/model/BookModel.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/searchoteca/model/BookModel.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/searchoteca/repository/BookRepository.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/searchoteca/repository/BookRepository.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/searchoteca/repository/DepartmentRepository.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/searchoteca/repository/DepartmentRepository.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/searchoteca/repository/LocationRepository.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/searchoteca/repository/LocationRepository.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/searchoteca/service/BookService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/searchoteca/service/BookService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/searchoteca/service/DepartmentService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/searchoteca/service/DepartmentService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/java/searchoteca/service/LocationService.java\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/java/searchoteca/service/LocationService.java\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/main/resources/schema.sql\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/main/resources/schema.sql\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/schema.sql\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/target/classes/schema.sql\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/searchoteca/v0/V0Application.class\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/searchoteca/v0/controller/BookController.class\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/searchoteca/v0/controller/DepartmentController.class\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/searchoteca/v0/controller/LocationController.class\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/searchoteca/v0/model/BookModel.class\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/searchoteca/v0/model/DepartmentModel.class\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/searchoteca/v0/model/LocationModel.class\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/searchoteca/v0/repository/BookRepository.class\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/searchoteca/v0/repository/DepartmentRepository.class\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/searchoteca/v0/repository/LocationRepository.class\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/searchoteca/v0/service/BookService.class\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/searchoteca/v0/service/DepartmentService.class\" beforeDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/target/classes/searchoteca/v0/service/LocationService.class\" beforeDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Class\" />\r\n        <option value=\"Interface\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitHubPullRequestSearchHistory\">{\r\n  &quot;lastFilter&quot;: {\r\n    &quot;state&quot;: &quot;OPEN&quot;,\r\n    &quot;assignee&quot;: &quot;GraziPO&quot;\r\n  }\r\n}</component>\r\n  <component name=\"GithubPullRequestsUISettings\">{\r\n  &quot;selectedUrlAndAccountId&quot;: {\r\n    &quot;url&quot;: &quot;https://github.com/GraziPO/Searchoteca.git&quot;,\r\n    &quot;accountId&quot;: &quot;1229a0f3-69b4-4584-a397-f3ab741e0daf&quot;\r\n  }\r\n}</component>\r\n  <component name=\"MavenImportPreferences\">\r\n    <option name=\"generalSettings\">\r\n      <MavenGeneralSettings>\r\n        <option name=\"mavenHomeTypeForPersistence\" value=\"WRAPPER\" />\r\n      </MavenGeneralSettings>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProjectColorInfo\">{\r\n  &quot;associatedIndex&quot;: 3,\r\n  &quot;fromUser&quot;: false\r\n}</component>\r\n  <component name=\"ProjectId\" id=\"3JTDGD9kcUjxO84LtSFRtIJs6G2\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">{\r\n  &quot;keyToString&quot;: {\r\n    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,\r\n    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,\r\n    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,\r\n    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,\r\n    &quot;Spring Boot.V0Application.executor&quot;: &quot;Run&quot;,\r\n    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,\r\n    &quot;git-widget-placeholder&quot;: &quot;Feature-Users-CRUD&quot;,\r\n    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,\r\n    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,\r\n    &quot;last_opened_file_path&quot;: &quot;C:/Users/grazi/OneDrive/Documentos/GitHub/PFC&quot;,\r\n    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,\r\n    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,\r\n    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,\r\n    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,\r\n    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;\r\n  }\r\n}</component>\r\n  <component name=\"SharedIndexes\">\r\n    <attachedChunks>\r\n      <set>\r\n        <option value=\"bundled-jdk-30f59d01ecdd-a203e0a19954-intellij.indexing.shared.core-IU-262.10968.63\" />\r\n        <option value=\"bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.10968.63\" />\r\n      </set>\r\n    </attachedChunks>\r\n  </component>\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"1daaa145-8aa5-4e40-a263-9fcd9df2d4de\" name=\"Changes\" comment=\"\" />\r\n      <created>1789676067615</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1789676067615</updated>\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"XSLT-Support.FileAssociations.UIState\">\r\n    <expand />\r\n    <select />\r\n  </component>\r\n</project>
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision b5236a2cdde227cf5532924aff0103b3a5166a6b)
++++ b/.idea/workspace.xml	(date 1789938221053)
+@@ -5,28 +5,13 @@
+   </component>
+   <component name="ChangeListManager">
+     <list default="true" id="1daaa145-8aa5-4e40-a263-9fcd9df2d4de" name="Changes" comment="">
+-      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/model/BookModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/model/BookModel.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/repository/BookRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/repository/BookRepository.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/repository/DepartmentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/repository/DepartmentRepository.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/repository/LocationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/repository/LocationRepository.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/service/BookService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/service/BookService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/service/DepartmentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/service/DepartmentService.java" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/service/LocationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/service/LocationService.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/service/LocationService.java" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/v0/model/CopyModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/v0/model/CopyModel.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/v0/repository/CopyRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/v0/repository/CopyRepository.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/v0/repository/DepartmentRepository.java" beforeDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/v0/service/DepartmentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/v0/service/DepartmentService.java" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/src/main/resources/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/schema.sql" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/schema.sql" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/V0Application.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/controller/BookController.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/controller/DepartmentController.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/controller/LocationController.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/model/BookModel.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/model/DepartmentModel.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/model/LocationModel.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/repository/BookRepository.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/repository/DepartmentRepository.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/repository/LocationRepository.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/service/BookService.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/service/DepartmentService.class" beforeDir="false" />
+-      <change beforePath="$PROJECT_DIR$/target/classes/searchoteca/v0/service/LocationService.class" beforeDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -72,25 +57,25 @@
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+   </component>
+-  <component name="PropertiesComponent">{
+-  &quot;keyToString&quot;: {
+-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+-    &quot;Spring Boot.V0Application.executor&quot;: &quot;Run&quot;,
+-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+-    &quot;git-widget-placeholder&quot;: &quot;Feature-Users-CRUD&quot;,
+-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+-    &quot;last_opened_file_path&quot;: &quot;C:/Users/grazi/OneDrive/Documentos/GitHub/PFC&quot;,
+-    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
+-    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
+-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+-    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,
+-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
++  <component name="PropertiesComponent"><![CDATA[{
++  "keyToString": {
++    "ModuleVcsDetector.initialDetectionPerformed": "true",
++    "RunOnceActivity.ShowReadmeOnStart": "true",
++    "RunOnceActivity.git.unshallow": "true",
++    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
++    "Spring Boot.V0Application.executor": "Run",
++    "codeWithMe.voiceChat.enabledByDefault": "false",
++    "git-widget-placeholder": "Feature-Custom-Book-ID-based-on-each-copy",
++    "ignore.virus.scanning.warn.message": "true",
++    "kotlin-language-version-configured": "true",
++    "last_opened_file_path": "C:/Users/grazi/OneDrive/Documentos/GitHub/PFC",
++    "node.js.detected.package.jshint": "true",
++    "node.js.selected.package.jshint": "",
++    "nodejs_package_manager_path": "npm",
++    "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
++    "settings.editor.selected.configurable": "preferences.lookFeel"
+   }
+-}</component>
++}]]></component>
+   <component name="SharedIndexes">
+     <attachedChunks>
+       <set>
+Index: src/main/java/searchoteca/v0/model/CopyModel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package searchoteca.model;\r\n\r\nimport lombok.Getter;\r\nimport lombok.Setter;\r\nimport org.springframework.data.annotation.Id;\r\nimport org.springframework.data.relational.core.mapping.Column;\r\nimport org.springframework.data.relational.core.mapping.Table;\r\n\r\n@Getter\r\n@Setter\r\n@Table(name=\"org_copies\")\r\npublic class CopyModel {\r\n    @Id\r\n    @Column(\"copy_id\")\r\n    private Long copy_id;\r\n\r\n    private String isbn;\r\n    private String depart_code;\r\n    private String local_code;\r\n    private int copy_index;\r\n    private String custom_id;\r\n    private String status;\r\n\r\n    public CopyModel() {}\r\n\r\n}\r\n
+===================================================================
+diff --git a/src/main/java/searchoteca/v0/model/CopyModel.java b/src/main/java/searchoteca/v0/model/CopyModel.java
+--- a/src/main/java/searchoteca/v0/model/CopyModel.java	(revision b5236a2cdde227cf5532924aff0103b3a5166a6b)
++++ b/src/main/java/searchoteca/v0/model/CopyModel.java	(date 1789937917071)
+@@ -1,4 +1,4 @@
+-package searchoteca.model;
++package searchoteca.v0.model;
+ 
+ import lombok.Getter;
+ import lombok.Setter;

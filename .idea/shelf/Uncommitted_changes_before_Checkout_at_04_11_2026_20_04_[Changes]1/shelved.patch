@@ -1,0 +1,121 @@
+Index: src/main/resources/schema.sql
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>CREATE TABLE IF NOT EXISTS org_depart(\r\n    depart_id SERIAL PRIMARY KEY,\r\n    depart_code VARCHAR(20) UNIQUE,\r\n    depart_name VARCHAR(100) NOT NULL UNIQUE,\r\n    depart_desc VARCHAR(100) NOT NULL\r\n);\r\n\r\nCREATE TABLE IF NOT EXISTS org_local(\r\n    local_id SERIAL PRIMARY KEY,\r\n    local_code VARCHAR(20) UNIQUE,\r\n    local_name VARCHAR(100) NOT NULL UNIQUE,\r\n    local_desc VARCHAR(100) NOT NULL,\r\n    depart_code VARCHAR,\r\n    FOREIGN KEY (depart_code) REFERENCES org_depart(depart_code)\r\n);\r\n\r\nCREATE TABLE IF NOT EXISTS org_books(\r\n    book_id SERIAL PRIMARY KEY,\r\n    isbn VARCHAR(15) NOT NULL UNIQUE,\r\n    title VARCHAR(100) NOT NULL,\r\n    author VARCHAR(100) NOT NULL,\r\n    rel_year INT,\r\n    publisher VARCHAR(50),\r\n    genre VARCHAR(50)\r\n);\r\n\r\nCREATE TABLE IF NOT EXISTS org_copies(\r\n    copy_id SERIAL PRIMARY KEY,\r\n    isbn VARCHAR(25) REFERENCES org_books(isbn),\r\n    depart_code VARCHAR REFERENCES org_depart(depart_code),\r\n    local_code  VARCHAR REFERENCES org_local(local_code),\r\n    copy_index INT NOT NULL,\r\n    copy_custom_code VARCHAR(60) GENERATED ALWAYS AS (isbn || depart_code || local_code || copy_index :: text) STORED,\r\n    status VARCHAR(20) DEFAULT 'DISPONÍVEL',\r\n    UNIQUE (isbn,copy_index)\r\n);\r\n\r\nCREATE TABLE IF NOT EXISTS sys_roles(\r\n    role_id SERIAL PRIMARY KEY,\r\n    role_code VARCHAR(20) UNIQUE NOT NULL,\r\n    role_name VARCHAR(50) NOT NULL UNIQUE,\r\n    role_desc VARCHAR(100) NOT NULL,\r\n    is_root BOOLEAN NOT NULL DEFAULT FALSE\r\n    );\r\nCREATE TABLE IF NOT EXISTS org_users(\r\n    user_id SERIAL PRIMARY KEY,\r\n    custom_id VARCHAR(30) UNIQUE,\r\n    username VARCHAR(30) NOT NULL UNIQUE,\r\n    complete_name VARCHAR(100) NOT NULL,\r\n    email VARCHAR(40) NOT NULL UNIQUE,\r\n    password VARCHAR(255) NOT NULL,\r\n    role_code VARCHAR(30) REFERENCES sys_roles(role_code),\r\n    status BOOLEAN NOT NULL DEFAULT TRUE\r\n    );\r\n\r\nCREATE TABLE IF NOT EXISTS sys_permissions(\r\n    permission_id SERIAL PRIMARY KEY,\r\n    permission_code VARCHAR(50) UNIQUE NOT NULL,  -- ex: 'org_books:create'\r\n    resource VARCHAR(30) NOT NULL,                -- ex: 'users', 'org_books'\r\n    action VARCHAR(30) NOT NULL,                  -- ex: 'create', 'view', 'alter_quantity'\r\n    description VARCHAR(100)\r\n    );\r\n\r\nCREATE TABLE IF NOT EXISTS sys_role_permissions(\r\n    role_code VARCHAR(20) NOT NULL REFERENCES sys_roles(role_code) ON DELETE CASCADE,\r\n    permission_code VARCHAR(50) NOT NULL REFERENCES sys_permissions(permission_code) ON DELETE CASCADE,\r\n    PRIMARY KEY (role_code, permission_code)\r\n    );\r\n\r\nCREATE TABLE IF NOT EXISTS auditTrail_logs(\r\n    id BIGSERIAL PRIMARY KEY,\r\n    time_stamp TIMESTAMP NOT NULL,\r\n    username VARCHAR(30),\r\n    action VARCHAR(30) NOT NULL,\r\n    details TEXT\r\n    );\r\n\r\n\r\nCREATE TABLE IF NOT EXISTS sys_mfa(\r\n    id BIGSERIAL PRIMARY KEY,\r\n    user_id INT NOT NULL REFERENCES org_users(user_id) ON DELETE CASCADE,\r\n    code_hash VARCHAR(255) NOT NULL,        -- hash BCrypt do código, nunca o código em si\r\n    created_at TIMESTAMP NOT NULL,\r\n    expires_at TIMESTAMP NOT NULL,\r\n    attempts INT NOT NULL DEFAULT 0,        -- tentativas erradas neste código\r\n    used_at TIMESTAMP                       -- preenchido quando usado ou invalidado\r\n);\r\n\r\nCREATE INDEX IF NOT EXISTS idx_mfa_user_created ON sys_mfa(user_id, created_at DESC);\r\n\r\nCREATE TABLE IF NOT EXISTS sys_password_reset(\r\n    id BIGSERIAL PRIMARY KEY,\r\n    user_id INT NOT NULL REFERENCES org_users(user_id) ON DELETE CASCADE,\r\n    code_hash VARCHAR(255) NOT NULL,\r\n    created_at TIMESTAMP NOT NULL,\r\n    expires_at TIMESTAMP NOT NULL,\r\n    attempts INT NOT NULL DEFAULT 0,\r\n    used_at TIMESTAMP\r\n);\r\n\r\nCREATE INDEX IF NOT EXISTS idx_reset_user_created\r\n    ON sys_password_reset(user_id, created_at DESC);\r\n\r\n-- Aceite dos Termos de Uso e da Política de Privacidade (uma linha por versão aceita)\r\nCREATE TABLE IF NOT EXISTS sys_terms_acceptance(\r\n    id BIGSERIAL PRIMARY KEY,\r\n    user_id INT NOT NULL REFERENCES org_users(user_id) ON DELETE CASCADE,\r\n    terms_version VARCHAR(20) NOT NULL,\r\n    privacy_version VARCHAR(20) NOT NULL,\r\n    accepted_at TIMESTAMP NOT NULL,\r\n    UNIQUE (user_id, terms_version, privacy_version)\r\n);\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/resources/schema.sql b/src/main/resources/schema.sql
+--- a/src/main/resources/schema.sql	(revision 4d2d57409bfaddc30c0ae761865b0a88b945bfa8)
++++ b/src/main/resources/schema.sql	(date 1793833202986)
+@@ -50,7 +50,8 @@
+     email VARCHAR(40) NOT NULL UNIQUE,
+     password VARCHAR(255) NOT NULL,
+     role_code VARCHAR(30) REFERENCES sys_roles(role_code),
+-    status BOOLEAN NOT NULL DEFAULT TRUE
++    status BOOLEAN NOT NULL DEFAULT TRUE,
++    must_change_password BOOLEAN NOT NULL DEFAULT FALSE;
+     );
+ 
+ CREATE TABLE IF NOT EXISTS sys_permissions(
+Index: src/main/java/searchoteca/security/CustomUserDetails.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package searchoteca.security;\r\n\r\nimport org.springframework.security.core.GrantedAuthority;\r\nimport org.springframework.security.core.authority.SimpleGrantedAuthority;\r\nimport org.springframework.security.core.userdetails.UserDetails;\r\nimport searchoteca.model.UserModel;\r\n\r\nimport java.util.Collection;\r\nimport java.util.List;\r\n\r\npublic class CustomUserDetails implements UserDetails{\r\n    private final UserModel user;\r\n    private final List<GrantedAuthority> permissions;\r\n\r\n    public CustomUserDetails(UserModel user, List<String> permissionCode, boolean isRoot) {\r\n        this.user = user;\r\n        this.permissions = permissionCode.stream()\r\n                .map(SimpleGrantedAuthority:: new)\r\n                .collect(java.util.stream.Collectors.toList());\r\n        \r\n        this.permissions.add(new SimpleGrantedAuthority(\"ROLE_\" + user.getRole_code().toUpperCase()));\r\n        if(isRoot) {\r\n            this.permissions.add(new SimpleGrantedAuthority(\"ROLE_ROOT\"));\r\n        }\r\n    }\r\n\r\n    public Long getUserId(){\r\n        return user.getId();\r\n    }\r\n    public String getRoleCode(){\r\n        return user.getRole_code();\r\n    }\r\n    public String getEmail(){\r\n        return user.getEmail();\r\n    }\r\n\r\n    public String getCompleteName(){\r\n        return user.getCompleteName();\r\n    }\r\n\r\n    @Override\r\n    public Collection<? extends GrantedAuthority> getAuthorities(){\r\n        return permissions;\r\n    }\r\n\r\n    @Override\r\n    public String getPassword(){\r\n        return user.getPassword();\r\n    }\r\n\r\n    @Override\r\n    public String getUsername(){\r\n        return user.getUsername();\r\n    }\r\n\r\n    @Override\r\n    public boolean isEnabled(){\r\n        return user.getStatus();\r\n    }\r\n\r\n    @Override\r\n    public boolean isAccountNonLocked(){\r\n        return user.getStatus();\r\n    }\r\n\r\n    @Override\r\n    public boolean isAccountNonExpired(){\r\n        return true;\r\n    }\r\n\r\n    @Override\r\n    public boolean isCredentialsNonExpired(){\r\n        return true;\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/searchoteca/security/CustomUserDetails.java b/src/main/java/searchoteca/security/CustomUserDetails.java
+--- a/src/main/java/searchoteca/security/CustomUserDetails.java	(revision 4d2d57409bfaddc30c0ae761865b0a88b945bfa8)
++++ b/src/main/java/searchoteca/security/CustomUserDetails.java	(date 1793833202986)
+@@ -33,10 +33,12 @@
+     public String getEmail(){
+         return user.getEmail();
+     }
+-
+     public String getCompleteName(){
+         return user.getCompleteName();
+     }
++    public Boolean mustChangePassword(){
++        return Boolean.TRUE.equals(user.getMust_change_password());
++    }
+ 
+     @Override
+     public Collection<? extends GrantedAuthority> getAuthorities(){
+Index: src/main/java/searchoteca/model/UserModel.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package searchoteca.model;\r\n\r\nimport lombok.Getter;\r\nimport lombok.Setter;\r\nimport org.springframework.data.annotation.Id;\r\nimport org.springframework.data.relational.core.mapping.Table;\r\nimport org.springframework.data.relational.core.mapping.Column;\r\n\r\n@Getter\r\n@Setter\r\n@Table(name = \"org_users\")\r\npublic class UserModel {\r\n    @Id\r\n    @Column(\"user_id\")\r\n    private Long userId;\r\n    @Column(\"custom_id\")\r\n    private String customId;\r\n\r\n    private String username;\r\n    private String completeName;\r\n    private String email;\r\n    private String password;\r\n    private String role_code;\r\n    private Boolean status;\r\n\r\n    public UserModel() {}\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/searchoteca/model/UserModel.java b/src/main/java/searchoteca/model/UserModel.java
+--- a/src/main/java/searchoteca/model/UserModel.java	(revision 4d2d57409bfaddc30c0ae761865b0a88b945bfa8)
++++ b/src/main/java/searchoteca/model/UserModel.java	(date 1793833202986)
+@@ -22,6 +22,7 @@
+     private String password;
+     private String role_code;
+     private Boolean status;
++    private Boolean must_change_password;
+ 
+     public UserModel() {}
+ 
+Index: src/main/java/searchoteca/service/users/StudentService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/searchoteca/service/users/StudentService.java b/src/main/java/searchoteca/service/users/StudentService.java
+new file mode 100644
+--- /dev/null	(date 1793833202986)
++++ b/src/main/java/searchoteca/service/users/StudentService.java	(date 1793833202986)
+@@ -0,0 +1,47 @@
++package searchoteca.service.users;
++
++import org.springframework.security.crypto.password.PasswordEncoder;
++import org.springframework.stereotype.Service;
++import org.springframework.transaction.annotation.Transactional;
++import searchoteca.DTO.users.student.StudentRequest;
++import searchoteca.model.StudentModel;
++import searchoteca.model.UserModel;
++import searchoteca.repository.users.StudentRepository;
++import searchoteca.repository.users.UserRepository;
++
++import java.time.LocalDateTime;
++
++@Service
++public class StudentService {
++    private final StudentRepository studentRepository;
++    private final UserRepository userRepository;
++    private final PasswordEncoder passwordEncoder;
++
++    public StudentService(StudentRepository studentRepository, PasswordEncoder passwordEncoder, UserRepository userRepository) {
++        this.studentRepository = studentRepository;
++        this.passwordEncoder = passwordEncoder;
++        this.userRepository = userRepository;
++    }
++
++    @Transactional
++    public StudentModel create(StudentRequest request) {
++        UserModel basicUser = new UserModel();
++        basicUser.setUsername(request.username());
++        basicUser.setCompleteName(request.completeName());
++        basicUser.setEmail(request.email());
++        basicUser.setPassword(passwordEncoder.encode(request.password()));
++        basicUser.setRole_code("students");
++        basicUser.setStatus(true);
++        basicUser.setMust_change_password(true);
++
++        basicUser = userRepository.save(basicUser);
++
++        StudentModel student = new StudentModel();
++        student.setUserId(basicUser.getUserId());
++        student.setRa(request.ra());
++        student.setPhone(request.phone());
++        student.setLastActivity(LocalDateTime.now());
++
++        return studentRepository.save(student);
++    }
++}
+diff --git a/logs/searchoteca.log b/logs/searchoteca.log
+deleted file mode 100644

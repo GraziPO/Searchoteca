@@ -1,0 +1,33 @@
+Index: .gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>.env\r\n*.iml\r\ntarget/\r\n<<<<<<< Updated upstream\r\n.idea/\r\n=======\r\n.idea/\r\nlogs/\r\nlogs/searchoteca.log\r\n/logs\r\nlogs/searchoteca.log\r\nlogs/searchoteca.log\r\n/logs\r\nlogs/searchoteca.log\r\n/logs\r\n>>>>>>> Stashed changes\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.gitignore b/.gitignore
+--- a/.gitignore	(revision 4d2d57409bfaddc30c0ae761865b0a88b945bfa8)
++++ b/.gitignore	(date 1793833224096)
+@@ -14,3 +14,4 @@
+ logs/searchoteca.log
+ /logs
+ >>>>>>> Stashed changes
++*.log
+Index: src/main/java/searchoteca/service/UserService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package searchoteca.service;\r\n\r\nimport org.springframework.security.crypto.password.PasswordEncoder;\r\nimport org.springframework.stereotype.Service;\r\nimport searchoteca.model.UserModel;\r\nimport searchoteca.repository.UserRepository;\r\nimport searchoteca.resetPassword.PasswordPolicy;\r\n\r\nimport java.util.List;\r\n\r\n@Service\r\npublic class UserService {\r\n\r\n    private final UserRepository userRepository;\r\n    private final PasswordEncoder passwordEncoder;\r\n    private final PasswordPolicy passwordPolicy;\r\n\r\n    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, PasswordPolicy passwordPolicy) {\r\n        this.userRepository = userRepository;\r\n        this.passwordEncoder = passwordEncoder;\r\n        this.passwordPolicy = passwordPolicy;\r\n    }\r\n\r\n    //====== métodos CRUD padrão =======\r\n\r\n    public UserModel create(UserModel user){\r\n        passwordPolicy.validatePassword(user.getPassword());\r\n        user.setPassword(passwordEncoder.encode(user.getPassword()));\r\n        user.setStatus(true);\r\n        return userRepository.save(user);\r\n    }\r\n\r\n    public List<UserModel> findAll(){\r\n        return (List<UserModel>)userRepository.findAll();\r\n    }\r\n\r\n    public UserModel findByUsername(String username){\r\n        return userRepository.findByUsername(username);\r\n    }\r\n\r\n    public UserModel update(String username, UserModel user){\r\n        UserModel up_user = userRepository.findByUsername(username);\r\n        up_user.setUsername(username);\r\n        up_user.setCompleteName(user.getCompleteName());\r\n        up_user.setEmail(user.getEmail());\r\n        up_user.setRole_code(user.getRole_code());\r\n\r\n        if (user.getPassword() != null && !user.getPassword().isBlank()) {\r\n            passwordPolicy.validatePassword(user.getPassword());\r\n            up_user.setPassword(passwordEncoder.encode(user.getPassword()));\r\n        }\r\n        return userRepository.save(up_user);\r\n    }\r\n\r\n    public void activate (String username){\r\n        UserModel user = userRepository.findByUsername(username);\r\n        user.setStatus(true);\r\n        userRepository.save(user);\r\n    }\r\n    public void deactivate(String username){\r\n        UserModel user = userRepository.findByUsername(username);\r\n        user.setStatus(false);\r\n        userRepository.save(user);\r\n    }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/searchoteca/service/UserService.java b/src/main/java/searchoteca/service/UserService.java
+--- a/src/main/java/searchoteca/service/UserService.java	(revision 4d2d57409bfaddc30c0ae761865b0a88b945bfa8)
++++ b/src/main/java/searchoteca/service/UserService.java	(date 1793833202986)
+@@ -27,6 +27,7 @@
+         passwordPolicy.validatePassword(user.getPassword());
+         user.setPassword(passwordEncoder.encode(user.getPassword()));
+         user.setStatus(true);
++        user.setMust_change_password(true);
+         return userRepository.save(user);
+     }
+ 

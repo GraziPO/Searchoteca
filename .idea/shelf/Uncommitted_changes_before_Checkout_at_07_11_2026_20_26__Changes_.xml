@@ -1,0 +1,17 @@
+<changelist name="Uncommitted_changes_before_Checkout_at_07_11_2026_20_26_[Changes]" date="1794094008596" recycled="true" deleted="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_07_11_2026_20_26_[Changes]/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before Checkout at 07/11/2026 20:26 [Changes]" />
+  <binary>
+    <option name="BEFORE_PATH" value="target/classes/searchoteca/exception/GlobalExceptionHandler.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="target/classes/searchoteca/model/UserModel.class" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="Claude outputs/Searchoteca-WebFrontend-atualizacao.zip" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_07_11_2026_20_26_[Changes]/Searchoteca-WebFrontend-atualizacao.zip" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="target/classes/searchoteca/controller/UserController.class" />
+  </binary>
+</changelist>

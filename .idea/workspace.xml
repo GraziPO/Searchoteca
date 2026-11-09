@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="1daaa145-8aa5-4e40-a263-9fcd9df2d4de" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/controller/archive/BookController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/controller/archive/BookController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/model/LoanItemModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/model/LoanItemModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/model/LoanModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/model/LoanModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/model/StudentModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/model/StudentModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/service/LoanService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/service/LoanService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/service/catalog/BookService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/service/catalog/BookService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/service/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/service/security/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/service/users/StudentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/service/users/StudentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/searchoteca/service/users/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/searchoteca/service/users/UserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/permissions.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/permissions.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/schema.sql" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Enum" />
+        <option value="package-info" />
+        <option value="Class" />
+        <option value="Record" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="INCOMING_COMMITS_CHECK_STRATEGY" value="FETCH" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="Feat/Other-Exits" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="SWAP_SIDES_IN_COMPARE_BRANCHES" value="true" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;GraziPO&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/GraziPO/Searchoteca.git&quot;,
+    &quot;accountId&quot;: &quot;1229a0f3-69b4-4584-a397-f3ab741e0daf&quot;
+  }
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3JhENUWY8VO9md5Fpr8ll85vmmL" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "JUnit.V0ApplicationTests.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Spring Boot.V0Application.executor": "Run",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "Feat/Waiting-Line",
+    "git.auto.fetch.suggestion.counter": "1",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/grazi/OneDrive/Documentos/GitHub/PFC",
+    "node.js.detected.package.jshint": "true",
+    "node.js.selected.package.jshint": "",
+    "nodejs_package_manager_path": "npm",
+    "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "sql.rename.search.for.storage.occurrences": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\grazi\OneDrive\Documentos\GitHub\PFC\src" />
+      <recent name="C:\Users\grazi\OneDrive\Documentos\GitHub\PFC" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\grazi\OneDrive\Documentos\GitHub\PFC\src\test\resources" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="searchoteca.resetPassword" />
+      <recent name="searchoteca.repository" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-a203e0a19954-intellij.indexing.shared.core-IU-262.10968.63" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.10968.63" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1daaa145-8aa5-4e40-a263-9fcd9df2d4de" name="Changes" comment="" />
+      <created>1790104865453</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1790104865453</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="dependencySupport" implementationName="java:org.springframework:spring-core" />
+    <option featureType="dependencySupport" implementationName="java:org.springframework.security:spring-security-core" />
+    <option featureType="dependencySupport" implementationName="java:jakarta.persistence:jakarta.persistence-api" />
+    <option featureType="dependencySupport" implementationName="java:io.projectreactor:reactor-core" />
+    <option featureType="dependencySupport" implementationName="java:org.springframework.data:spring-data-commons" />
+    <option featureType="dependencySupport" implementationName="java:org.springframework.boot:spring-boot" />
+    <option featureType="dependencySupport" implementationName="java:org.springframework:spring-webmvc" />
+    <option featureType="dependencySupport" implementationName="java:org.projectlombok:lombok" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/searchoteca/DTO/dashboard/DashboardKpis.java</url>
+          <line>8</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
