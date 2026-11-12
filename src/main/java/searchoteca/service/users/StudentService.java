@@ -9,6 +9,7 @@ import searchoteca.model.UserModel;
 import searchoteca.repository.users.StudentRepository;
 import searchoteca.repository.users.UserRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -40,7 +41,7 @@ public class StudentService {
         student.setUserId(basicUser.getUserId());
         student.setRa(request.ra());
         student.setPhone(request.phone());
-        student.setLastActivity(LocalDateTime.now());
+        student.setLastActivity(LocalDate.now());
 
         return studentRepository.save(student);
     }

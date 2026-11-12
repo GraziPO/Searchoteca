@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import searchoteca.model.Books.status.ExitType;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -22,7 +23,7 @@ public class ReceiptRepository {
     }
 
     public void insert(long id, String code, ExitType type, Long operatorId, Long loanId,
-                        BigDecimal total, LocalDateTime createdAt, String snapshotJson){
+                       BigDecimal total, LocalDate createdAt, String snapshotJson){
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", id)
                 .addValue("code", code)

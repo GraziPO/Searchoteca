@@ -21,6 +21,7 @@ import searchoteca.repository.archive.LoanItemRepository;
 import searchoteca.repository.archive.LoanRepository;
 import searchoteca.security.CustomUserDetails;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,7 @@ public class LoanService {
     private final CopyRepository copyRepository;
     private final ReceiptService receiptService;
     private final BookRepository bookRepository;
+    private final WaitlistService waitlistService;
 
 
     public LoanService(LoanRepository loanRepository,
@@ -46,7 +48,8 @@ public class LoanService {
                        CopyRepository copyRepository,
                        StudentRepository studentRepository,
                        ReceiptService receiptService,
-                       BookRepository bookRepository) {
+                       BookRepository bookRepository,
+                       WaitlistService waitlistService) {
         this.loanRepository = loanRepository;
         this.loanItemRepository = loanItemRepository;
         this.userRepository = userRepository;
@@ -54,6 +57,7 @@ public class LoanService {
         this.studentRepository = studentRepository;
         this.receiptService = receiptService;
         this.bookRepository = bookRepository;
+        this.waitlistService = waitlistService;
     }
 
     public List<LoanModel> findAll() {
@@ -83,12 +87,13 @@ public class LoanService {
             throw new ResourceConflictException("INforme ao menos um exemplar");
         }
 
+
         LocalDateTime now = LocalDateTime.now();
         LoanModel loan = new LoanModel();
         loan.setStudentId(student.getStudentId());
         loan.setOperatorId(operator.getUserId());
         loan.setLoanDate(now);
-        loan.setDueDate(now.toLocalDate().plusDays(15)); //standard value just for testing. the period may be adjusted by an admin user in later versions.
+        loan.setDueDate(now.plusDays(15)); //standard value just for testing. the period may be adjusted by an admin user in later versions.
         loan.setStatus(LoanStatus.OPEN.name());
 
         loan = loanRepository.save(loan);
@@ -98,8 +103,13 @@ public class LoanService {
         for(Long copyId : request.items()){
             CopyModel copy = copyRepository.findById(copyId)
                     .orElseThrow(()-> new ResourceNotFoundException("Exemplar não existente"));
-            if(!CopyStatus.AVAILABLE.name().equals(copy.getStatus())){
-                throw new ResourceConflictException("Esemplar não disponivel");
+
+            if (CopyStatus.RESERVED.name().equals(copy.getStatus())) {
+                // reservado pela fila de espera: só o aluno dono da reserva pode levar
+                waitlistService.claimReservation(copy, student.getStudentId());
+
+            } else if(!CopyStatus.AVAILABLE.name().equals(copy.getStatus())){
+                throw new ResourceConflictException("Exemplar " + copy.getCopy_custom_code() + " não está disponível");
             }
 
             copy.setStatus(CopyStatus.LOANED.name());
@@ -111,6 +121,8 @@ public class LoanService {
             item.setLoanId(loan.getLoanId());
             item.setCopyId(copy.getCopyId());
             loanItemRepository.save(item);
+
+            waitlistService.closeEntriesAfterLoan(student.getStudentId(), loaned);
         }
 
         Map<String, BookModel> books = bookRepository.findByIsbnIn(
@@ -176,15 +188,16 @@ public class LoanService {
     }
 
 
+    // Fecha o item e libera o exemplar: vai para o primeiro da fila de espera ou fica disponível.
     private void releaseItem(LoanItemModel item, Long operatorId, LocalDateTime now){
         CopyModel copy = copyRepository.findById(item.getCopyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Exemplar não existente"));
-        copy.setStatus(CopyStatus.AVAILABLE.name());
-        copyRepository.save(copy);
 
         item.setReturned_to(operatorId);
         item.setReturned_at(now);
         loanItemRepository.save(item);
+
+        waitlistService.releaseCopy(copy);   // antes: copy.setStatus(AVAILABLE); save(copy)
     }
 
     @Transactional

@@ -47,7 +47,8 @@ INSERT INTO sys_permissions (permission_code, resource, action, description) VAL
     ('students:view', 'students', 'view', 'Visualizar aluno'),
 
     ('exits:create', 'exits', 'create', 'Registrar venda, doação ou baixa'),
-    ('receipts:view', 'receipts', 'view', 'Consultar comprovantes')
+    ('receipts:view', 'receipts', 'view', 'Consultar comprovantes'),
+    ('dashboard:view', 'dashboard', 'view', 'Visualizar dashboard administrativo')
 ON CONFLICT(permission_code) DO NOTHING;
 
 -- ===== seed: role x permission =====
@@ -97,7 +98,7 @@ INSERT INTO sys_role_permissions (role_code, permission_code) VALUES
 
     ('students', 'loans:view_own'),
 
-    ('dashboard:view', 'dashboard', 'view', 'Visualizar dashboard administrativo')
+    ('dashboard', 'dashboard:view')
     ON CONFLICT DO NOTHING;
 
 -- ===== seed: usuário root inicial (bootstrap) =====

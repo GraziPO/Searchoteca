@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
 import searchoteca.mfa.EmailMasker;
-import searchoteca.mfa.EmailService;
+import searchoteca.service.EmailService;
 import searchoteca.mfa.MfaException;
 import searchoteca.model.UserModel;
 import searchoteca.repository.users.UserRepository;

@@ -17,6 +17,7 @@ import searchoteca.model.UserModel;
 import searchoteca.security.CustomUserDetails;
 import searchoteca.security.CustomUserDetailsService;
 import searchoteca.security.JWTService;
+import searchoteca.service.EmailService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,7 +46,8 @@ class MFAServiceTest {
 
     @Mock CodeRepository codeRepository;
     @Mock PasswordEncoder passwordEncoder;
-    @Mock EmailService emailService;
+    @Mock
+    EmailService emailService;
     @Mock JWTService jwtService;
     @Mock CustomUserDetailsService userDetailsService;
     @Mock AuditLogService auditLogService;

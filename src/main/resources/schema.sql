@@ -170,3 +170,26 @@ CREATE TABLE IF NOT EXISTS org_receipt_items(
     unit_price NUMERIC(10,2),
     PRIMARY KEY (receipt_id, copy_id)
 );
+
+CREATE TABLE IF NOT EXISTS org_waitlist(
+    waitlist_id SERIAL PRIMARY KEY,
+    isbn VARCHAR(15) NOT NULL REFERENCES org_books(isbn),
+    student_id INT NOT NULL REFERENCES org_students(student_id),
+    status VARCHAR(20) NOT NULL DEFAULT 'WAITING',
+    created_at TIMESTAMP NOT NULL,      -- ordem de chegada
+    copy_id INT REFERENCES org_copies(copy_id),  -- exemplar reservado (quando NOTIFIED)
+    notified_at TIMESTAMP,
+    expires_at TIMESTAMP,
+    closed_at TIMESTAMP
+    );
+
+-- o mesmo aluno não entra duas vezes na fila do mesmo título
+CREATE UNIQUE INDEX IF NOT EXISTS waitlist_one_active_per_student
+    ON org_waitlist(isbn, student_id) WHERE status IN ('WAITING', 'NOTIFIED');
+
+-- um exemplar só pode estar reservado para uma pessoa
+CREATE UNIQUE INDEX IF NOT EXISTS waitlist_one_active_per_copy
+    ON org_waitlist(copy_id) WHERE status = 'NOTIFIED';
+
+CREATE INDEX IF NOT EXISTS waitlist_queue   ON org_waitlist(isbn, status, created_at);
+CREATE INDEX IF NOT EXISTS waitlist_expires ON org_waitlist(expires_at) WHERE status = 'NOTIFIED';
