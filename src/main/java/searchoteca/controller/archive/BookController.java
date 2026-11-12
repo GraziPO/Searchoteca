@@ -23,14 +23,14 @@ public class BookController {
         this.auditLogService=auditLogService;
     }
 
-    @PreAuthorize("hasAuthorization('org_books:view')")
+    @PreAuthorize("hasAuthority('org_books:view')")
     @GetMapping
     public ResponseEntity<?> getAll(){
         auditLogService.record(AuditAction.ACCESS,"All books");
         return ResponseEntity.ok(bookService.findAll());
     }
 
-    @PreAuthorize("hasAuthorization('org_books:view')")
+    @PreAuthorize("hasAuthority('org_books:view')")
     @GetMapping("/{isbn}")
     public ResponseEntity<?> getByIsbn(@PathVariable String isbn){
         BookModel book = bookService.findByIsbn(isbn);

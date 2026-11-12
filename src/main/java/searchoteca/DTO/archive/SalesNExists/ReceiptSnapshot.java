@@ -12,10 +12,10 @@ import java.util.List;
 public record ReceiptSnapshot(
         String code,
         ExitType exitType,
-        LocalDate issuedAt,
+        LocalDateTime issuedAt,
         OperatorInfo operator,
         StudentInfo student,
-        LocalDateTime dueDate,
+        LocalDate dueDate,
         List<ReceiptItem> items,
         BigDecimal total,
         String notes

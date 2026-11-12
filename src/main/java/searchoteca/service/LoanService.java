@@ -93,7 +93,7 @@ public class LoanService {
         loan.setStudentId(student.getStudentId());
         loan.setOperatorId(operator.getUserId());
         loan.setLoanDate(now);
-        loan.setDueDate(now.plusDays(15)); //standard value just for testing. the period may be adjusted by an admin user in later versions.
+        loan.setDueDate(now.plusDays(15).toLocalDate()); //standard value just for testing. the period may be adjusted by an admin user in later versions.
         loan.setStatus(LoanStatus.OPEN.name());
 
         loan = loanRepository.save(loan);
@@ -121,9 +121,9 @@ public class LoanService {
             item.setLoanId(loan.getLoanId());
             item.setCopyId(copy.getCopyId());
             loanItemRepository.save(item);
-
-            waitlistService.closeEntriesAfterLoan(student.getStudentId(), loaned);
         }
+
+        waitlistService.closeEntriesAfterLoan(student.getStudentId(), loaned);
 
         Map<String, BookModel> books = bookRepository.findByIsbnIn(
                         loaned.stream().map(CopyModel::getIsbn).collect(Collectors.toSet()))
@@ -140,11 +140,9 @@ public class LoanService {
                 new StudentInfo(student.getRa(), studentUser.getCompleteName()),
                 loan.getDueDate(), loan.getLoanId(), items, null);
 
-        student.setLastActivity(now);
+        student.setLastActivity(now.toLocalDate());
 
         studentRepository.save(student);
-
-        receiptService.issue(ExitType.LOAN, operator, null, loan.getDueDate(), loan.getLoanId(), null, null);
 
         return loan;
     }
@@ -181,7 +179,7 @@ public class LoanService {
 
         //set student last activity
         StudentModel student = studentRepository.findByStudentId(loan.getStudentId());
-        student.setLastActivity(date);
+        student.setLastActivity(date.toLocalDate());
 
         studentRepository.save(student);
         return loanRepository.save(loan);
@@ -222,7 +220,7 @@ public class LoanService {
 
         StudentModel student = studentRepository.findByStudentId(loan.getStudentId());
         if(student != null){
-            student.setLastActivity(now);
+            student.setLastActivity(now.toLocalDate());
             studentRepository.save(student);
         }
         return loanRepository.save(loan);

@@ -1,6 +1,7 @@
 package searchoteca.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -73,5 +74,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ErrorResponse.of(409, "Conflict",
                         "Operação não permitida: o registro já existe ou está ligado a outros dados."));
+    }
+
+    // Erro 500 genérico
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception ex){
+        log.warn("Erro ao processar: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponse.of(500, "Internor Server Error",
+                        "Algo deu errado. Tente novamente."));
     }
 }

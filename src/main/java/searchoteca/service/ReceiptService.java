@@ -34,8 +34,8 @@ public class ReceiptService {
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
-    public ReceiptSnapshot issue(ExitType type, CustomUserDetails operator, StudentInfo student, LocalDateTime dueDate, Long loanId, List<ReceiptItem> items, String notes) {
-        LocalDate now  = LocalDate.now();
+    public ReceiptSnapshot issue(ExitType type, CustomUserDetails operator, StudentInfo student, LocalDate dueDate, Long loanId, List<ReceiptItem> items, String notes) {
+        LocalDateTime now  = LocalDateTime.now();
         long id = receiptRepository.nextId();
         String code = "CMP-" + now.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + String.format("%06d", id);
 

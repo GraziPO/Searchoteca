@@ -23,7 +23,7 @@ public class ReceiptRepository {
     }
 
     public void insert(long id, String code, ExitType type, Long operatorId, Long loanId,
-                       BigDecimal total, LocalDate createdAt, String snapshotJson){
+                       BigDecimal total, LocalDateTime createdAt, String snapshotJson){
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", id)
                 .addValue("code", code)

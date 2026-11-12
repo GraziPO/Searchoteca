@@ -17,7 +17,7 @@ public class LoanModel {
     @Column("loan_id")
     private Long loanId;
     private LocalDateTime loanDate;
-    private LocalDateTime dueDate;
+    private LocalDate dueDate;
     private Long operatorId;
     private Long studentId;
     private String status;

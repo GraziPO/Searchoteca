@@ -11,7 +11,7 @@ public class WaitlistScheduler {
 
     private final WaitlistService waitlistService;
 
-    private static final Logger log = LoggerFactory.getLogger(WaitlistNotifier.class);
+    private static final Logger log = LoggerFactory.getLogger(WaitlistScheduler.class);
 
     public  WaitlistScheduler(WaitlistService waitlistService) {
         this.waitlistService = waitlistService;

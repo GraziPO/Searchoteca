@@ -39,13 +39,11 @@ public class BookService {
         return books;   // lista vazia é resposta válida, não erro
     }
 
-    @PreAuthorize("hasAuthorization('org_books:create')")
     public BookModel create(BookModel book){
         book.setSalePrice(null);
         return bookRepository.save(book);
     }
 
-    @PreAuthorize("hasAuthorization('org_books:edit')")
     public BookModel update (String isbn, BookModel bookInfo){
         BookModel book = bookRepository.findByIsbn(isbn);
 
@@ -59,7 +57,6 @@ public class BookService {
         book.setGenre(bookInfo.getGenre());
         return bookRepository.save(book);
     }
-    @PreAuthorize("hasAuthorization('org_books:delete')")
     public void delete (String isbn){
         BookModel book = bookRepository.findByIsbn(isbn);
         if (book == null) {

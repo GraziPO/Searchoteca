@@ -23,7 +23,7 @@ public interface CopyRepository extends CrudRepository<CopyModel,Long> {
 
     long countByIsbn(String isbn);
 
-    @Query("SELECT * FROM org_copies WHERE copy_custom_code IN (:codes")
+    @Query("SELECT * FROM org_copies WHERE copy_custom_code IN (:codes)")
     List<CopyModel> findByCustomCodes(@Param("codes") Collection<String> codes);
 }
 

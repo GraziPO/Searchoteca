@@ -20,7 +20,7 @@ public class StudentModel {
     private Long userId;
     private String ra;
     private String phone;
-    private LocalDateTime lastActivity;
+    private LocalDate lastActivity;
 
     public StudentModel() { }
 
