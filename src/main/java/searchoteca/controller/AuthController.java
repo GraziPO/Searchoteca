@@ -21,6 +21,7 @@ import searchoteca.resetPassword.PasswordChangeService;
 import searchoteca.resetPassword.PasswordResetService;
 import searchoteca.security.CustomUserDetails;
 import searchoteca.security.JWTService;
+import searchoteca.security.LoginAttemptService;
 
 import java.util.Map;
 
@@ -43,6 +44,7 @@ public class AuthController {
     private final PasswordResetService passwordResetService;
     private final PasswordChangeService passwordChangeService;
     private final long passwordChangeTokenTtl; //tirar essa variavel daqui e manter dentro do metodo depois
+    private final LoginAttemptService loginAttemptService;
 
     public AuthController(AuthenticationManager authenticationManager,
                           JWTService jwtService,
@@ -52,7 +54,8 @@ public class AuthController {
                           @Value("${mfa.enabled:true}") boolean mfaEnabled,
                           @Value("${password-change.token-ttl-ms}") long passwordChangeTokenTtl,
                           PasswordResetService passwordResetService,
-                          PasswordChangeService passwordChangeService) {
+                          PasswordChangeService passwordChangeService,
+                          LoginAttemptService loginAttemptService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.auditLogService = auditLogService;
@@ -62,11 +65,15 @@ public class AuthController {
         this.passwordResetService = passwordResetService;
         this.passwordChangeTokenTtl = passwordChangeTokenTtl;
         this.passwordChangeService = passwordChangeService;
+        this.loginAttemptService = loginAttemptService;
     }
 
     /** Etapa 1: confere usuário e senha. */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        // bloqueado recusa antes de conferir a senha (429)
+        loginAttemptService.checkNotLocked(loginRequest.username());
+
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
@@ -74,9 +81,12 @@ public class AuthController {
             );
         } catch (AuthenticationException ex) {
             auditLogService.save(loginRequest.username(), AuditAction.LOGIN_FAILURE, null);
+            loginAttemptService.registerFailure(loginRequest.username()); // na 5ª falha, bloqueia (429)
             throw ex; // GlobalExceptionHandler -> 401
         }
 
+        // senha certa: as falhas anteriores deixam de contar
+        loginAttemptService.registerSuccess(loginRequest.username());
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
         // Sem aceite da versão atual: para aqui. Nenhum código de MFA é enviado.

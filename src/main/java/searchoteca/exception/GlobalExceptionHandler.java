@@ -1,7 +1,7 @@
 package searchoteca.exception;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -84,4 +84,12 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(500, "Internor Server Error",
                         "Algo deu errado. Tente novamente."));
     }
+
+    @ExceptionHandler(LoginLockedException.class)
+    public ResponseEntity<ErrorResponse> handleLoginLocked(LoginLockedException ex){
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(ErrorResponse.of(429, "Too Many Requests", ex.getMessage()));
+    }
+
 }

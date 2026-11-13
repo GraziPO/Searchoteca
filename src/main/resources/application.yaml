@@ -48,6 +48,11 @@ password-reset:
 password-change:
   token-ttl-ms: 900000
 
+login-attempts:
+  maxAttempts: 5
+  lockMinutes: 5
+  windowMinutes: 15
+
 sales:
   enabled: ${SALES_ENABLED:false}
 

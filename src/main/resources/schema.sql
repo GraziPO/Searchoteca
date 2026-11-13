@@ -193,3 +193,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS waitlist_one_active_per_copy
 
 CREATE INDEX IF NOT EXISTS waitlist_queue   ON org_waitlist(isbn, status, created_at);
 CREATE INDEX IF NOT EXISTS waitlist_expires ON org_waitlist(expires_at) WHERE status = 'NOTIFIED';
+
+CREATE TABLE IF NOT EXISTS sys_login_attempts(
+    username VARCHAR(30) PRIMARY KEY,
+    failed_attempts INT NOT NULL DEFAULT 0,
+    last_failure_at TIMESTAMP NOT NULL,
+    locked_until TIMESTAMP
+);
