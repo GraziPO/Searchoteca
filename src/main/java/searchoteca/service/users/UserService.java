@@ -5,6 +5,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import searchoteca.auditTrail.AuditAction;
+import searchoteca.auditTrail.AuditDiff;
+import searchoteca.auditTrail.AuditLogService;
 import org.springframework.transaction.annotation.Transactional;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
@@ -26,13 +29,16 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final PasswordPolicy passwordPolicy;
     private final AccountLifecycleRepository lifecycleRepository;
+    private final AuditLogService auditLogService;
 
     public UserService(UserRepository userRepository,
                        RoleRepository roleRepository,
                        PasswordEncoder passwordEncoder,
                        PasswordPolicy passwordPolicy,
-                       AccountLifecycleRepository lifecycleRepository) {
+                       AccountLifecycleRepository lifecycleRepository,
+                       AuditLogService auditLogService) {
         this.lifecycleRepository = lifecycleRepository;
+        this.auditLogService = auditLogService;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -79,6 +85,15 @@ public class UserService {
         // mexer num root, ou transformar alguém em root, só o root pode
         requireRootCallerIf(isRootRole(up_user.getRole_code()) || (newRole != null && newRole.isRoot()));
 
+        boolean passwordChanged = user.getPassword() != null && !user.getPassword().isBlank();
+
+        // antes de alterar: o que está no banco x o que chegou (RF22). A senha só aparece como "alterada".
+        AuditDiff diff = new AuditDiff()
+                .field("nome", up_user.getCompleteName(), user.getCompleteName())
+                .field("e-mail", up_user.getEmail(), user.getEmail())
+                .field("perfil", up_user.getRole_code(), newRole == null ? up_user.getRole_code() : newRole.getRoleCode())
+                .secret("senha", passwordChanged);
+
         up_user.setUsername(username);
         up_user.setCompleteName(user.getCompleteName());
         up_user.setEmail(user.getEmail());
@@ -86,13 +101,16 @@ public class UserService {
             up_user.setRole_code(newRole.getRoleCode());
         }
         // senha definida pelo admin: só se veio preenchida, e grava em up_user (o usuário do banco)
-        if (user.getPassword() != null && !user.getPassword().isBlank()) {
+        if (passwordChanged) {
             passwordPolicy.validatePassword(user.getPassword());
             up_user.setPassword(passwordEncoder.encode(user.getPassword()));
             up_user.setPasswordChangedAt(LocalDateTime.now());   // derruba as sessões abertas (RF18)
             up_user.setMust_change_password(true);               // a pessoa troca no próximo acesso
         }
-        return userRepository.save(up_user);
+        UserModel saved = userRepository.save(up_user);
+
+        auditLogService.record(AuditAction.UPDATE, "usuário " + username + ": " + diff);
+        return saved;
     }
 
     // ========================================== ATIVAÇÃO / DESATIVACAO ======================================

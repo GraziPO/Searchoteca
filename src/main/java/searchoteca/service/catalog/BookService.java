@@ -50,12 +50,22 @@ public class BookService {
         if (book == null){
             throw new ResourceNotFoundException("registro não encontrado");
         }
+        AuditDiff diff = new AuditDiff()
+                .field("título", book.getTitle(), bookInfo.getTitle())
+                .field("autor", book.getAuthor(), bookInfo.getAuthor())
+                .field("ano", book.getRel_year(), bookInfo.getRel_year())
+                .field("editora", book.getPublisher(), bookInfo.getPublisher())
+                .field("gênero", book.getGenre(), bookInfo.getGenre());
+
         book.setTitle(bookInfo.getTitle());
         book.setAuthor(bookInfo.getAuthor());
         book.setRel_year((bookInfo.getRel_year()));
         book.setPublisher(bookInfo.getPublisher());
         book.setGenre(bookInfo.getGenre());
-        return bookRepository.save(book);
+        BookModel saved = bookRepository.save(book);
+
+        auditLogService.record(AuditAction.UPDATE, "livro " + isbn + ": " + diff);
+        return saved;
     }
     public void delete (String isbn){
         BookModel book = bookRepository.findByIsbn(isbn);
@@ -95,7 +105,7 @@ public class BookService {
 
         book.setSalePrice(normalized);
         bookRepository.save(book);
-        auditLogService.record(AuditAction.UPDATE,"preço do livro"+ isbn + ": " + diff);
+        auditLogService.record(AuditAction.UPDATE,"preço do livro " + isbn + ": " + diff);
         return book;
     }
 }

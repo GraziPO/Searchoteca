@@ -52,14 +52,15 @@ public class UserController {
     @PreAuthorize("hasAuthority('users:create')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody UserModel user) {
-        auditLogService.record(AuditAction.CREATE, "users" + user.getUsername());
-        return ResponseEntity.ok(userService.create(user));
+        UserModel created = userService.create(user);
+        auditLogService.record(AuditAction.CREATE, "usuário " + created.getUsername() + " (perfil " + created.getRole_code() + ")");
+        return ResponseEntity.ok(created);
     }
 
     @PreAuthorize("hasAuthority('users:edit')")
     @PutMapping("/{username}")
     public ResponseEntity<?> update(@PathVariable String username, @RequestBody UserModel userInfo) {
-        auditLogService.record(AuditAction.UPDATE, "users" + username);
+        // o registro (com o antes -> depois) é feito no UserService
         return ResponseEntity.ok(userService.update(username, userInfo));
     }
 
@@ -69,7 +70,7 @@ public class UserController {
     @PostMapping("/aluno")
     public ResponseEntity<?> createStudent(@RequestBody StudentRequest studentInfo) {
         studentService.create(studentInfo);
-        auditLogService.record(AuditAction.CREATE, "student" + studentInfo.ra());
+        auditLogService.record(AuditAction.CREATE, "aluno RA " + studentInfo.ra());
         return ResponseEntity.ok().build();
     }
 
@@ -89,7 +90,7 @@ public class UserController {
     @PatchMapping("/{username}/status/ativar")
     public ResponseEntity<?> activate(@PathVariable String username) {
         userService.activate(username);
-        auditLogService.record(AuditAction.ACTIVATE_USER, "users" + username);
+        auditLogService.record(AuditAction.ACTIVATE_USER, "usuário " + username);
         return ResponseEntity.ok().build();
     }
 
@@ -97,7 +98,7 @@ public class UserController {
     @PatchMapping("/{username}/status/desativar")
     public ResponseEntity<?> deactivate(@PathVariable String username) {
         userService.deactivate(username);
-        auditLogService.record(AuditAction.DEACTIVATE_USER, "users" + username);
+        auditLogService.record(AuditAction.DEACTIVATE_USER, "usuário " + username);
         return ResponseEntity.ok().build();
     }
 }

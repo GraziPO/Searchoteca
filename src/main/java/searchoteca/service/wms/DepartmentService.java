@@ -1,6 +1,9 @@
 package searchoteca.service.wms;
 
 import org.springframework.stereotype.Service;
+import searchoteca.auditTrail.AuditAction;
+import searchoteca.auditTrail.AuditDiff;
+import searchoteca.auditTrail.AuditLogService;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.Books.BookModel;
@@ -21,12 +24,15 @@ public class DepartmentService {
     private final BookRepository bookRepository;
     private final CopyRepository copyRepository;
     private final LocationRepository locationRepository;
-    
-    public DepartmentService(DepartmentRepository departmentRepository, BookRepository bookRepository, LocationRepository locationRepository,  CopyRepository copyRepository) {
+    private final AuditLogService auditLogService;
+
+    public DepartmentService(DepartmentRepository departmentRepository, BookRepository bookRepository, LocationRepository locationRepository,
+                             CopyRepository copyRepository, AuditLogService auditLogService) {
         this.departmentRepository = departmentRepository;
         this.bookRepository = bookRepository;
         this.locationRepository = locationRepository;
         this.copyRepository = copyRepository;
+        this.auditLogService = auditLogService;
     }
 
 
@@ -54,9 +60,17 @@ public class DepartmentService {
         if (department ==null){
             throw new ResourceNotFoundException("Departamento inexistente");
         }
+        // o diff é montado antes de alterar: compara o que está no banco com o que chegou (RF22)
+        AuditDiff diff = new AuditDiff()
+                .field("nome", department.getDepartName(), departInfo.getDepartName())
+                .field("descrição", department.getDepartDesc(), departInfo.getDepartDesc());
+
         department.setDepartName(departInfo.getDepartName());
         department.setDepartDesc(departInfo.getDepartDesc());
-        return departmentRepository.save(department);
+        DepartmentModel saved = departmentRepository.save(department);
+
+        auditLogService.record(AuditAction.UPDATE, "departamento " + departCode + ": " + diff);
+        return saved;
     }
 
 

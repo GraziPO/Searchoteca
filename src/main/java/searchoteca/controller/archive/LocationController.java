@@ -36,22 +36,23 @@ public class LocationController {
     @PreAuthorize("hasAuthority('org_local:create')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody LocationModel location){
-        auditLogService.record(AuditAction.CREATE,"location" + location.getLocalCode());
-        return ResponseEntity.ok(locationService.create(location));
+        LocationModel created = locationService.create(location);
+        auditLogService.record(AuditAction.CREATE, "localização " + created.getLocalCode());
+        return ResponseEntity.ok(created);
     }
 
     @PreAuthorize("hasAuthority('org_local:edit')")
     @PutMapping("/{localCode}")
     public ResponseEntity<?> update(@PathVariable String localCode, @RequestBody LocationModel local){
-        auditLogService.record(AuditAction.UPDATE,"location" + localCode);
+        // o registro (com o antes -> depois) é feito no LocationService
         return ResponseEntity.ok(locationService.update(localCode, local));
     }
 
     @PreAuthorize("hasAuthority('org_local:delete')")
     @DeleteMapping("/{localCode}")
     public ResponseEntity<?> delete(@PathVariable String localCode){
-        auditLogService.record(AuditAction.DELETE,"location" + localCode);
         locationService.delete(localCode);
+        auditLogService.record(AuditAction.DELETE, "localização " + localCode);
         return ResponseEntity.noContent().build();
     }
 

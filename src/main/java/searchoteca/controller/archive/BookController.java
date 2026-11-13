@@ -44,22 +44,23 @@ public class BookController {
     @PreAuthorize("hasAuthority('org_books:create')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody BookModel Book){
-        return ResponseEntity.ok(bookService.create(Book));
+        BookModel created = bookService.create(Book);
+        auditLogService.record(AuditAction.CREATE, "livro " + created.getIsbn());
+        return ResponseEntity.ok(created);
     }
 
     @PreAuthorize("hasAuthority('org_books:edit')")
     @PutMapping("/{isbn}")
     public ResponseEntity<?> update(@PathVariable String isbn, @RequestBody BookModel bookInfo){
-        bookService.update(isbn, bookInfo);
-        auditLogService.record(AuditAction.UPDATE,"org_books" + isbn + " " + bookInfo);
-        return ResponseEntity.ok().build();
+        // o registro (com o antes -> depois) é feito no BookService
+        return ResponseEntity.ok(bookService.update(isbn, bookInfo));
     }
 
     @PreAuthorize("hasAuthority('org_books:delete')")
     @DeleteMapping("/{isbn}")
     public ResponseEntity<?> delete(@PathVariable String isbn) {
         bookService.delete(isbn);
-        auditLogService.record(AuditAction.DELETE,"org_books" + isbn);
+        auditLogService.record(AuditAction.DELETE, "livro " + isbn);
         return ResponseEntity.noContent().build();
     }
 

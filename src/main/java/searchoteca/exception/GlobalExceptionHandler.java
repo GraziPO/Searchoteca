@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import searchoteca.mfa.MfaException;
 import searchoteca.legal.TermsException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -74,6 +75,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(ErrorResponse.of(409, "Conflict",
                         "Operação não permitida: o registro já existe ou está ligado a outros dados."));
+    }
+
+    // Parâmetro com formato errado na URL (ex.: ?de=13/11/2026 em vez de 2026-11-13): 400, e não 500
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleBadParameter(MethodArgumentTypeMismatchException ex){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of(400, "Bad Request",
+                        "Valor inválido para o parâmetro '" + ex.getName() + "'. Datas usam o formato AAAA-MM-DD."));
     }
 
     // Erro 500 genérico
