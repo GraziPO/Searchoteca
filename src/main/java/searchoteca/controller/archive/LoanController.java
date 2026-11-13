@@ -49,7 +49,7 @@ public class LoanController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody LoanRequest request, Authentication auth) {
         CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-        auditLogService.save(user.getUsername(), AuditAction.CREATE,"usuário do tipo "+ user.getRoleCode()+ " criado");
+        auditLogService.save(user.getUsername(), AuditAction.CREATE,"emprestimo criado para RA "+ request.ra());
         return ResponseEntity.ok(loanService.create(request, user));
     }
 
@@ -67,7 +67,7 @@ public class LoanController {
     public ResponseEntity<?> returnItem(@PathVariable Long copyId, Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         LoanModel loan = loanService.returnItem(copyId,user.getUserId());
-        auditLogService.save(user.getUsername(), AuditAction.UPDATE,"registro de empréstimo" + "devovido ao usuario "+ user.getUsername());
+        auditLogService.save(user.getUsername(), AuditAction.UPDATE,"registro de empréstimo" + "devolvido ao usuario "+ user.getUsername());
         return ResponseEntity.ok(loan);
     }
 }

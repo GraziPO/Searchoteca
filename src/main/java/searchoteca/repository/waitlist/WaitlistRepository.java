@@ -44,5 +44,8 @@ public interface WaitlistRepository extends CrudRepository<WaitlistModel, Long> 
 
     @Query("SELECT * FROM org_waitlist WHERE status = 'NOTIFIED' AND expires_at < :now ORDER BY expires_at")
     List<WaitlistModel> findExpired(@Param("now") LocalDateTime now);
-}
 
+    /** Todas as filas ativas de um aluno (usado ao anonimizar a conta). */
+    @Query("SELECT * FROM org_waitlist WHERE student_id = :studentId AND status IN ('WAITING', 'NOTIFIED')")
+    List<WaitlistModel> findActiveByStudent(@Param("studentId") Long studentId);
+}

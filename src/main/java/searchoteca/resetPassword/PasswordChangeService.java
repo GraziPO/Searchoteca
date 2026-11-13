@@ -15,6 +15,8 @@ import searchoteca.security.CustomUserDetails;
 import searchoteca.security.CustomUserDetailsService;
 import searchoteca.security.JWTService;
 
+import java.time.LocalDateTime;
+
 @Service
 public class PasswordChangeService {
     private static final String SESSION_INVALID = "Sessão expirada ou inválida. Faça login novamente.";
@@ -81,6 +83,7 @@ public class PasswordChangeService {
         }
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setMust_change_password(false);
+        user.setPasswordChangedAt(LocalDateTime.now());   // derruba os tokens emitidos antes (RF18)
         userRepository.save(user);
     }
 }

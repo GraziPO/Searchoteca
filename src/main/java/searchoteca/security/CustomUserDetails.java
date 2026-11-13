@@ -36,6 +36,11 @@ public class CustomUserDetails implements UserDetails{
     public String getCompleteName(){
         return user.getCompleteName();
     }
+    /** Última troca de senha (pode ser null em contas antigas). */
+    public java.time.LocalDateTime getPasswordChangedAt(){
+        return user.getPasswordChangedAt();
+    }
+
     public Boolean mustChangePassword(){
         return Boolean.TRUE.equals(user.getMust_change_password());
     }

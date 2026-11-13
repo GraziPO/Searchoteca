@@ -4,6 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import searchoteca.DTO.users.student.StudentRequest;
+import searchoteca.exception.ResourceConflictException;
 import searchoteca.model.StudentModel;
 import searchoteca.model.UserModel;
 import searchoteca.repository.users.StudentRepository;
@@ -30,7 +31,12 @@ public class StudentService {
         basicUser.setUsername(request.username());
         basicUser.setCompleteName(request.completeName());
         basicUser.setEmail(request.email());
-        basicUser.setPassword(passwordEncoder.encode(request.password()));
+
+        if (request.ra() == null || request.ra().isBlank()) {
+            throw new ResourceConflictException("Informe o RA do aluno.");
+        }
+
+        basicUser.setPassword(passwordEncoder.encode(request.ra()));
         basicUser.setRole_code("students");
         basicUser.setStatus(true);
         basicUser.setMust_change_password(true);

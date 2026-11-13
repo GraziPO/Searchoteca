@@ -54,7 +54,10 @@ INSERT INTO sys_permissions (permission_code, resource, action, description) VAL
 
     ('waitlist:join', 'waitlist', 'join', 'Acesso a fila de espera da biblioteca'),
 
-    ('waitlist:view', 'waitlist', 'view', 'Visualiza a fila de espera da biblioteca')
+    ('waitlist:view', 'waitlist', 'view', 'Visualiza a fila de espera da biblioteca'),
+
+    ('account:request', 'account', 'request', 'Pedir desativação da Conta'),
+    ('account_requests:manage', 'account_requests', 'manage', 'Aprova ou Recusa pedido de desativação da Conta')
 ON CONFLICT(permission_code) DO NOTHING;
 
 -- ===== seed: role x permission =====
@@ -103,8 +106,10 @@ INSERT INTO sys_role_permissions (role_code, permission_code) VALUES
     ('loan_op', 'students:view'),
 
     ('students', 'loans:view_own'),
+
     ('students', 'waitlist:join'),
-    ('students','waitlist:view')
+
+    ('students', 'account:request')
     ON CONFLICT DO NOTHING;
 
 -- ===== seed: usuário root inicial (bootstrap) =====

@@ -4,30 +4,34 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
+import searchoteca.exception.LoginLockedException;
 import searchoteca.repository.LoginAttemptRepository;
 
-import static sun.security.krb5.internal.ktab.KeyTab.normalize;
-
+/**
+ * Bloqueio temporário de login (RNF05).
+ * Depois de max-attempts senhas erradas seguidas (padrão 5), o usuário fica bloqueado
+ * por lock-minutes (padrão 5). Durante o bloqueio, nem a senha certa entra.
+ */
 @Service
 public class LoginAttemptService {
-    private LoginAttemptRepository repository;
-    private AuditLogService auditLogService;
+
+    private final LoginAttemptRepository repository;
+    private final AuditLogService auditLogService;
     private final int maxAttempts;
     private final int lockMinutes;
     private final int windowMinutes;
 
     public LoginAttemptService(LoginAttemptRepository repository,
                                AuditLogService auditLogService,
-                               @Value("${login-attempts.maxAttempts}") int maxAttempts,
-                               @Value("${login-attempts.lockMinutes}") int lockMinutes,
-                               @Value("${login-attempts.windowsMinutes}") int windowMinutes) {
+                               @Value("${login-lock.max-attempts:5}") int maxAttempts,
+                               @Value("${login-lock.lock-minutes:5}") int lockMinutes,
+                               @Value("${login-lock.window-minutes:15}") int windowMinutes) {
         this.repository = repository;
         this.auditLogService = auditLogService;
         this.maxAttempts = maxAttempts;
         this.lockMinutes = lockMinutes;
         this.windowMinutes = windowMinutes;
     }
-    // ... campos e construtor, com os valores do application.yaml (padrão 5 tentativas, 5 min, janela de 15 min)
 
     /** Antes de conferir a senha: se estiver bloqueado, recusa sem nem testar. */
     public void checkNotLocked(String rawUsername) {
@@ -44,20 +48,7 @@ public class LoginAttemptService {
     public void registerFailure(String rawUsername) {
         String username = normalize(rawUsername);
         if (username == null) return;
-        public class LoginLockedException extends RuntimeException {
-            private final long retryAfterSeconds;
 
-            public LoginLockedException(long retryAfterSeconds) {
-                super(message(retryAfterSeconds));
-                this.retryAfterSeconds = retryAfterSeconds;
-            }
-
-            private static String message(long seconds) {
-                long minutes = Math.max(1, (seconds + 59) / 60);   // arredonda para cima: 61 s -> 2 min
-                return "Muitas tentativas de login sem sucesso. Tente novamente em "
-                        + minutes + (minutes == 1 ? " minuto." : " minutos.");
-            }
-        }
         int attempts = repository.registerFailure(username, windowMinutes);
         if (attempts >= maxAttempts) {
             repository.lock(username, lockMinutes);
@@ -74,5 +65,19 @@ public class LoginAttemptService {
 
         repository.clear(username);
     }
-}
 
+    /** Desbloqueio antes do prazo, por um administrador. */
+    public void unlock(String rawUsername) {
+        String username = normalize(rawUsername);
+        if (username == null) return;
+
+        repository.clear(username);
+    }
+
+    /** Mesmo tratamento do AuditLogService: sem espaços nas pontas e no tamanho da coluna (30). */
+    private static String normalize(String username) {
+        if (username == null || username.isBlank()) return null;
+        String u = username.trim();
+        return u.length() > 30 ? u.substring(0, 30) : u;
+    }
+}

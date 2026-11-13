@@ -254,6 +254,23 @@ public class WaitlistService {
                 canJoin);
     }
 
+    /**
+     * Tira o aluno de todas as filas (conta desativada ou anonimizada).
+     * Reservas que ele tinha passam para o próximo da fila.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public int cancelAllForStudent(Long studentId) {
+        List<WaitlistModel> entries = waitlistRepository.findActiveByStudent(studentId);
+        for (WaitlistModel entry : entries) {
+            Long reservedCopy = WaitlistStatus.NOTIFIED.name().equals(entry.getStatus()) ? entry.getCopyId() : null;
+            close(entry, WaitlistStatus.CANCELLED);
+            if (reservedCopy != null) {
+                copyRepository.findById(reservedCopy).ifPresent(this::releaseCopy);
+            }
+        }
+        return entries.size();
+    }
+
     private void close(WaitlistModel entry, WaitlistStatus status) {
         entry.setStatus(status.name());
         entry.setClosedAt(LocalDateTime.now());

@@ -58,6 +58,8 @@ CREATE TABLE IF NOT EXISTS org_users(
     must_change_password BOOLEAN NOT NULL DEFAULT FALSE
     );
 
+ALTER TABLE org_users ADD COLUMN IF NOT EXISTS password_changed_at TIMESTAMP;
+
 CREATE TABLE IF NOT EXISTS sys_permissions(
     permission_id SERIAL PRIMARY KEY,
     permission_code VARCHAR(50) UNIQUE NOT NULL,  -- ex: 'org_books:create'
@@ -200,3 +202,24 @@ CREATE TABLE IF NOT EXISTS sys_login_attempts(
     last_failure_at TIMESTAMP NOT NULL,
     locked_until TIMESTAMP
 );
+
+ALTER TABLE org_students ADD COLUMN IF NOT EXISTS deactivated_at      TIMESTAMP;
+ALTER TABLE org_students ADD COLUMN IF NOT EXISTS deactivation_reason VARCHAR(20);  -- INACTIVITY | REQUEST
+ALTER TABLE org_students ADD COLUMN IF NOT EXISTS anonymized_at       TIMESTAMP;
+
+-- Pedidos do aluno para desativar ou reativar a conta. Só o root decide.
+CREATE TABLE IF NOT EXISTS sys_account_requests(
+                                                   request_id    SERIAL PRIMARY KEY,
+                                                   user_id       INT NOT NULL REFERENCES org_users(user_id),
+    type          VARCHAR(20) NOT NULL,                    -- DEACTIVATE | REACTIVATE
+    status        VARCHAR(20) NOT NULL DEFAULT 'PENDING',  -- PENDING | APPROVED | REJECTED | CANCELLED
+    reason        VARCHAR(255),                            -- texto do aluno (apagado na anonimização)
+    created_at    TIMESTAMP NOT NULL,
+    decided_at    TIMESTAMP,
+    decided_by    INT REFERENCES org_users(user_id),
+    decision_note VARCHAR(255)
+    );
+
+-- no máximo um pedido em aberto por usuário
+CREATE UNIQUE INDEX IF NOT EXISTS account_request_one_pending
+    ON sys_account_requests(user_id) WHERE status = 'PENDING';
