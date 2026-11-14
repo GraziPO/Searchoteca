@@ -1,5 +1,8 @@
 package searchoteca.service.wms;
 
+import org.springframework.data.domain.Sort;
+import searchoteca.DTO.archive.publicSearch.PageResponse;
+import searchoteca.components.Paging;
 import org.springframework.stereotype.Service;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditDiff;
@@ -43,6 +46,11 @@ public class DepartmentService {
         return departments;   // lista vazia é resposta válida, não erro
     }
 
+
+    /** Listagem paginada, em ordem de código (RNF06). */
+    public PageResponse<DepartmentModel> findPage(int page, int size){
+        return PageResponse.from(departmentRepository.findAll(Paging.of(page, size, Sort.by("departCode"))));
+    }
 
     public DepartmentModel findByDepartCode(String departCode){
         if(departmentRepository.findByDepartCode(departCode)==null){

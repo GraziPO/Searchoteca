@@ -25,8 +25,8 @@ public class LoanController {
 
     @PreAuthorize("hasAuthority('loans:view')")
     @GetMapping
-    public ResponseEntity<?> findAll() {
-        return ResponseEntity.ok(loanService.findAll());
+    public ResponseEntity<?> findAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(loanService.findPage(page, size));
     }
 
     @PreAuthorize("hasAuthority('loans:view')")
@@ -39,10 +39,10 @@ public class LoanController {
     //endpoint exclusivo para os alunos
     @PreAuthorize("hasAuthority('loans:view_own')")
     @GetMapping("/historico")
-    public ResponseEntity<?> findOwn(Authentication authentication) {
+    public ResponseEntity<?> findOwn(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size, Authentication authentication) {
         CustomUserDetails student = (CustomUserDetails) authentication.getPrincipal();
         auditLogService.record(AuditAction.ACCESS,"Acesso ao histórico do usuario");
-        return ResponseEntity.ok(loanService.findAllByStudent(student.getUserId()));
+        return ResponseEntity.ok(loanService.findPageByStudent(student.getUserId(), page, size));
     }
 
     @PreAuthorize("hasAuthority('loans:create')")

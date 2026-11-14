@@ -21,9 +21,9 @@ public class LocationController {
 
     @PreAuthorize("hasAuthority('org_local:view')")
     @GetMapping
-    public ResponseEntity<?> getAll(){
-        auditLogService.record(AuditAction.ACCESS,"All Locations");
-        return ResponseEntity.ok(locationService.findAll());
+    public ResponseEntity<?> getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size){
+        auditLogService.record(AuditAction.ACCESS, "listagem de localizações (página " + page + ")");
+        return ResponseEntity.ok(locationService.findPage(page, size));
     }
 
     @PreAuthorize("hasAuthority('org_local:view')")

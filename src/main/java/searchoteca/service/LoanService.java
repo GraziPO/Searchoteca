@@ -1,5 +1,8 @@
 package searchoteca.service;
 
+import org.springframework.data.domain.Sort;
+import searchoteca.DTO.archive.publicSearch.PageResponse;
+import searchoteca.components.Paging;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import searchoteca.DTO.archive.LoanRequest;
@@ -71,6 +74,22 @@ public class LoanService {
 
     public List<LoanModel> findAll() {
         return loanRepository.findAll();
+    }
+
+    /** Todos os empréstimos, paginados, do mais recente para o mais antigo (RNF06). */
+    public PageResponse<LoanModel> findPage(int page, int size) {
+        return PageResponse.from(loanRepository.findAll(
+                Paging.of(page, size, Sort.by(Sort.Direction.DESC, "loanDate"))));
+    }
+
+    /** Histórico do aluno logado, paginado, do mais recente para o mais antigo. */
+    public PageResponse<LoanModel> findPageByStudent(Long userId, int page, int size) {
+        StudentModel student = studentRepository.findByUserId(userId);
+        if (student == null) {
+            throw new ResourceNotFoundException("Perfil de aluno não encontrado para este usuário.");
+        }
+        return PageResponse.from(loanRepository.findByStudentId(student.getStudentId(),
+                Paging.of(page, size, Sort.by(Sort.Direction.DESC, "loanDate"))));
     }
 
     //specific get for loans by student

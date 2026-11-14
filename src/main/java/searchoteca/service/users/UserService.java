@@ -1,5 +1,9 @@
 package searchoteca.service.users;
 
+import org.springframework.data.domain.Sort;
+import searchoteca.DTO.archive.publicSearch.PageResponse;
+import searchoteca.components.Paging;
+import searchoteca.DTO.users.UserResponse;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -79,6 +83,12 @@ public class UserService {
 
     public List<UserModel> findAll(){
         return (List<UserModel>)userRepository.findAll();
+    }
+
+    /** Listagem paginada, em ordem de username (RNF06). Devolve UserResponse: o hash da senha nunca sai. */
+    public PageResponse<UserResponse> findPage(int page, int size){
+        return PageResponse.from(userRepository.findAll(Paging.of(page, size, Sort.by("username")))
+                .map(UserResponse::from));
     }
 
     public UserModel findByUsername(String username){

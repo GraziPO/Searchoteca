@@ -25,9 +25,9 @@ public class BookController {
 
     @PreAuthorize("hasAuthority('org_books:view')")
     @GetMapping
-    public ResponseEntity<?> getAll(){
-        auditLogService.record(AuditAction.ACCESS,"All books");
-        return ResponseEntity.ok(bookService.findAll());
+    public ResponseEntity<?> getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size){
+        auditLogService.record(AuditAction.ACCESS, "listagem de livros (página " + page + ")");
+        return ResponseEntity.ok(bookService.findPage(page, size));
     }
 
     @PreAuthorize("hasAuthority('org_books:view')")

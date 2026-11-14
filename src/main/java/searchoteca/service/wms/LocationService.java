@@ -1,5 +1,8 @@
 package searchoteca.service.wms;
 
+import org.springframework.data.domain.Sort;
+import searchoteca.DTO.archive.publicSearch.PageResponse;
+import searchoteca.components.Paging;
 import org.springframework.stereotype.Service;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditDiff;
@@ -36,6 +39,11 @@ public class LocationService {
         location =  (List<LocationModel>) locationRepository.findAll();
 
         return location;   // lista vazia é resposta válida, não erro
+    }
+
+    /** Listagem paginada, em ordem de código (RNF06). */
+    public PageResponse<LocationModel> findPage(int page, int size){
+        return PageResponse.from(locationRepository.findAll(Paging.of(page, size, Sort.by("localCode"))));
     }
 
     public LocationModel findByLocalCode(String localCode){

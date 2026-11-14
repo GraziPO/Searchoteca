@@ -1,5 +1,8 @@
 package searchoteca.service.catalog;
 
+import org.springframework.data.domain.Sort;
+import searchoteca.DTO.archive.publicSearch.PageResponse;
+import searchoteca.components.Paging;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +40,11 @@ public class BookService {
         books = (List<BookModel>) bookRepository.findAll();
 
         return books;   // lista vazia é resposta válida, não erro
+    }
+
+    /** Listagem paginada, em ordem de título (RNF06). */
+    public PageResponse<BookModel> findPage(int page, int size){
+        return PageResponse.from(bookRepository.findAll(Paging.of(page, size, Sort.by("title"))));
     }
 
     public BookModel create(BookModel book){

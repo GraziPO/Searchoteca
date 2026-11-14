@@ -21,9 +21,9 @@ public class DepartmentController {
 
     @PreAuthorize("hasAuthority('org_depart:view')")
     @GetMapping
-    public ResponseEntity<?> getAll() {
-        auditLogService.record(AuditAction.ACCESS,"All Departments");
-        return ResponseEntity.ok(departmentService.findAll());
+    public ResponseEntity<?> getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        auditLogService.record(AuditAction.ACCESS, "listagem de departamentos (página " + page + ")");
+        return ResponseEntity.ok(departmentService.findPage(page, size));
     }
 
     @PreAuthorize("hasAuthority('org_depart:view')")
