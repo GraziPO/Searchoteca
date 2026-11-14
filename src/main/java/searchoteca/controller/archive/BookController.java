@@ -8,6 +8,7 @@ import searchoteca.auditTrail.AuditLogService;
 import searchoteca.model.Books.BookModel;
 import searchoteca.service.catalog.BookService;
 import searchoteca.service.catalog.CopyService;
+import searchoteca.service.catalog.IsbnLookupService;
 
 @RestController
 @RequestMapping("/api/livro")
@@ -16,11 +17,26 @@ public class BookController {
     private final BookService bookService;
     private final CopyService copyService;
     private final AuditLogService auditLogService;
+    private final IsbnLookupService isbnLookupService;
 
-    public BookController(BookService bookService, CopyService copyService, AuditLogService auditLogService) {
+    public BookController(BookService bookService, CopyService copyService, AuditLogService auditLogService,
+                          IsbnLookupService isbnLookupService) {
         this.bookService=bookService;
         this.copyService=copyService;
         this.auditLogService=auditLogService;
+        this.isbnLookupService=isbnLookupService;
+    }
+
+    /**
+     * Preenche o cadastro pelo ISBN, buscando na Open Library (RF05). Não salva nada:
+     * o operador confere os dados e depois envia o POST /api/livro.
+     *   200 dados encontrados | 404 ISBN não encontrado | 409 ISBN inválido ou já cadastrado
+     *   503 Open Library fora do ar (o cadastro continua manual)
+     */
+    @PreAuthorize("hasAuthority('org_books:create')")
+    @GetMapping("/consulta/{isbn}")
+    public ResponseEntity<?> lookupIsbn(@PathVariable String isbn){
+        return ResponseEntity.ok(isbnLookupService.lookup(isbn));
     }
 
     @PreAuthorize("hasAuthority('org_books:view')")

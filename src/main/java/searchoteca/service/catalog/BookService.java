@@ -2,6 +2,7 @@ package searchoteca.service.catalog;
 
 import org.springframework.data.domain.Sort;
 import searchoteca.DTO.archive.publicSearch.PageResponse;
+import searchoteca.components.Isbn;
 import searchoteca.components.Paging;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,19 @@ public class BookService {
     }
 
     public BookModel create(BookModel book){
+        // ISBN sem hífens e com dígito verificador correto (RF05)
+        String isbn = Isbn.normalize(book.getIsbn());
+        if (!Isbn.isValid(isbn)) {
+            throw new ResourceConflictException("ISBN inválido. Confira os números (ISBN-10 ou ISBN-13).");
+        }
+        if (bookRepository.findByIsbn(isbn) != null) {
+            throw new ResourceConflictException("Este ISBN já está cadastrado no acervo.");
+        }
+        if (book.getTitle() == null || book.getTitle().isBlank()
+                || book.getAuthor() == null || book.getAuthor().isBlank()) {
+            throw new ResourceConflictException("Título e autor são obrigatórios.");
+        }
+        book.setIsbn(isbn);
         book.setSalePrice(null);
         return bookRepository.save(book);
     }

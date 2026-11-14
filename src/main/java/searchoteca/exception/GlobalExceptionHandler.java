@@ -90,6 +90,13 @@ public class GlobalExceptionHandler {
                         "Valor inválido para o parâmetro '" + ex.getName() + "'. Datas usam o formato AAAA-MM-DD."));
     }
 
+    // Serviço externo fora do ar (ex.: Open Library): 503, e o frontend segue com o cadastro manual
+    @ExceptionHandler(ExternalServiceException.class)
+    public ResponseEntity<ErrorResponse> handleExternalService(ExternalServiceException ex){
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ErrorResponse.of(503, "Service Unavailable", ex.getMessage()));
+    }
+
     // Erro 500 genérico
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex){
