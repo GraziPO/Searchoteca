@@ -64,8 +64,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request){
         auditLogService.recordAccessDenied(request.getMethod() + " " + request.getRequestURI());
+        // @PreAuthorize negado vem com o texto padrão "Access Denied"; quando o próprio código
+        // explica o motivo (ex.: "só o root pode..."), essa explicação vai para o frontend
+        String message = ex.getMessage() == null || "Access Denied".equals(ex.getMessage())
+                ? "Você não tem permissão para esta ação."
+                : ex.getMessage();
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ErrorResponse.of(403, "Forbidden", "Você não tem permissão para esta ação."));
+                .body(ErrorResponse.of(403, "Forbidden", message));
     }
 
     // Registro duplicado ou ligado a outros dados (chave estrangeira)

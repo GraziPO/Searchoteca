@@ -1,5 +1,6 @@
 package searchoteca.service.users;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import searchoteca.repository.users.AccountLifecycleRepository;
 import searchoteca.repository.users.AccountLifecycleRepository.PersonalData;
 import searchoteca.repository.users.StudentRepository;
 import searchoteca.repository.users.UserRepository;
+import searchoteca.security.CurrentUser;
 import searchoteca.service.WaitlistService;
 import searchoteca.service.settings.SettingsService;
 
@@ -27,12 +29,20 @@ import java.util.UUID;
  *    pelo job da madrugada. É reversível: o root reativa, ou aprova um pedido de reativação.
  *  - RF19: o aluno pede a desativação; só o root aprova. Ao aprovar, a conta é desativada e
  *    os dados pessoais são anonimizados (LGPD). Isso não tem volta.
+ *
+ * Quem decide os pedidos:
+ *  - account_requests:manage (só o root): qualquer pedido.
+ *  - account_requests:reactivate (admin_users): só pedidos de REATIVAÇÃO de contas desativadas por inatividade.
  */
 @Service
 public class AccountLifecycleService {
 
     public static final String DEACTIVATE = "DEACTIVATE";
     public static final String REACTIVATE = "REACTIVATE";
+
+    public static final String PERM_MANAGE = "account_requests:manage";
+    public static final String PERM_REACTIVATE = "account_requests:reactivate";
+    public static final String REASON_INACTIVITY = "INACTIVITY";
 
     private final AccountLifecycleRepository repository;
     private final UserRepository userRepository;
@@ -126,12 +136,16 @@ public class AccountLifecycleService {
 
     @Transactional(readOnly = true)
     public List<AccountRequestView> listRequests(String status) {
-        return repository.findByStatus(status == null || status.isBlank() ? null : status.trim().toUpperCase());
+        String st = status == null || status.isBlank() ? null : status.trim().toUpperCase();
+        // o root vê tudo; o admin_users só os pedidos de reativação
+        String type = CurrentUser.hasAuthority(PERM_MANAGE) ? null : REACTIVATE;
+        return repository.findByStatus(st, type);
     }
 
     @Transactional
     public AccountRequestView approve(Long requestId, Long rootUserId, String note) {
         AccountRequestView request = pendingRequest(requestId);
+        requireCanDecide(request);
 
         if (DEACTIVATE.equals(request.type())) {
             StudentModel student = studentOf(request.userId());
@@ -156,6 +170,7 @@ public class AccountLifecycleService {
     @Transactional
     public void reject(Long requestId, Long rootUserId, String note) {
         AccountRequestView request = pendingRequest(requestId);
+        requireCanDecide(request);
         repository.decide(requestId, "REJECTED", rootUserId, trim(note));
         auditLogService.record(AuditAction.ACCOUNT_REQUEST_REJECTED, "pedido " + requestId + " (" + request.type() + ")");
     }
@@ -186,6 +201,23 @@ public class AccountLifecycleService {
             throw new ResourceConflictException("Este pedido já foi decidido (" + request.status() + ").");
         }
         return request;
+    }
+
+    /**
+     * Root decide qualquer pedido. O admin_users só decide reativação de conta desativada por inatividade;
+     * desativação/anonimização e contas desativadas por outro motivo ficam com o root.
+     */
+    private void requireCanDecide(AccountRequestView request) {
+        if (CurrentUser.hasAuthority(PERM_MANAGE)) {
+            return;
+        }
+        if (DEACTIVATE.equals(request.type())) {
+            throw new AccessDeniedException("Pedidos de desativação e anonimização só podem ser decididos pelo root.");
+        }
+        if (!CurrentUser.hasAuthority(PERM_REACTIVATE) || !REASON_INACTIVITY.equals(request.deactivationReason())) {
+            throw new AccessDeniedException("O administrador só reativa contas desativadas por inatividade. "
+                    + "Esta conta precisa ser reativada pelo root.");
+        }
     }
 
     private StudentModel studentOf(Long userId) {

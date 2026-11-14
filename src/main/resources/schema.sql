@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS sys_login_attempts(
 );
 
 ALTER TABLE org_students ADD COLUMN IF NOT EXISTS deactivated_at      TIMESTAMP;
-ALTER TABLE org_students ADD COLUMN IF NOT EXISTS deactivation_reason VARCHAR(20);  -- INACTIVITY | REQUEST
+ALTER TABLE org_students ADD COLUMN IF NOT EXISTS deactivation_reason VARCHAR(20);  -- INACTIVITY | ADMIN | REQUEST
 ALTER TABLE org_students ADD COLUMN IF NOT EXISTS anonymized_at       TIMESTAMP;
 
 -- Pedidos do aluno para desativar ou reativar a conta. Só o root decide.

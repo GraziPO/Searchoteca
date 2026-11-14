@@ -75,6 +75,14 @@ public class AccountLifecycleRepository {
         return rows;
     }
 
+    /** Motivo da desativação do aluno (INACTIVITY, ADMIN, REQUEST) ou null se não houver. */
+    public String findDeactivationReason(Long userId) {
+        List<String> rows = jdbc.queryForList(
+                "SELECT deactivation_reason FROM org_students WHERE user_id = :id",
+                Map.of("id", userId), String.class);
+        return rows.isEmpty() ? null : rows.getFirst();
+    }
+
     public boolean isAnonymized(Long userId) {
         Boolean anon = jdbc.queryForObject("""
                 SELECT EXISTS (SELECT 1 FROM org_students WHERE user_id = :id AND anonymized_at IS NOT NULL)
@@ -218,10 +226,18 @@ public class AccountLifecycleRepository {
                 .addValue("by", decidedBy).addValue("note", note));
     }
 
-    public List<AccountRequestView> findByStatus(String status) {
+    /**
+     * Lista os pedidos. status null = os 200 mais recentes; type null = todos os tipos
+     * (o admin_users só enxerga os de REACTIVATE).
+     */
+    public List<AccountRequestView> findByStatus(String status, String type) {
+        MapSqlParameterSource p = new MapSqlParameterSource()
+                .addValue("status", status).addValue("type", type);
+        String where = " WHERE (CAST(:status AS VARCHAR) IS NULL OR r.status = :status)"
+                + " AND (CAST(:type AS VARCHAR) IS NULL OR r.type = :type)";
         return status == null
-                ? query("ORDER BY r.created_at DESC LIMIT 200", Map.of())
-                : query("WHERE r.status = :status ORDER BY r.created_at", Map.of("status", status));
+                ? query(where + " ORDER BY r.created_at DESC LIMIT 200", p)
+                : query(where + " ORDER BY r.created_at", p);
     }
 
     public List<AccountRequestView> findByUser(Long userId) {
@@ -229,9 +245,14 @@ public class AccountLifecycleRepository {
     }
 
     private List<AccountRequestView> query(String tail, Map<String, ?> params) {
+        return query(tail, new MapSqlParameterSource(params));
+    }
+
+    private List<AccountRequestView> query(String tail, MapSqlParameterSource params) {
         return jdbc.query("""
                 SELECT r.request_id, r.user_id, u.username, u.complete_name, s.ra, r.type, r.status,
-                       r.reason, r.created_at, r.decided_at, d.username AS decided_by, r.decision_note
+                       r.reason, r.created_at, r.decided_at, d.username AS decided_by, r.decision_note,
+                       s.deactivation_reason
                 FROM sys_account_requests r
                 JOIN org_users u       ON u.user_id = r.user_id
                 LEFT JOIN org_students s ON s.user_id = r.user_id
@@ -248,7 +269,8 @@ public class AccountLifecycleRepository {
                 toDateTime(rs.getTimestamp("created_at")),
                 toDateTime(rs.getTimestamp("decided_at")),
                 rs.getString("decided_by"),
-                rs.getString("decision_note")));
+                rs.getString("decision_note"),
+                rs.getString("deactivation_reason")));
     }
 
     private static LocalDateTime toDateTime(Timestamp ts) {

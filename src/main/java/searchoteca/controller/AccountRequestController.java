@@ -60,16 +60,19 @@ public class AccountRequestController {
                 "Se os dados estiverem corretos e a conta puder ser reativada, o pedido foi enviado ao administrador."));
     }
 
-    // ------------------------------------------------------------------ root
+    // ------------------------------------------------------------------ root e admin_users
+    // root (account_requests:manage): todos os pedidos.
+    // admin_users (account_requests:reactivate): só reativação de conta desativada por inatividade
+    // (a regra fina fica no AccountLifecycleService).
 
     /** ?status=PENDING para a fila de análise; sem status, os 200 mais recentes. */
-    @PreAuthorize("hasAuthority('account_requests:manage')")
+    @PreAuthorize("hasAnyAuthority('account_requests:manage', 'account_requests:reactivate')")
     @GetMapping("/usuarios/pedidos")
     public ResponseEntity<List<AccountRequestView>> list(@RequestParam(required = false) String status) {
         return ResponseEntity.ok(lifecycleService.listRequests(status));
     }
 
-    @PreAuthorize("hasAuthority('account_requests:manage')")
+    @PreAuthorize("hasAnyAuthority('account_requests:manage', 'account_requests:reactivate')")
     @PostMapping("/usuarios/pedidos/{id}/aprovar")
     public ResponseEntity<AccountRequestView> approve(@PathVariable Long id,
                                                       @RequestBody(required = false) DecisionRequest body,
@@ -77,7 +80,7 @@ public class AccountRequestController {
         return ResponseEntity.ok(lifecycleService.approve(id, userId(auth), body == null ? null : body.note()));
     }
 
-    @PreAuthorize("hasAuthority('account_requests:manage')")
+    @PreAuthorize("hasAnyAuthority('account_requests:manage', 'account_requests:reactivate')")
     @PostMapping("/usuarios/pedidos/{id}/recusar")
     public ResponseEntity<Void> reject(@PathVariable Long id,
                                        @RequestBody(required = false) DecisionRequest body,

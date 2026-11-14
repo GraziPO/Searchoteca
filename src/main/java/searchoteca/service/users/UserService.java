@@ -19,6 +19,7 @@ import searchoteca.repository.users.AccountLifecycleRepository;
 import searchoteca.repository.users.StudentRepository;
 import searchoteca.repository.users.UserRepository;
 import searchoteca.resetPassword.PasswordPolicy;
+import searchoteca.security.CurrentUser;
 import searchoteca.service.WaitlistService;
 
 import java.time.LocalDateTime;
@@ -127,8 +128,9 @@ public class UserService {
     // ========================================== ATIVAÇÃO / DESATIVACAO ======================================
 
     /**
-     * Reativa a conta. Aluno pode ser reativado pelo root ou pelo admin_users (users:edit),
-     * ou pelo root aprovando um pedido de reativação. Conta anonimizada não volta.
+     * Reativa a conta.
+     * Aluno: o root reativa qualquer conta; o admin_users só as desativadas por inatividade.
+     * Conta anonimizada não volta.
      */
     @Transactional
     public void activate (String username){
@@ -141,6 +143,14 @@ public class UserService {
         if (STUDENT_ROLE.equals(user.getRole_code())) {
             if (lifecycleRepository.isAnonymized(user.getUserId())) {
                 throw new ResourceConflictException("Esta conta foi anonimizada e não pode ser reativada.");
+            }
+            if (Boolean.TRUE.equals(user.getStatus())) {
+                return;   // já está ativa: nada a fazer
+            }
+            if (!CurrentUser.hasAuthority(AccountLifecycleService.PERM_MANAGE)
+                    && !AccountLifecycleService.REASON_INACTIVITY.equals(lifecycleRepository.findDeactivationReason(user.getUserId()))) {
+                throw new AccessDeniedException("O administrador só reativa contas desativadas por inatividade. "
+                        + "Esta conta precisa ser reativada pelo root.");
             }
             // reativa e zera o relógio da inatividade (RF17)
             lifecycleRepository.markReactivated(user.getUserId());

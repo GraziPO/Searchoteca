@@ -15,6 +15,7 @@ public record AccountRequestView(
         LocalDateTime createdAt,
         LocalDateTime decidedAt,
         String decidedBy,
-        String decisionNote
+        String decisionNote,
+        String deactivationReason   // por que a conta está desativada: INACTIVITY | ADMIN | REQUEST (null se ativa)
 ) {
 }
