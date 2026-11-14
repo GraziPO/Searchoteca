@@ -1,6 +1,5 @@
 package searchoteca.service.users;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +15,7 @@ import searchoteca.repository.users.AccountLifecycleRepository.PersonalData;
 import searchoteca.repository.users.StudentRepository;
 import searchoteca.repository.users.UserRepository;
 import searchoteca.service.WaitlistService;
+import searchoteca.service.settings.SettingsService;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,7 +23,7 @@ import java.util.UUID;
 /**
  * Ciclo de vida da conta do aluno.
  *
- *  - RF17: aluno sem empréstimo nem devolução há {@code students.inactivity-days} (90) é desativado
+ *  - RF17: aluno sem empréstimo nem devolução há N dias (configurado pelo root, padrão 90) é desativado
  *    pelo job da madrugada. É reversível: o root reativa, ou aprova um pedido de reativação.
  *  - RF19: o aluno pede a desativação; só o root aprova. Ao aprovar, a conta é desativada e
  *    os dados pessoais são anonimizados (LGPD). Isso não tem volta.
@@ -40,7 +40,7 @@ public class AccountLifecycleService {
     private final WaitlistService waitlistService;
     private final PasswordEncoder passwordEncoder;
     private final AuditLogService auditLogService;
-    private final int inactivityDays;
+    private final SettingsService settingsService;
 
     public AccountLifecycleService(AccountLifecycleRepository repository,
                                    UserRepository userRepository,
@@ -48,14 +48,14 @@ public class AccountLifecycleService {
                                    WaitlistService waitlistService,
                                    PasswordEncoder passwordEncoder,
                                    AuditLogService auditLogService,
-                                   @Value("${students.inactivity-days:90}") int inactivityDays) {
+                                   SettingsService settingsService) {
         this.repository = repository;
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
         this.waitlistService = waitlistService;
         this.passwordEncoder = passwordEncoder;
         this.auditLogService = auditLogService;
-        this.inactivityDays = inactivityDays;
+        this.settingsService = settingsService;
     }
 
     // ===================================================================== RF17: inatividade
@@ -63,6 +63,7 @@ public class AccountLifecycleService {
     /** Chamado pelo StudentInactivityScheduler uma vez por dia. */
     @Transactional
     public int deactivateInactiveStudents() {
+        int inactivityDays = settingsService.inactivityDays();   // lido a cada execução: a mudança do root vale na próxima madrugada
         List<Long> userIds = repository.findInactiveStudentUserIds(inactivityDays);
         for (Long userId : userIds) {
             repository.markDeactivated(userId, "INACTIVITY");

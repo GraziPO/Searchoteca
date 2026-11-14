@@ -19,11 +19,14 @@ import searchoteca.repository.catalog.CopyRepository;
 import searchoteca.repository.users.StudentRepository;
 import searchoteca.repository.archive.LoanItemRepository;
 import searchoteca.repository.archive.LoanRepository;
+import searchoteca.repository.archive.LoanRulesRepository;
 import searchoteca.security.CustomUserDetails;
+import searchoteca.service.settings.SettingsService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,6 +43,8 @@ public class LoanService {
     private final ReceiptService receiptService;
     private final BookRepository bookRepository;
     private final WaitlistService waitlistService;
+    private final SettingsService settingsService;
+    private final LoanRulesRepository loanRulesRepository;
 
 
     public LoanService(LoanRepository loanRepository,
@@ -49,7 +54,9 @@ public class LoanService {
                        StudentRepository studentRepository,
                        ReceiptService receiptService,
                        BookRepository bookRepository,
-                       WaitlistService waitlistService) {
+                       WaitlistService waitlistService,
+                       SettingsService settingsService,
+                       LoanRulesRepository loanRulesRepository) {
         this.loanRepository = loanRepository;
         this.loanItemRepository = loanItemRepository;
         this.userRepository = userRepository;
@@ -58,6 +65,8 @@ public class LoanService {
         this.receiptService = receiptService;
         this.bookRepository = bookRepository;
         this.waitlistService = waitlistService;
+        this.settingsService = settingsService;
+        this.loanRulesRepository = loanRulesRepository;
     }
 
     public List<LoanModel> findAll() {
@@ -84,16 +93,27 @@ public class LoanService {
             throw new ResourceNotFoundException("Aluno não encontrado");
         }
         if(request.items() == null || request.items().isEmpty()){
-            throw new ResourceConflictException("INforme ao menos um exemplar");
+            throw new ResourceConflictException("Informe ao menos um exemplar");
         }
 
+        // conta desativada (por inatividade ou pelo administrador) não pega livro:
+        // precisa ser reativada antes, pelo root ou por pedido de reativação (RF17)
+        UserModel studentUser = userRepository.findById(student.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Aluno não encontrado"));
+        if (!Boolean.TRUE.equals(studentUser.getStatus())) {
+            throw new ResourceConflictException("A conta deste aluno está desativada. Ela precisa ser reativada "
+                    + "pelo administrador (ou por um pedido de reativação do aluno) antes de um novo empréstimo.");
+        }
+
+        // regras definidas pelo root na área de configurações
+        checkLoanRules(student.getStudentId(), new LinkedHashSet<>(request.items()).size());
 
         LocalDateTime now = LocalDateTime.now();
         LoanModel loan = new LoanModel();
         loan.setStudentId(student.getStudentId());
         loan.setOperatorId(operator.getUserId());
         loan.setLoanDate(now);
-        loan.setDueDate(now.plusDays(15).toLocalDate()); //standard value just for testing. the period may be adjusted by an admin user in later versions.
+        loan.setDueDate(now.toLocalDate().plusDays(settingsService.loanPeriodDays()));   // prazo definido pelo root
         loan.setStatus(LoanStatus.OPEN.name());
 
         loan = loanRepository.save(loan);
@@ -135,7 +155,6 @@ public class LoanService {
                     b.getIsbn(), b.getTitle(), b.getAuthor(), null);   // empréstimo não tem preço
         }).toList();
 
-        UserModel studentUser = userRepository.findById(student.getUserId()).orElseThrow();
         receiptService.issue(ExitType.LOAN, operator,
                 new StudentInfo(student.getRa(), studentUser.getCompleteName()),
                 loan.getDueDate(), loan.getLoanId(), items, null);
@@ -145,6 +164,28 @@ public class LoanService {
         studentRepository.save(student);
 
         return loan;
+    }
+
+    /**
+     * Limite de livros por aluno e bloqueio por atraso (configurações do root).
+     * A linha do aluno fica travada até o fim da transação, para dois empréstimos
+     * simultâneos ao mesmo aluno não passarem do limite juntos.
+     */
+    private void checkLoanRules(Long studentId, int requestedItems) {
+        loanRulesRepository.lockStudent(studentId);
+
+        if (settingsService.blockOverdueLoans() && loanRulesRepository.hasOverdueItems(studentId)) {
+            throw new ResourceConflictException(
+                    "Este aluno tem livro com a devolução atrasada. Faça a devolução antes de um novo empréstimo.");
+        }
+
+        int limit = settingsService.maxOpenLoansPerStudent();
+        int open = loanRulesRepository.countOpenItems(studentId);
+        if (open + requestedItems > limit) {
+            int left = Math.max(limit - open, 0);
+            throw new ResourceConflictException("Limite de " + limit + " livros por aluno. Ele já está com " + open
+                    + (left == 0 ? ", e não pode levar mais nenhum." : ", e pode levar no máximo mais " + left + "."));
+        }
     }
 
     @Transactional

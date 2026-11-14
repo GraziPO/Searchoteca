@@ -121,6 +121,15 @@ CREATE INDEX IF NOT EXISTS idx_reset_user_created
     ON sys_password_reset(user_id, created_at DESC);
 -- ============================================== alunos =====================================================
 
+-- ============================================== configurações (root) =====================================================
+-- Só aparecem aqui as configurações já alteradas; as demais usam o padrão do SettingsService.
+CREATE TABLE IF NOT EXISTS sys_settings(
+    setting_key   VARCHAR(60) PRIMARY KEY,
+    setting_value VARCHAR(255) NOT NULL,
+    updated_at    TIMESTAMP NOT NULL,
+    updated_by    INT REFERENCES org_users(user_id)
+);
+
 CREATE TABLE IF NOT EXISTS org_students(
     student_id SERIAL PRIMARY KEY,
     user_id INT NOT NULL UNIQUE REFERENCES org_users(user_id),

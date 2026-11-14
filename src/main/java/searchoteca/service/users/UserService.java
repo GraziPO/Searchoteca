@@ -12,11 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.RoleModel;
+import searchoteca.model.StudentModel;
 import searchoteca.model.UserModel;
 import searchoteca.repository.auth.RoleRepository;
 import searchoteca.repository.users.AccountLifecycleRepository;
+import searchoteca.repository.users.StudentRepository;
 import searchoteca.repository.users.UserRepository;
 import searchoteca.resetPassword.PasswordPolicy;
+import searchoteca.service.WaitlistService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,21 +27,29 @@ import java.util.List;
 @Service
 public class UserService {
 
+    private static final String STUDENT_ROLE = "students";
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final PasswordPolicy passwordPolicy;
     private final AccountLifecycleRepository lifecycleRepository;
     private final AuditLogService auditLogService;
+    private final StudentRepository studentRepository;
+    private final WaitlistService waitlistService;
 
     public UserService(UserRepository userRepository,
                        RoleRepository roleRepository,
                        PasswordEncoder passwordEncoder,
                        PasswordPolicy passwordPolicy,
                        AccountLifecycleRepository lifecycleRepository,
-                       AuditLogService auditLogService) {
+                       AuditLogService auditLogService,
+                       StudentRepository studentRepository,
+                       WaitlistService waitlistService) {
         this.lifecycleRepository = lifecycleRepository;
         this.auditLogService = auditLogService;
+        this.studentRepository = studentRepository;
+        this.waitlistService = waitlistService;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -115,6 +126,11 @@ public class UserService {
 
     // ========================================== ATIVAÇÃO / DESATIVACAO ======================================
 
+    /**
+     * Reativa a conta. Aluno pode ser reativado pelo root ou pelo admin_users (users:edit),
+     * ou pelo root aprovando um pedido de reativação. Conta anonimizada não volta.
+     */
+    @Transactional
     public void activate (String username){
         UserModel user = findByUsername(username);
 
@@ -122,11 +138,11 @@ public class UserService {
 
         requireRootCallerIf(role.isRoot());
 
-        if ("students".equals(user.getRole_code())) {
-            // aluno: não reativa conta anonimizada, e zera o relógio da inatividade (RF17)
+        if (STUDENT_ROLE.equals(user.getRole_code())) {
             if (lifecycleRepository.isAnonymized(user.getUserId())) {
                 throw new ResourceConflictException("Esta conta foi anonimizada e não pode ser reativada.");
             }
+            // reativa e zera o relógio da inatividade (RF17)
             lifecycleRepository.markReactivated(user.getUserId());
             return;
         }
@@ -134,6 +150,11 @@ public class UserService {
         userRepository.save(user);
     }
 
+    /**
+     * Desativa a conta. Aluno desativado não faz mais nada até ser reativado:
+     * não entra no sistema (login e tokens recusados), não pega livro e sai das filas de espera.
+     */
+    @Transactional
     public void deactivate(String username){
         UserModel user = findByUsername(username);
 
@@ -141,6 +162,17 @@ public class UserService {
 
         requireRootCallerIf(role.isRoot());
 
+        if (STUDENT_ROLE.equals(user.getRole_code())) {
+            // mesmo registro da desativação por inatividade, com o motivo ADMIN
+            lifecycleRepository.markDeactivated(user.getUserId(), "ADMIN");
+
+            // sai das filas; se tinha exemplar reservado, a reserva passa para o próximo da fila
+            StudentModel student = studentRepository.findByUserId(user.getUserId());
+            if (student != null) {
+                waitlistService.cancelAllForStudent(student.getStudentId());
+            }
+            return;
+        }
         user.setStatus(false);
         userRepository.save(user);
     }

@@ -1,6 +1,5 @@
 package searchoteca.service.catalog;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +11,7 @@ import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.Books.BookModel;
 import searchoteca.repository.catalog.BookRepository;
 import searchoteca.repository.catalog.CopyRepository;
+import searchoteca.service.settings.SettingsService;
 
 
 import java.math.BigDecimal;
@@ -23,13 +23,13 @@ public class BookService {
     private final BookRepository bookRepository;
     private final CopyRepository copyRepository;
     private final AuditLogService auditLogService;
-    private final boolean salesEnabled;
+    private final SettingsService settingsService;
 
-    public BookService(BookRepository bookRepository, CopyRepository copyRepository, AuditLogService auditLogService, @Value("${sales.enabled:false}")  boolean salesEnabled) {
+    public BookService(BookRepository bookRepository, CopyRepository copyRepository, AuditLogService auditLogService, SettingsService settingsService) {
         this.bookRepository=bookRepository;
         this.copyRepository=copyRepository;
         this.auditLogService=auditLogService;
-        this.salesEnabled=salesEnabled;
+        this.settingsService=settingsService;
     }
 
     public List<BookModel> findAll(){
@@ -89,7 +89,7 @@ public class BookService {
 
     @Transactional
     public BookModel updatePrice(String isbn, BigDecimal newPrice){
-        if(!salesEnabled){
+        if(!settingsService.salesEnabled()){   // ligado/desligado pelo root
             throw new ResourceConflictException("Vendas não habilitado para esta organização");
         }
         BookModel book = bookRepository.findByIsbn(isbn);

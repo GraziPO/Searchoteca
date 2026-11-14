@@ -57,7 +57,10 @@ INSERT INTO sys_permissions (permission_code, resource, action, description) VAL
     ('waitlist:view', 'waitlist', 'view', 'Visualiza a fila de espera da biblioteca'),
 
     ('account:request', 'account', 'request', 'Pedir desativação da Conta'),
-    ('account_requests:manage', 'account_requests', 'manage', 'Aprova ou Recusa pedido de desativação da Conta')
+    ('account_requests:manage', 'account_requests', 'manage', 'Aprova ou Recusa pedido de desativação da Conta'),
+
+    -- nenhum perfil recebe: só o root (que ganha todas as permissões desta tabela)
+    ('settings:manage', 'settings', 'manage', 'Alterar as configurações da organização')
 ON CONFLICT(permission_code) DO NOTHING;
 
 -- ===== seed: role x permission =====
@@ -67,6 +70,7 @@ INSERT INTO sys_role_permissions (role_code, permission_code) VALUES
     ('admin_users', 'users:edit'),
     ('admin_users', 'users:view'),
     ('admin_users', 'users:delete'),
+    ('admin_users', 'account_requests:manage'),
 
     ('warehouse_op', 'org_local:create'),
     ('warehouse_op', 'org_local:edit'),

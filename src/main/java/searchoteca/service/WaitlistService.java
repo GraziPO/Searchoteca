@@ -18,6 +18,7 @@ import searchoteca.repository.catalog.CopyRepository;
 import searchoteca.repository.users.StudentRepository;
 import searchoteca.repository.waitlist.WaitlistRepository;
 import searchoteca.repository.waitlist.WaitlistQueryRepository;
+import searchoteca.service.settings.SettingsService;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -38,7 +39,7 @@ public class WaitlistService {
     private final StudentRepository studentRepository;
     private final AuditLogService auditLogService;
     private final ApplicationEventPublisher events;
-    private final int maxSize;
+    private final SettingsService settingsService;
     private final Duration holdTime;
 
     public WaitlistService(WaitlistRepository waitlistRepository,
@@ -48,7 +49,7 @@ public class WaitlistService {
                            StudentRepository studentRepository,
                            AuditLogService auditLogService,
                            ApplicationEventPublisher events,
-                           @Value("${waitlist.max-size:3}") int maxSize,
+                           SettingsService settingsService,
                            @Value("${waitlist.hold-hours:48}") long holdHours) {
         this.waitlistRepository = waitlistRepository;
         this.writeRepository = writeRepository;
@@ -57,7 +58,7 @@ public class WaitlistService {
         this.studentRepository = studentRepository;
         this.auditLogService = auditLogService;
         this.events = events;
-        this.maxSize = maxSize;
+        this.settingsService = settingsService;
         this.holdTime = Duration.ofHours(holdHours);
     }
 
@@ -116,6 +117,7 @@ public class WaitlistService {
         if (waitlistRepository.findActive(isbn, student.getStudentId()).isPresent()) {
             throw new ResourceConflictException("Você já está na fila de espera deste título.");
         }
+        int maxSize = settingsService.waitlistMaxSize();   // definido pelo root
         if (waitlistRepository.countActive(isbn) >= maxSize) {
             throw new ResourceConflictException("A fila de espera deste título está cheia (máximo de " + maxSize + " alunos).");
         }
@@ -235,6 +237,7 @@ public class WaitlistService {
     private WaitlistSummary buildSummary(Long studentId, String isbn) {
         int[] counts = writeRepository.copyCounts(isbn);
         int queueSize = (int) waitlistRepository.countActive(isbn);
+        int maxSize = settingsService.waitlistMaxSize();
 
         WaitlistEntry mine = writeRepository.findByStudent(studentId).stream()
                 .filter(e -> e.isbn().equals(isbn))

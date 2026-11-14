@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import searchoteca.service.users.AccountLifecycleService;
 
-/** RF17: uma vez por dia, desativa os alunos sem movimentação há 90 dias. */
+/** RF17: uma vez por dia, desativa os alunos sem movimentação há N dias (configurado pelo root). */
 @Component
 public class StudentInactivityScheduler {
 
