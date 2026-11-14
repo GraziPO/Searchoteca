@@ -1,6 +1,5 @@
 package searchoteca.service;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import searchoteca.DTO.archive.SalesNExists.ExitRequest;
@@ -15,6 +14,7 @@ import searchoteca.model.Books.status.ExitType;
 import searchoteca.repository.catalog.BookRepository;
 import searchoteca.repository.catalog.CopyRepository;
 import searchoteca.security.CustomUserDetails;
+import searchoteca.service.settings.SettingsService;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -25,13 +25,13 @@ public class ExitService {
     private final CopyRepository copyRepository;
     private final BookRepository bookRepository;
     private final ReceiptService receiptService;
-    private final boolean salesEnabled;
+    private final SettingsService settingsService;
 
-    public ExitService(CopyRepository copyRepository, BookRepository bookRepository, ReceiptService receiptService, @Value("${sales.enabled:false}") boolean salesEnabled) {
+    public ExitService(CopyRepository copyRepository, BookRepository bookRepository, ReceiptService receiptService, SettingsService settingsService) {
         this.copyRepository = copyRepository;
         this.bookRepository = bookRepository;
         this.receiptService = receiptService;
-        this.salesEnabled = salesEnabled;
+        this.settingsService = settingsService;
     }
 
     @Transactional
@@ -42,7 +42,7 @@ public class ExitService {
             throw new ResourceConflictException("Informe o tipo de saída. Empréstimos não são contabilizados aqui");
         }
 
-        if(type == ExitType.SALE && !salesEnabled){
+        if(type == ExitType.SALE && !settingsService.salesEnabled()){   // ligado/desligado pelo root
             throw new ResourceConflictException("Modo de Vendas não está implementado para esta organização");
         }
 

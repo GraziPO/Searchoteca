@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Service
@@ -103,7 +105,22 @@ public class JWTService {
         Claims claims = parseClaims(token);
         return claims.getSubject().equals(userDetails.getUsername())
                 && !claims.getExpiration().before(new Date())
-                && claims.get(STAGE_CLAIM) == null;   // recusa o mfaToken nas rotas protegidas
+                && claims.get(STAGE_CLAIM) == null   // recusa o mfaToken nas rotas protegidas
+                && !issuedBeforePasswordChange(claims, userDetails.getPasswordChangedAt());
+    }
+
+    /**
+     * RF18: o token foi emitido antes da última troca de senha? Então não vale mais.
+     * O "iat" do JWT guarda só segundos inteiros, por isso a troca também é comparada em segundos:
+     * o token novo, gerado logo depois da troca (no mesmo segundo), continua válido.
+     */
+    private boolean issuedBeforePasswordChange(Claims claims, LocalDateTime passwordChangedAt) {
+        if (passwordChangedAt == null || claims.getIssuedAt() == null) {
+            return false;   // conta que nunca trocou a senha
+        }
+        long issuedAt = claims.getIssuedAt().toInstant().getEpochSecond();
+        long changedAt = passwordChangedAt.atZone(ZoneId.systemDefault()).toEpochSecond();
+        return issuedAt < changedAt;
     }
 
     public boolean isTokenExpired(String token){

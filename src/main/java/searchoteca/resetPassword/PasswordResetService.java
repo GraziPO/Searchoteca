@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import searchoteca.auditTrail.AuditAction;
 import searchoteca.auditTrail.AuditLogService;
 import searchoteca.mfa.EmailMasker;
-import searchoteca.mfa.EmailService;
+import searchoteca.service.EmailService;
 import searchoteca.mfa.MfaException;
 import searchoteca.model.UserModel;
 import searchoteca.repository.users.UserRepository;
@@ -118,6 +118,7 @@ public class PasswordResetService {
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPasswordChangedAt(LocalDateTime.now());   // quem estava logado com a senha antiga cai (RF18)
         user.setMust_change_password(false);
         userRepository.save(user);
         auditLogService.save(user.getUsername(), AuditAction.PASSWORD_RESET_SUCCESS, null);

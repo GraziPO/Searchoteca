@@ -1,10 +1,12 @@
 package searchoteca.exception;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import searchoteca.mfa.MfaException;
 import searchoteca.legal.TermsException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -62,8 +64,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request){
         auditLogService.recordAccessDenied(request.getMethod() + " " + request.getRequestURI());
+        // @PreAuthorize negado vem com o texto padrão "Access Denied"; quando o próprio código
+        // explica o motivo (ex.: "só o root pode..."), essa explicação vai para o frontend
+        String message = ex.getMessage() == null || "Access Denied".equals(ex.getMessage())
+                ? "Você não tem permissão para esta ação."
+                : ex.getMessage();
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ErrorResponse.of(403, "Forbidden", "Você não tem permissão para esta ação."));
+                .body(ErrorResponse.of(403, "Forbidden", message));
     }
 
     // Registro duplicado ou ligado a outros dados (chave estrangeira)
@@ -74,4 +81,36 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(409, "Conflict",
                         "Operação não permitida: o registro já existe ou está ligado a outros dados."));
     }
+
+    // Parâmetro com formato errado na URL (ex.: ?de=13/11/2026 em vez de 2026-11-13): 400, e não 500
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleBadParameter(MethodArgumentTypeMismatchException ex){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResponse.of(400, "Bad Request",
+                        "Valor inválido para o parâmetro '" + ex.getName() + "'. Datas usam o formato AAAA-MM-DD."));
+    }
+
+    // Serviço externo fora do ar (ex.: Open Library): 503, e o frontend segue com o cadastro manual
+    @ExceptionHandler(ExternalServiceException.class)
+    public ResponseEntity<ErrorResponse> handleExternalService(ExternalServiceException ex){
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ErrorResponse.of(503, "Service Unavailable", ex.getMessage()));
+    }
+
+    // Erro 500 genérico
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception ex){
+        log.warn("Erro ao processar: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ErrorResponse.of(500, "Internor Server Error",
+                        "Algo deu errado. Tente novamente."));
+    }
+
+    @ExceptionHandler(LoginLockedException.class)
+    public ResponseEntity<ErrorResponse> handleLoginLocked(LoginLockedException ex){
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getRetryAfterSeconds()))
+                .body(ErrorResponse.of(429, "Too Many Requests", ex.getMessage()));
+    }
+
 }

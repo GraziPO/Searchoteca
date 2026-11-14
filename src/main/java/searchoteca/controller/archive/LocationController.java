@@ -21,9 +21,9 @@ public class LocationController {
 
     @PreAuthorize("hasAuthority('org_local:view')")
     @GetMapping
-    public ResponseEntity<?> getAll(){
-        auditLogService.record(AuditAction.ACCESS,"All Locations");
-        return ResponseEntity.ok(locationService.findAll());
+    public ResponseEntity<?> getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size){
+        auditLogService.record(AuditAction.ACCESS, "listagem de localizações (página " + page + ")");
+        return ResponseEntity.ok(locationService.findPage(page, size));
     }
 
     @PreAuthorize("hasAuthority('org_local:view')")
@@ -36,22 +36,23 @@ public class LocationController {
     @PreAuthorize("hasAuthority('org_local:create')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody LocationModel location){
-        auditLogService.record(AuditAction.CREATE,"location" + location.getLocalCode());
-        return ResponseEntity.ok(locationService.create(location));
+        LocationModel created = locationService.create(location);
+        auditLogService.record(AuditAction.CREATE, "localização " + created.getLocalCode());
+        return ResponseEntity.ok(created);
     }
 
     @PreAuthorize("hasAuthority('org_local:edit')")
     @PutMapping("/{localCode}")
     public ResponseEntity<?> update(@PathVariable String localCode, @RequestBody LocationModel local){
-        auditLogService.record(AuditAction.UPDATE,"location" + localCode);
+        // o registro (com o antes -> depois) é feito no LocationService
         return ResponseEntity.ok(locationService.update(localCode, local));
     }
 
     @PreAuthorize("hasAuthority('org_local:delete')")
     @DeleteMapping("/{localCode}")
     public ResponseEntity<?> delete(@PathVariable String localCode){
-        auditLogService.record(AuditAction.DELETE,"location" + localCode);
         locationService.delete(localCode);
+        auditLogService.record(AuditAction.DELETE, "localização " + localCode);
         return ResponseEntity.noContent().build();
     }
 

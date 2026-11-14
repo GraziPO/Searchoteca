@@ -17,6 +17,7 @@ import searchoteca.model.Books.status.CopyStatus;
 import searchoteca.repository.catalog.BookRepository;
 import searchoteca.repository.catalog.CopyRepository;
 import searchoteca.repository.archive.LocationRepository;
+import searchoteca.service.WaitlistService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,13 +28,15 @@ public class CopyService {
     private final LocationRepository locationRepository;
     private final BookRepository bookRepository;
     private final AuditLogService auditLogService;
+    private final WaitlistService waitlistService;
     private static final int MAX_BATCH = 200; //limite de cópias que podem ser localizadas por vez
 
-    public CopyService(CopyRepository copyRepository, LocationRepository locationRepository, BookRepository bookRepository, AuditLogService auditLogService) {
+    public CopyService(CopyRepository copyRepository, LocationRepository locationRepository, BookRepository bookRepository, AuditLogService auditLogService, WaitlistService waitlistService) {
         this.copyRepository = copyRepository;
         this.locationRepository = locationRepository;
         this.bookRepository = bookRepository;
         this.auditLogService = auditLogService;
+        this.waitlistService = waitlistService;
     }
 
     public List<CopyModel> findAllByBook(String isbn) {
@@ -73,6 +76,12 @@ public class CopyService {
 
         List<CopyModel> saved = new ArrayList<>();
         copyRepository.saveAll(copies).forEach(saved::add);
+
+        if (waitlistService.hasWaiting(request.isbn())) {
+            for (CopyModel copy : saved) {
+                waitlistService.releaseCopy(copy);
+            }
+        }
         return findLabels(saved.stream().map(CopyModel::getCopyId).toList());
     }
 

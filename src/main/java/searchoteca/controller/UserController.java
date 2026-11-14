@@ -16,6 +16,7 @@ import searchoteca.service.users.StudentService;
 import searchoteca.service.users.UserService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -25,7 +26,7 @@ public class UserController {
     private final AuditLogService auditLogService;
     private final PasswordChangeService passwordChangeService;
 
-    public UserController(UserService userService,  AuditLogService auditLogService, StudentService studentService, PasswordChangeService passwordChangeService) {
+    public UserController(UserService userService, AuditLogService auditLogService, StudentService studentService, PasswordChangeService passwordChangeService) {
         this.userService = userService;
         this.auditLogService = auditLogService;
         this.studentService = studentService;
@@ -34,64 +35,69 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('users:view')")
     @GetMapping
-    public ResponseEntity<?> findAll() {
-        List<UserResponse> user = userService.findAll().stream().map(UserResponse::from).toList();
-        auditLogService.record(AuditAction.ACCESS,"All Users");
-        return ResponseEntity.ok(user);
+    public ResponseEntity<?> findAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        auditLogService.record(AuditAction.ACCESS, "listagem de usuários (página " + page + ")");
+        return ResponseEntity.ok(userService.findPage(page, size));
     }
 
     @PreAuthorize("hasAuthority('users:view')")
     @GetMapping("/{username}")
     public ResponseEntity<?> findById(@PathVariable String username) {
         UserModel user = userService.findByUsername(username);
-        auditLogService.record(AuditAction.ACCESS,"users" + username);
+        auditLogService.record(AuditAction.ACCESS, "users" + username);
         return ResponseEntity.ok(UserResponse.from(user));
     }
 
     @PreAuthorize("hasAuthority('users:create')")
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody UserModel user){
-        auditLogService.record(AuditAction.CREATE,"users" + user.getUsername());
-        return ResponseEntity.ok(userService.create(user));
+    public ResponseEntity<?> create(@RequestBody UserModel user) {
+        UserModel created = userService.create(user);
+        auditLogService.record(AuditAction.CREATE, "usuário " + created.getUsername() + " (perfil " + created.getRole_code() + ")");
+        return ResponseEntity.ok(created);
     }
 
     @PreAuthorize("hasAuthority('users:edit')")
     @PutMapping("/{username}")
-    public ResponseEntity<?> update(@PathVariable String username, @RequestBody UserModel userInfo){
-        auditLogService.record(AuditAction.UPDATE,"users" + username);
+    public ResponseEntity<?> update(@PathVariable String username, @RequestBody UserModel userInfo) {
+        // o registro (com o antes -> depois) é feito no UserService
         return ResponseEntity.ok(userService.update(username, userInfo));
-    }
-
-    @PreAuthorize("hasAuthority('users:edit')")
-    @PatchMapping("/{username}/status/ativar")
-    public ResponseEntity<?> activate (@PathVariable String username){
-        userService.activate(username);
-        auditLogService.record(AuditAction.ACTIVATE_USER,"users" + username);
-        return ResponseEntity.ok().build();
-    }
-
-    @PreAuthorize("hasAuthority('users:edit')")
-    @PatchMapping("/{username}/status/desativar")
-    public ResponseEntity<?> deactivate (@PathVariable String username){
-        userService.deactivate(username);
-        auditLogService.record(AuditAction.DEACTIVATE_USER,"users" + username);
-        return ResponseEntity.ok().build();
     }
 
     //======================= cria usuários do tipo "aluno" =======================
 
     @PreAuthorize("hasAuthority('students:create')")
     @PostMapping("/aluno")
-    public ResponseEntity<?> createStudent(@RequestBody StudentRequest studentInfo){
+    public ResponseEntity<?> createStudent(@RequestBody StudentRequest studentInfo) {
         studentService.create(studentInfo);
-        auditLogService.record(AuditAction.CREATE,"student" + studentInfo.ra());
+        auditLogService.record(AuditAction.CREATE, "aluno RA " + studentInfo.ra());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/me/senha")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request, Authentication auth) {
         CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-        passwordChangeService.changeOwnPassword(user.getUserId(), request.currentPassword(),  request.newPassword());
-        return ResponseEntity.noContent().build();
+        passwordChangeService.changeOwnPassword(user.getUserId(), request.currentPassword(), request.newPassword());
+        // RF18: o token usado nesta requisição já não vale; o frontend manda para o login
+        return ResponseEntity.ok(Map.of(
+                "message", "Senha alterada. Entre novamente com a nova senha.",
+                "reloginRequired", true));
+    }
+
+    // ---------------- ROTAS DE ATIVAÇÃO / DESATICACAO -------------------
+
+    @PreAuthorize("hasAuthority('users:edit')")
+    @PatchMapping("/{username}/status/ativar")
+    public ResponseEntity<?> activate(@PathVariable String username) {
+        userService.activate(username);
+        auditLogService.record(AuditAction.ACTIVATE_USER, "usuário " + username);
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasAuthority('users:edit')")
+    @PatchMapping("/{username}/status/desativar")
+    public ResponseEntity<?> deactivate(@PathVariable String username) {
+        userService.deactivate(username);
+        auditLogService.record(AuditAction.DEACTIVATE_USER, "usuário " + username);
+        return ResponseEntity.ok().build();
     }
 }

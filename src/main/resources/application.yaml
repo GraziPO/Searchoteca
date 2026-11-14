@@ -48,6 +48,18 @@ password-reset:
 password-change:
   token-ttl-ms: 900000
 
+# ===== BLOQUEIO DE LOGIN (RNF05) =====
+login-lock:
+  max-attempts: 5
+  lock-minutes: 5
+  window-minutes: 15
+
+# ===== DESATIVAÇÃO DE ALUNOS POR INATIVIDADE (RF17) =====
+students:
+  inactivity-days: 90
+  inactivity-cron: "0 0 3 * * *"
+
+# ===================OPÇÃO DE VENDAS ´============================
 sales:
   enabled: ${SALES_ENABLED:false}
 

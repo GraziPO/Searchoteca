@@ -25,8 +25,8 @@ public class LoanController {
 
     @PreAuthorize("hasAuthority('loans:view')")
     @GetMapping
-    public ResponseEntity<?> findAll() {
-        return ResponseEntity.ok(loanService.findAll());
+    public ResponseEntity<?> findAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(loanService.findPage(page, size));
     }
 
     @PreAuthorize("hasAuthority('loans:view')")
@@ -39,17 +39,17 @@ public class LoanController {
     //endpoint exclusivo para os alunos
     @PreAuthorize("hasAuthority('loans:view_own')")
     @GetMapping("/historico")
-    public ResponseEntity<?> findOwn(Authentication authentication) {
+    public ResponseEntity<?> findOwn(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size, Authentication authentication) {
         CustomUserDetails student = (CustomUserDetails) authentication.getPrincipal();
         auditLogService.record(AuditAction.ACCESS,"Acesso ao histórico do usuario");
-        return ResponseEntity.ok(loanService.findAllByStudent(student.getUserId()));
+        return ResponseEntity.ok(loanService.findPageByStudent(student.getUserId(), page, size));
     }
 
     @PreAuthorize("hasAuthority('loans:create')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody LoanRequest request, Authentication auth) {
         CustomUserDetails user = (CustomUserDetails) auth.getPrincipal();
-        auditLogService.save(user.getUsername(), AuditAction.CREATE,"usuário do tipo "+ user.getRoleCode()+ " criado");
+        auditLogService.save(user.getUsername(), AuditAction.CREATE,"emprestimo criado para RA "+ request.ra());
         return ResponseEntity.ok(loanService.create(request, user));
     }
 
@@ -67,7 +67,7 @@ public class LoanController {
     public ResponseEntity<?> returnItem(@PathVariable Long copyId, Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         LoanModel loan = loanService.returnItem(copyId,user.getUserId());
-        auditLogService.save(user.getUsername(), AuditAction.UPDATE,"registro de empréstimo" + "devovido ao usuario "+ user.getUsername());
+        auditLogService.save(user.getUsername(), AuditAction.UPDATE,"registro de empréstimo" + "devolvido ao usuario "+ user.getUsername());
         return ResponseEntity.ok(loan);
     }
 }

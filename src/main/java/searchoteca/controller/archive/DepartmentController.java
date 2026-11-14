@@ -21,9 +21,9 @@ public class DepartmentController {
 
     @PreAuthorize("hasAuthority('org_depart:view')")
     @GetMapping
-    public ResponseEntity<?> getAll() {
-        auditLogService.record(AuditAction.ACCESS,"All Departments");
-        return ResponseEntity.ok(departmentService.findAll());
+    public ResponseEntity<?> getAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+        auditLogService.record(AuditAction.ACCESS, "listagem de departamentos (página " + page + ")");
+        return ResponseEntity.ok(departmentService.findPage(page, size));
     }
 
     @PreAuthorize("hasAuthority('org_depart:view')")
@@ -36,14 +36,15 @@ public class DepartmentController {
     @PreAuthorize("hasAuthority('org_depart:create')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody DepartmentModel department){
-        auditLogService.record(AuditAction.CREATE,"department" + department.getDepartCode());
-        return ResponseEntity.ok(departmentService.create(department));
+        DepartmentModel created = departmentService.create(department);
+        auditLogService.record(AuditAction.CREATE, "departamento " + created.getDepartCode());
+        return ResponseEntity.ok(created);
     }
 
     @PreAuthorize("hasAuthority('org_depart:edit')")
     @PutMapping("/{departCode}")
     public ResponseEntity<?> update(@PathVariable String departCode, @RequestBody DepartmentModel departInfo){
-        auditLogService.record(AuditAction.UPDATE,"department" + departCode);
+        // o registro (com o antes -> depois) é feito no DepartmentService
         return ResponseEntity.ok(departmentService.update(departCode, departInfo));
     }
 
@@ -51,7 +52,7 @@ public class DepartmentController {
     @DeleteMapping("/{departCode}")
     public ResponseEntity<?> delete(@PathVariable String departCode){
         departmentService.delete(departCode);
-        auditLogService.record(AuditAction.DELETE,"department" + departCode);
+        auditLogService.record(AuditAction.DELETE, "departamento " + departCode);
         return ResponseEntity.noContent().build();
     }
 

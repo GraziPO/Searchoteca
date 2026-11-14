@@ -1,5 +1,8 @@
 package searchoteca.service;
 
+import org.springframework.data.domain.Sort;
+import searchoteca.DTO.archive.publicSearch.PageResponse;
+import searchoteca.components.Paging;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import searchoteca.DTO.archive.LoanRequest;
@@ -19,10 +22,14 @@ import searchoteca.repository.catalog.CopyRepository;
 import searchoteca.repository.users.StudentRepository;
 import searchoteca.repository.archive.LoanItemRepository;
 import searchoteca.repository.archive.LoanRepository;
+import searchoteca.repository.archive.LoanRulesRepository;
 import searchoteca.security.CustomUserDetails;
+import searchoteca.service.settings.SettingsService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,6 +45,9 @@ public class LoanService {
     private final CopyRepository copyRepository;
     private final ReceiptService receiptService;
     private final BookRepository bookRepository;
+    private final WaitlistService waitlistService;
+    private final SettingsService settingsService;
+    private final LoanRulesRepository loanRulesRepository;
 
 
     public LoanService(LoanRepository loanRepository,
@@ -46,7 +56,10 @@ public class LoanService {
                        CopyRepository copyRepository,
                        StudentRepository studentRepository,
                        ReceiptService receiptService,
-                       BookRepository bookRepository) {
+                       BookRepository bookRepository,
+                       WaitlistService waitlistService,
+                       SettingsService settingsService,
+                       LoanRulesRepository loanRulesRepository) {
         this.loanRepository = loanRepository;
         this.loanItemRepository = loanItemRepository;
         this.userRepository = userRepository;
@@ -54,10 +67,29 @@ public class LoanService {
         this.studentRepository = studentRepository;
         this.receiptService = receiptService;
         this.bookRepository = bookRepository;
+        this.waitlistService = waitlistService;
+        this.settingsService = settingsService;
+        this.loanRulesRepository = loanRulesRepository;
     }
 
     public List<LoanModel> findAll() {
         return loanRepository.findAll();
+    }
+
+    /** Todos os empréstimos, paginados, do mais recente para o mais antigo (RNF06). */
+    public PageResponse<LoanModel> findPage(int page, int size) {
+        return PageResponse.from(loanRepository.findAll(
+                Paging.of(page, size, Sort.by(Sort.Direction.DESC, "loanDate"))));
+    }
+
+    /** Histórico do aluno logado, paginado, do mais recente para o mais antigo. */
+    public PageResponse<LoanModel> findPageByStudent(Long userId, int page, int size) {
+        StudentModel student = studentRepository.findByUserId(userId);
+        if (student == null) {
+            throw new ResourceNotFoundException("Perfil de aluno não encontrado para este usuário.");
+        }
+        return PageResponse.from(loanRepository.findByStudentId(student.getStudentId(),
+                Paging.of(page, size, Sort.by(Sort.Direction.DESC, "loanDate"))));
     }
 
     //specific get for loans by student
@@ -80,15 +112,27 @@ public class LoanService {
             throw new ResourceNotFoundException("Aluno não encontrado");
         }
         if(request.items() == null || request.items().isEmpty()){
-            throw new ResourceConflictException("INforme ao menos um exemplar");
+            throw new ResourceConflictException("Informe ao menos um exemplar");
         }
+
+        // conta desativada (por inatividade ou pelo administrador) não pega livro:
+        // precisa ser reativada antes, pelo root ou por pedido de reativação (RF17)
+        UserModel studentUser = userRepository.findById(student.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Aluno não encontrado"));
+        if (!Boolean.TRUE.equals(studentUser.getStatus())) {
+            throw new ResourceConflictException("A conta deste aluno está desativada. Ela precisa ser reativada "
+                    + "pelo administrador (ou por um pedido de reativação do aluno) antes de um novo empréstimo.");
+        }
+
+        // regras definidas pelo root na área de configurações
+        checkLoanRules(student.getStudentId(), new LinkedHashSet<>(request.items()).size());
 
         LocalDateTime now = LocalDateTime.now();
         LoanModel loan = new LoanModel();
         loan.setStudentId(student.getStudentId());
         loan.setOperatorId(operator.getUserId());
         loan.setLoanDate(now);
-        loan.setDueDate(now.toLocalDate().plusDays(15)); //standard value just for testing. the period may be adjusted by an admin user in later versions.
+        loan.setDueDate(now.toLocalDate().plusDays(settingsService.loanPeriodDays()));   // prazo definido pelo root
         loan.setStatus(LoanStatus.OPEN.name());
 
         loan = loanRepository.save(loan);
@@ -98,8 +142,13 @@ public class LoanService {
         for(Long copyId : request.items()){
             CopyModel copy = copyRepository.findById(copyId)
                     .orElseThrow(()-> new ResourceNotFoundException("Exemplar não existente"));
-            if(!CopyStatus.AVAILABLE.name().equals(copy.getStatus())){
-                throw new ResourceConflictException("Esemplar não disponivel");
+
+            if (CopyStatus.RESERVED.name().equals(copy.getStatus())) {
+                // reservado pela fila de espera: só o aluno dono da reserva pode levar
+                waitlistService.claimReservation(copy, student.getStudentId());
+
+            } else if(!CopyStatus.AVAILABLE.name().equals(copy.getStatus())){
+                throw new ResourceConflictException("Exemplar " + copy.getCopy_custom_code() + " não está disponível");
             }
 
             copy.setStatus(CopyStatus.LOANED.name());
@@ -113,6 +162,8 @@ public class LoanService {
             loanItemRepository.save(item);
         }
 
+        waitlistService.closeEntriesAfterLoan(student.getStudentId(), loaned);
+
         Map<String, BookModel> books = bookRepository.findByIsbnIn(
                         loaned.stream().map(CopyModel::getIsbn).collect(Collectors.toSet()))
                 .stream().collect(Collectors.toMap(BookModel::getIsbn, b -> b));
@@ -123,18 +174,37 @@ public class LoanService {
                     b.getIsbn(), b.getTitle(), b.getAuthor(), null);   // empréstimo não tem preço
         }).toList();
 
-        UserModel studentUser = userRepository.findById(student.getUserId()).orElseThrow();
         receiptService.issue(ExitType.LOAN, operator,
                 new StudentInfo(student.getRa(), studentUser.getCompleteName()),
                 loan.getDueDate(), loan.getLoanId(), items, null);
 
-        student.setLastActivity(now);
+        student.setLastActivity(now.toLocalDate());
 
         studentRepository.save(student);
 
-        receiptService.issue(ExitType.LOAN, operator, null, loan.getDueDate(), loan.getLoanId(), null, null);
-
         return loan;
+    }
+
+    /**
+     * Limite de livros por aluno e bloqueio por atraso (configurações do root).
+     * A linha do aluno fica travada até o fim da transação, para dois empréstimos
+     * simultâneos ao mesmo aluno não passarem do limite juntos.
+     */
+    private void checkLoanRules(Long studentId, int requestedItems) {
+        loanRulesRepository.lockStudent(studentId);
+
+        if (settingsService.blockOverdueLoans() && loanRulesRepository.hasOverdueItems(studentId)) {
+            throw new ResourceConflictException(
+                    "Este aluno tem livro com a devolução atrasada. Faça a devolução antes de um novo empréstimo.");
+        }
+
+        int limit = settingsService.maxOpenLoansPerStudent();
+        int open = loanRulesRepository.countOpenItems(studentId);
+        if (open + requestedItems > limit) {
+            int left = Math.max(limit - open, 0);
+            throw new ResourceConflictException("Limite de " + limit + " livros por aluno. Ele já está com " + open
+                    + (left == 0 ? ", e não pode levar mais nenhum." : ", e pode levar no máximo mais " + left + "."));
+        }
     }
 
     @Transactional
@@ -169,22 +239,23 @@ public class LoanService {
 
         //set student last activity
         StudentModel student = studentRepository.findByStudentId(loan.getStudentId());
-        student.setLastActivity(date);
+        student.setLastActivity(date.toLocalDate());
 
         studentRepository.save(student);
         return loanRepository.save(loan);
     }
 
 
+    // Fecha o item e libera o exemplar: vai para o primeiro da fila de espera ou fica disponível.
     private void releaseItem(LoanItemModel item, Long operatorId, LocalDateTime now){
         CopyModel copy = copyRepository.findById(item.getCopyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Exemplar não existente"));
-        copy.setStatus(CopyStatus.AVAILABLE.name());
-        copyRepository.save(copy);
 
         item.setReturned_to(operatorId);
         item.setReturned_at(now);
         loanItemRepository.save(item);
+
+        waitlistService.releaseCopy(copy);   // antes: copy.setStatus(AVAILABLE); save(copy)
     }
 
     @Transactional
@@ -209,7 +280,7 @@ public class LoanService {
 
         StudentModel student = studentRepository.findByStudentId(loan.getStudentId());
         if(student != null){
-            student.setLastActivity(now);
+            student.setLastActivity(now.toLocalDate());
             studentRepository.save(student);
         }
         return loanRepository.save(loan);

@@ -1,6 +1,12 @@
 package searchoteca.service.wms;
 
+import org.springframework.data.domain.Sort;
+import searchoteca.DTO.archive.publicSearch.PageResponse;
+import searchoteca.components.Paging;
 import org.springframework.stereotype.Service;
+import searchoteca.auditTrail.AuditAction;
+import searchoteca.auditTrail.AuditDiff;
+import searchoteca.auditTrail.AuditLogService;
 import searchoteca.exception.ResourceConflictException;
 import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.Books.BookModel;
@@ -18,11 +24,14 @@ public class LocationService {
     private final LocationRepository locationRepository;
     private final BookRepository bookRepository;
     private final CopyRepository copyRepository;
+    private final AuditLogService auditLogService;
 
-    public LocationService(LocationRepository locationRepository, BookRepository bookRepository, CopyRepository copyRepository) {
+    public LocationService(LocationRepository locationRepository, BookRepository bookRepository, CopyRepository copyRepository,
+                           AuditLogService auditLogService) {
         this.locationRepository= locationRepository;
         this.bookRepository= bookRepository;
         this.copyRepository= copyRepository;
+        this.auditLogService= auditLogService;
     }
 
     public List<LocationModel> findAll(){
@@ -30,6 +39,11 @@ public class LocationService {
         location =  (List<LocationModel>) locationRepository.findAll();
 
         return location;   // lista vazia é resposta válida, não erro
+    }
+
+    /** Listagem paginada, em ordem de código (RNF06). */
+    public PageResponse<LocationModel> findPage(int page, int size){
+        return PageResponse.from(locationRepository.findAll(Paging.of(page, size, Sort.by("localCode"))));
     }
 
     public LocationModel findByLocalCode(String localCode){
@@ -56,11 +70,18 @@ public class LocationService {
         if(location == null){
             throw new ResourceNotFoundException("Registro inexistente");
         }
+        AuditDiff diff = new AuditDiff()
+                .field("nome", location.getLocalName(), localInfo.getLocalName())
+                .field("descrição", location.getLocalDesc(), localInfo.getLocalDesc())
+                .field("departamento", location.getDepartCode(), localInfo.getDepartCode());
+
         location.setLocalName(localInfo.getLocalName());
         location.setLocalDesc(localInfo.getLocalDesc());
         location.setDepartCode(localInfo.getDepartCode());
+        LocationModel saved = locationRepository.save(location);
 
-        return locationRepository.save(location);
+        auditLogService.record(AuditAction.UPDATE, "localização " + localCode + ": " + diff);
+        return saved;
     }
 
     public void delete(String localCode){

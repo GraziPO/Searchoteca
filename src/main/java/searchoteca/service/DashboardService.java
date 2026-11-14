@@ -6,6 +6,7 @@ import searchoteca.DTO.dashboard.DashboardResponse;
 import searchoteca.auditTrail.AuditLogRepository;
 import searchoteca.repository.DashboardRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -35,7 +36,7 @@ public class DashboardService {
 
         return new DashboardResponse(
                 period,
-                LocalDateTime.now(),
+                LocalDate.now(),
                 dashboardRepository.kpis(period),
                 dashboardRepository.diary(period),
                 dashboardRepository.copiesByStatus(),

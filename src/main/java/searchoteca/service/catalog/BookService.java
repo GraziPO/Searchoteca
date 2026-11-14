@@ -1,6 +1,9 @@
 package searchoteca.service.catalog;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Sort;
+import searchoteca.DTO.archive.publicSearch.PageResponse;
+import searchoteca.components.Isbn;
+import searchoteca.components.Paging;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +15,7 @@ import searchoteca.exception.ResourceNotFoundException;
 import searchoteca.model.Books.BookModel;
 import searchoteca.repository.catalog.BookRepository;
 import searchoteca.repository.catalog.CopyRepository;
+import searchoteca.service.settings.SettingsService;
 
 
 import java.math.BigDecimal;
@@ -23,13 +27,13 @@ public class BookService {
     private final BookRepository bookRepository;
     private final CopyRepository copyRepository;
     private final AuditLogService auditLogService;
-    private final boolean salesEnabled;
+    private final SettingsService settingsService;
 
-    public BookService(BookRepository bookRepository, CopyRepository copyRepository, AuditLogService auditLogService, @Value("${sales.enabled:false}")  boolean salesEnabled) {
+    public BookService(BookRepository bookRepository, CopyRepository copyRepository, AuditLogService auditLogService, SettingsService settingsService) {
         this.bookRepository=bookRepository;
         this.copyRepository=copyRepository;
         this.auditLogService=auditLogService;
-        this.salesEnabled=salesEnabled;
+        this.settingsService=settingsService;
     }
 
     public List<BookModel> findAll(){
@@ -39,27 +43,52 @@ public class BookService {
         return books;   // lista vazia é resposta válida, não erro
     }
 
-    @PreAuthorize("hasAuthorization('org_books:create')")
+    /** Listagem paginada, em ordem de título (RNF06). */
+    public PageResponse<BookModel> findPage(int page, int size){
+        return PageResponse.from(bookRepository.findAll(Paging.of(page, size, Sort.by("title"))));
+    }
+
     public BookModel create(BookModel book){
+        // ISBN sem hífens e com dígito verificador correto (RF05)
+        String isbn = Isbn.normalize(book.getIsbn());
+        if (!Isbn.isValid(isbn)) {
+            throw new ResourceConflictException("ISBN inválido. Confira os números (ISBN-10 ou ISBN-13).");
+        }
+        if (bookRepository.findByIsbn(isbn) != null) {
+            throw new ResourceConflictException("Este ISBN já está cadastrado no acervo.");
+        }
+        if (book.getTitle() == null || book.getTitle().isBlank()
+                || book.getAuthor() == null || book.getAuthor().isBlank()) {
+            throw new ResourceConflictException("Título e autor são obrigatórios.");
+        }
+        book.setIsbn(isbn);
         book.setSalePrice(null);
         return bookRepository.save(book);
     }
 
-    @PreAuthorize("hasAuthorization('org_books:edit')")
     public BookModel update (String isbn, BookModel bookInfo){
         BookModel book = bookRepository.findByIsbn(isbn);
 
         if (book == null){
             throw new ResourceNotFoundException("registro não encontrado");
         }
+        AuditDiff diff = new AuditDiff()
+                .field("título", book.getTitle(), bookInfo.getTitle())
+                .field("autor", book.getAuthor(), bookInfo.getAuthor())
+                .field("ano", book.getRel_year(), bookInfo.getRel_year())
+                .field("editora", book.getPublisher(), bookInfo.getPublisher())
+                .field("gênero", book.getGenre(), bookInfo.getGenre());
+
         book.setTitle(bookInfo.getTitle());
         book.setAuthor(bookInfo.getAuthor());
         book.setRel_year((bookInfo.getRel_year()));
         book.setPublisher(bookInfo.getPublisher());
         book.setGenre(bookInfo.getGenre());
-        return bookRepository.save(book);
+        BookModel saved = bookRepository.save(book);
+
+        auditLogService.record(AuditAction.UPDATE, "livro " + isbn + ": " + diff);
+        return saved;
     }
-    @PreAuthorize("hasAuthorization('org_books:delete')")
     public void delete (String isbn){
         BookModel book = bookRepository.findByIsbn(isbn);
         if (book == null) {
@@ -82,7 +111,7 @@ public class BookService {
 
     @Transactional
     public BookModel updatePrice(String isbn, BigDecimal newPrice){
-        if(!salesEnabled){
+        if(!settingsService.salesEnabled()){   // ligado/desligado pelo root
             throw new ResourceConflictException("Vendas não habilitado para esta organização");
         }
         BookModel book = bookRepository.findByIsbn(isbn);
@@ -98,7 +127,7 @@ public class BookService {
 
         book.setSalePrice(normalized);
         bookRepository.save(book);
-        auditLogService.record(AuditAction.UPDATE,"preço do livro"+ isbn + ": " + diff);
+        auditLogService.record(AuditAction.UPDATE,"preço do livro " + isbn + ": " + diff);
         return book;
     }
 }

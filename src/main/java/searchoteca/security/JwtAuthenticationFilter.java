@@ -41,7 +41,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
                 CustomUserDetails userDetailInfo = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
 
-                if(jwtService.isTokenValid(token, userDetailInfo)){
+                // conta desativada perde o acesso na hora, mesmo com um token ainda dentro da validade
+                if(userDetailInfo.isEnabled() && jwtService.isTokenValid(token, userDetailInfo)){
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetailInfo, null, userDetailInfo.getAuthorities());
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
